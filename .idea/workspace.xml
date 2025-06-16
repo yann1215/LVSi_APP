@@ -1,0 +1,946 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f5988503-30a8-4a88-8218-1b1633587dff" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/fijiCountFaster29.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AST_loop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AST_runner.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/AST_vimbaX.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/.checksums" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/ImageJ-win64.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/__None__.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/db.xml.gz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/fiji-windows-x64.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/Correct_3D_Drift-1.0.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/JWlz-1.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/Kappa-2.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/KymographBuilder-3.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/OMEVisual-2.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ST4-4.3.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/T2-NIT-1.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/T2-TreelineGraph-1.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/TrackMate-7.14.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/VIB-lib-2.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/VectorGraphics2D-0.13.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/VectorString-3.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/antlr-runtime-3.5.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/antlr.antlr-2.7.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/api-0.14.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/api-common-2.37.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/app-launcher-2.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/args4j-2.33.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/asm-9.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/asm-analysis-9.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/asm-commons-9.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/asm-tree-9.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/asm-util-9.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/auto-value-annotations-1.11.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/autocomplete-3.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/base-18.09.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/base64-2.3.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/batch-processor-0.4.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bigdataviewer-core-10.6.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bigdataviewer-vistools-1.0.0-beta-36.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bij-1.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/formats-api-8.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/formats-bsd-8.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/formats-gpl-8.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/jai_imageio-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/jxrlib-all-0.2.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/metakit-5.3.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-codecs-1.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-common-6.0.25.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-jai-0.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-mdbtools-5.3.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-poi-5.3.9.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/ome-xml-6.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/specification-6.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bio-formats/turbojpeg-8.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/blas-0.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bounce-0.18.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bsh-2.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/bytelist-1.0.15.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/caffeine-2.9.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/checker-qual-3.48.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/classgraph-4.8.162.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/client-0.14.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/codemodel-2.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/collections-generic-4.01.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-beanutils-1.9.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-codec-1.17.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-collections-3.2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-collections4-4.5.0-M2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-io-2.17.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-lang-2.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-lang3-3.17.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-logging-1.3.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-math-2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-math3-3.6.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-pool2-2.12.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-text-1.12.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/commons-vfs2-2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/compiler-interface-1.3.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/converter-jackson-2.9.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/datasets-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/directories-26.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/dirgra-0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-all-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-cdense-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-core-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-ddense-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-dsparse-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-fdense-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-fsparse-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-simple-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ejml-zdense-0.41.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/error_prone_annotations-2.32.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/eventbus-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/f2jutil-0.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/failureaccess-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ffmpeg-6.1.1-1.5.10.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/fiji-2.16.1-SNAPSHOT.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/fiji-compat-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/fiji-lib-2.1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/filters-2.0.235.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/flatlaf-3.5.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/fontchooser-2.5.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gapic-google-cloud-storage-v2-2.34.0-alpha.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gax-2.54.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gax-grpc-2.54.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gax-httpjson-2.54.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gcc-runtime-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gentyref-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gluegen-rt-2.5.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-api-client-2.7.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-api-services-cloudresourcemanager-v1-rev20240128-2.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-api-services-storage-v1-rev20240209-2.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-auth-library-credentials-1.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-auth-library-oauth2-http-1.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-cloud-core-2.33.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-cloud-core-grpc-2.33.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-cloud-core-http-2.33.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-cloud-resourcemanager-1.38.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-cloud-storage-2.34.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-apache-v2-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-appengine-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-gson-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-jackson2-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-http-client-xml-1.45.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/google-oauth-client-1.36.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gpars-1.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/grDevices-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/graphics-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/gson-2.10.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/guava-33.3.1-jre.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ij-1.54p.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ij1-patcher-1.2.9-SNAPSHOT.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/image4j-0.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-2.16.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-common-2.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-deprecated-0.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-launcher-6.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-legacy-2.0.2-SNAPSHOT.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-mesh-0.8.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-mesh-io-0.1.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-notebook-0.7.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-ops-2.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-plugins-batch-0.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-plugins-commands-0.8.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-plugins-tools-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-plugins-uploader-ssh-0.3.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-plugins-uploader-webdav-0.3.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-scripting-0.8.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-ui-awt-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-ui-swing-1.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imagej-updater-2.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-7.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-algorithm-0.18.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-algorithm-fft-0.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-algorithm-gpl-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-cache-1.0.0-beta-19.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-ij-2.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-imglyb-1.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-label-multisets-0.15.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-realtransform-4.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-roi-0.15.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-ui-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/imglib2-unsafe-1.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/invokebinder-1.10.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ion-java-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/istack-commons-runtime-3.0.12.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ivy-2.5.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/j2objc-annotations-3.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/j3dcore-1.6.0-scijava-2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/j3dutils-1.6.0-scijava-2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jackrabbit-webdav-2.21.22.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jai-codec-1.1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jai-core-1.1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jakarta.activation-api-1.2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jakarta.xml.bind-api-2.3.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jama-1.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/java-cup-11b-20160615.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/java-sizeof-0.0.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/java3d-core-1.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/java3d-utils-1.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/javaGeom-0.11.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/javacpp-1.5.10.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/javassist-3.30.2-GA.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/javax.annotation-api-1.3.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/javax.servlet-api-3.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jaxb-runtime-2.3.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jblosc-1.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jclipboardhelper-0.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jcodings-1.0.58.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jcommander-1.48.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jcommon-1.0.24.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jdatepicker-1.3.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jdom2-2.0.6.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jep-2.4.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jffi-1.3.13-native.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jffi-1.3.13.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jfilechooser-bookmarks-0.1.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jfreechart-1.5.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jfreesvg-3.4.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jgoodies-common-1.7.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jgoodies-forms-1.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jgrapht-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jgrapht-core-1.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jgraphx-4.2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jheaps-0.14.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jhotdraw-7.6.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jitk-tps-3.0.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jline-2.14.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jline-native-3.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jline-reader-3.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jline-terminal-3.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jline-terminal-jna-3.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jmespath-java-1.12.772.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jna-5.14.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-a64asm-1.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-constants-0.10.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-enxio-0.16.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-ffi-2.2.16.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-netdb-1.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-posix-3.1.19.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-unixsocket-0.17.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jnr-x86asm-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/joda-time-2.13.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jogl-all-2.5.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/joml-1.10.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/joni-2.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jpedalSTD-2.80b11.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jply-0.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jsch-0.1.55.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/json-20240303.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jsoup-1.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jsr166y-1.7.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jsr305-3.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jtransforms-2.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jung-api-2.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jung-graph-impl-2.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jython-shaded-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jython-slim-2.7.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/jzlib-1.1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/kotlin-stdlib-1.9.22.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/kotlin-stdlib-common-1.8.22.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/kotlin-stdlib-jdk7-1.8.22.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/kotlin-stdlib-jdk8-1.8.22.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/kryo-5.6.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/labkit-pixel-classification-0.1.18.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/labkit-ui-0.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/languagesupport-3.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/lapack-0.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/legacy-imglib1-1.1.11.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/log4j-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/logback-classic-1.2.12.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/logback-core-1.2.12.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/lz4-java-1.9-inv.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/mapdb-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/markdownj-0.3.0-1.0.2b4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/maven-scm-api-1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/maven-scm-provider-svn-commons-1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/maven-scm-provider-svnexe-1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/mbknor-jackson-jsonschema_2.12-1.0.34.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/metadata-extractor-2.19.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/methods-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/miglayout-core-5.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/miglayout-swing-5.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/mines-jtk-20151125.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/minimaven-2.2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/minio-5.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/minlog-1.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/modulator-1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/mpicbg-1.6.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/mtj-1.0.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/multiverse-core-0.7.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-3.5.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-aws-s3-4.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-blosc-1.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-google-cloud-5.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-hdf5-2.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-ij-4.4.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-imglib2-7.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-universe-2.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-zarr-1.5.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/n5-zstandard-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/nailgun-server-0.9.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/native-lib-loader-2.5.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netcdf-0.0.0-STUB.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netlib-java-0.9.3-renjin-patched-2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-buffer-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-codec-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-common-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-handler-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-resolver-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-tcnative-classes-2.0.46.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/netty-transport-4.1.73.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/object-inspector-0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/objenesis-3.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ojalgo-45.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/okhttp-4.12.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/okio-3.9.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/okio-jvm-3.9.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/op-finder-0.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/opencensus-api-0.31.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/opencensus-contrib-http-util-0.24.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/opencensus-proto-0.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/opencsv-5.9.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/options-1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/pal-optimization-2.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/parsington-3.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/perf4j-0.9.16.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/perfmark-api-0.27.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/picocli-4.7.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/plexus-utils-4.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/postgresql-42.7.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/prettytime-4.0.1.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/protobuf-java-4.28.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/protobuf-java-util-4.28.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/re2j-1.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/reactive-streams-1.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/reflectasm-1.11.9.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/regexp-1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/reload4j-1.2.25.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/renjin-appl-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/renjin-core-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/renjin-gnur-runtime-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/renjin-script-engine-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/retrofit-2.9.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/rhino-1.7.14.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/rsyntaxtextarea-3.5.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/rxjava-2.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scala-asm-9.4.0-scala-1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scala-library-2.13.10.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scala3-compiler_3-3.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scala3-interfaces-3.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scala3-library_3-3.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-0.46.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-bf-compat-4.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-cli-0.6.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-hdf5-0.2.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-jai-imageio-1.1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-labeling-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-lifesci-0.9.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scifio-ome-xml-0.17.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-common-2.99.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-config-2.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-io-http-0.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-listeners-1.0.0-beta-3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-optional-1.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-plot-0.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-plugins-commands-0.2.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-plugins-platforms-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-plugins-text-markdown-0.1.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-plugins-text-plain-0.1.4.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-search-3.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-table-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-ui-awt-0.1.7.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-ui-swing-1.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scijava-vecmath-1.6.0-scijava-2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/script-editor-1.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/script-editor-jython-1.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/script-editor-scala-0.2.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-beanshell-1.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-clojure-0.1.6.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-java-0.4.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-javascript-1.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-jruby-0.3.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-jython-1.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-renjin-0.2.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/scripting-scala-0.3.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/serializer-2.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/service-0.14.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/slf4j-api-1.7.36.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/snakeyaml-2.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/spim_data-2.3.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/sqlite-jdbc-3.49.1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/stats-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/swing-checkbox-tree-1.0.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/swing-worker-1.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/swingx-1.6.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/tasty-core_3-3.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/threetenbp-1.7.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/trakem2-transform-1.0.1.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/trove4j-3.0.3.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/txw2-2.3.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/udunits-4.3.18.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/ui-behaviour-2.0.8.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/unsafe-fences-1.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/util-interface-1.3.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/utils-0.8.1906.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/validation-api-2.0.1.Final.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/vecmath-1.7.2.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/win64/ffmpeg-6.1.1-1.5.10-windows-x86_64.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/win64/gluegen-rt-2.5.0-natives-windows-amd64.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/jars/win64/jogl-all-2.5.0-natives-windows-amd64.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/ASSEMBLY_EXCEPTION" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/LICENSE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/THIRD_PARTY_README" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/JAWTAccessBridge-64.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/JavaAccessBridge-64.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/WindowsAccessBridge-64.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-console-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-console-l1-2-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-datetime-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-debug-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-errorhandling-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-fibers-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-fibers-l1-1-1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-file-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-file-l1-2-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-file-l2-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-handle-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-heap-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-interlocked-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-kernel32-legacy-l1-1-1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-libraryloader-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-localization-l1-2-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-memory-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-namedpipe-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-processenvironment-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-processthreads-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-processthreads-l1-1-1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-profile-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-rtlsupport-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-string-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-synch-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-synch-l1-2-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-sysinfo-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-sysinfo-l1-2-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-timezone-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-core-util-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-conio-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-convert-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-environment-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-filesystem-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-heap-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-locale-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-math-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-multibyte-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-private-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-process-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-runtime-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-stdio-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-string-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-time-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/api-ms-win-crt-utility-l1-1-0.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/attach.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/awt.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/decora_sse.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/dt_shmem.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/dt_socket.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/fontmanager.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/freetype.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/fxplugins.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/glass.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/glib-lite.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/gstreamer-lite.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/hprof.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/instrument.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/j2gss.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/j2pcsc.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/j2pkcs11.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jaas_nt.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jabswitch.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/java-rmi.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/java.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/java.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/java_crw_demo.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/javafx_font.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/javafx_iio.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/javaw.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jawt.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jdwp.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jfr.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jfxmedia.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jfxwebkit.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jjs.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jli.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jpeg.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jsdt.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jsound.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/jsoundds.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/keytool.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/kinit.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/klist.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/ktab.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/lcms.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/management.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/mlib_image.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/msvcp140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/msvcp140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/msvcp140_2.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/net.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/nio.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/npt.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/orbd.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/pack200.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/policytool.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/prism_common.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/prism_d3d.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/prism_es2.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/prism_sw.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/rmid.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/rmiregistry.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/sawindbg.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/server/Xusage.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/server/jvm.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/servertool.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/splashscreen.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/sspi_bridge.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/sunec.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/sunmscapi.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/tnameserv.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/ucrtbase.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/unpack.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/unpack200.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/vcruntime140.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/vcruntime140_1.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/verify.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/w2k_lsa_auth.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/bin/zip.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/accessibility.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/amd64/jvm.cfg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/calendars.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cat.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/charsets.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/classlist" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cmm/CIEXYZ.pf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cmm/GRAY.pf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cmm/LINEAR_RGB.pf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cmm/PYCC.pf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/cmm/sRGB.pf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/content-types.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/currency.data" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/access-bridge-64.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/cldrdata.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/crs-agent.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/dnsns.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/jaccess.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/jfxrt.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/localedata.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/meta-index" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/nashorn.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/sunec.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/sunjce_provider.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/sunmscapi.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/sunpkcs11.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/ext/zipfs.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/flavormap.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/fontconfig.bfc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/fontconfig.properties.src" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/hijrah-config-umalqura.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/cursors.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/invalid32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_CopyDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_CopyNoDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_LinkDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_LinkNoDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_MoveDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/images/cursors/win32_MoveNoDrop32x32.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/javafx.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jce.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jfr.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jfr/default.jfc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jfr/profile.jfc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jfxswt.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jsse.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/jvm.hprof.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/logging.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/management-agent.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/management/jmxremote.access" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/management/jmxremote.password.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/management/management.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/management/snmp.acl.template" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/meta-index" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/net.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/psfont.properties.ja" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/psfontj2d.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/resources.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/rt.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/blacklisted.certs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/cacerts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/java.policy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/java.security" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/policy/limited/US_export_policy.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/policy/limited/local_policy.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/policy/unlimited/US_export_policy.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/security/policy/unlimited/local_policy.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/sound.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/tzdb.dat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/java/win64/zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64/jre/lib/tzmappings" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Fiji.app/plugins/VIB_-4.0.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_panel_maker_center.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_panel_maker_east.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_panel_maker_north.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_panel_maker_south.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_panel_maker_west.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_paraSettings.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/GUI_para_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_LongbacTrackmate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_NormalTrackmate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_ReChooser.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_impListener.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_preProcess.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_shakePart.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Script_subLongbac.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util_Java.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util_csvOutputer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Util_dirSeeker.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/__hooks__/hook-imglyb.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/__hooks__/hook-java.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/__hooks__/hook-pyimagej.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/__hooks__/hook-scyjava.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_main.spec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_para.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fijiCountingFaster30-default/.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fijiCountingFaster30-default/DEFAULT.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fijiCountingFaster30-default/JH.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fijiCountingFaster30-default/LMH.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform)); sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo, NoAppException&#10;for module in [&quot;main.py&quot;, &quot;wsgi.py&quot;, &quot;app.py&quot;]:&#10;    try: locals().update(ScriptInfo(app_import_path=module, create_app=None).load_app().make_shell_context()); print(&quot;\nFlask App: %s&quot; % app.import_name); break&#10;    except NoAppException: pass" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2y2QjHAedUwnTibJFEK45jRu0qE" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.AST_preprocess.executor": "Run",
+    "Python.AST_vimbaX.executor": "Run",
+    "Python.GUI.executor": "Run",
+    "Python.GUI_DS (1).executor": "Run",
+    "Python.GUI_DS.executor": "Run",
+    "Python.GUI_DS2 (1).executor": "Run",
+    "Python.GUI_panel_maker_west.executor": "Run",
+    "Python.GUI_paraSettings.executor": "Run",
+    "Python.Util_Java.executor": "Run",
+    "Python._AST_Main.executor": "Run",
+    "Python.__try (1).executor": "Run",
+    "Python.__try__.executor": "Run",
+    "Python._main (1).executor": "Run",
+    "Python.auto_c.executor": "Run",
+    "Python.fiji_file_chooser.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.roi2json.executor": "Run",
+    "Python.roi2json_lmh (1).executor": "Run",
+    "Python.todo.executor": "Run",
+    "Python.try.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/LMH/Desktop/work/fijiCountFasterPlus/fijiCountFaster30toEXE",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "vcs.Git",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster30toEXE" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE\Fiji.app" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE\fiji_dir" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE\Fiji.app\jars" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE\Fiji.app" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29toEXE\__hooks__" />
+      <recent name="C:\Users\LMH\Desktop\work\fijiCountFasterPlus\fijiCountFaster29" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python._main (1)">
+    <configuration name="GUI_panel_maker_west" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="fijiCountFaster29" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/GUI_panel_maker_west.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Util_Java" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="fijiCountFaster29" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Util_Java.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="__try__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="fijiCountFaster29" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/__try__.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="_main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="fijiCountFaster29" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/_main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="todo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="fijiCountFaster29" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../.." />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../../todo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python._main (1)" />
+        <item itemvalue="Python.todo" />
+        <item itemvalue="Python.__try__" />
+        <item itemvalue="Python.Util_Java" />
+        <item itemvalue="Python.GUI_panel_maker_west" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-PY-243.22562.220" />
+        <option value="bundled-python-sdk-0fc6c617c4bd-9a18a617cbe4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.22562.220" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="f5988503-30a8-4a88-8218-1b1633587dff" name="更改" comment="" />
+      <created>1749030323604</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1749030323604</updated>
+      <workItem from="1749030325159" duration="17968000" />
+      <workItem from="1749112604595" duration="12105000" />
+      <workItem from="1749130105621" duration="4719000" />
+      <workItem from="1749189042870" duration="24503000" />
+      <workItem from="1749235300441" duration="4293000" />
+      <workItem from="1749245044573" duration="29656000" />
+      <workItem from="1749281671342" duration="13495000" />
+      <workItem from="1749296277402" duration="73854000" />
+      <workItem from="1749449141230" duration="12411000" />
+      <workItem from="1749478010563" duration="4664000" />
+      <workItem from="1749545209022" duration="2038000" />
+      <workItem from="1749547262843" duration="1009000" />
+      <workItem from="1749549096898" duration="5700000" />
+      <workItem from="1749554842341" duration="4088000" />
+      <workItem from="1749558970217" duration="91000" />
+      <workItem from="1749559069062" duration="160000" />
+      <workItem from="1749559314313" duration="420000" />
+      <workItem from="1749559746603" duration="459000" />
+      <workItem from="1749560335495" duration="497000" />
+      <workItem from="1749560845783" duration="966000" />
+      <workItem from="1749561824251" duration="99000" />
+      <workItem from="1749561931851" duration="2549000" />
+      <workItem from="1749564494058" duration="59000" />
+      <workItem from="1749564560742" duration="587000" />
+      <workItem from="1749565423797" duration="1304000" />
+      <workItem from="1749566898161" duration="2980000" />
+      <workItem from="1749569914710" duration="1353000" />
+      <workItem from="1749571375081" duration="615000" />
+      <workItem from="1749572366546" duration="658000" />
+      <workItem from="1749573308891" duration="4508000" />
+      <workItem from="1749577861722" duration="101000" />
+      <workItem from="1749578031197" duration="2590000" />
+      <workItem from="1749580649886" duration="1686000" />
+      <workItem from="1749582774058" duration="1386000" />
+      <workItem from="1749584206237" duration="1132000" />
+      <workItem from="1749585412425" duration="10447000" />
+      <workItem from="1749598709307" duration="2752000" />
+      <workItem from="1749601510303" duration="2523000" />
+      <workItem from="1749631783893" duration="875000" />
+      <workItem from="1749649549897" duration="9546000" />
+      <workItem from="1749666667755" duration="4237000" />
+      <workItem from="1749728050570" duration="9902000" />
+      <workItem from="1749742108008" duration="3444000" />
+      <workItem from="1749747131852" duration="9095000" />
+      <workItem from="1749757021681" duration="14786000" />
+      <workItem from="1749797633782" duration="711000" />
+      <workItem from="1749799243558" duration="258000" />
+      <workItem from="1749799510046" duration="4000" />
+      <workItem from="1749799829292" duration="16266000" />
+      <workItem from="1749819456972" duration="2672000" />
+      <workItem from="1749945605261" duration="299000" />
+      <workItem from="1750041450169" duration="8791000" />
+      <workItem from="1750061209796" duration="6739000" />
+      <workItem from="1750068046401" duration="3799000" />
+      <workItem from="1750074617445" duration="681000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$__try__1_.coverage" NAME="__try (1) 覆盖结果" MODIFIED="1749575569982" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$GUI_DS__1_.coverage" NAME="GUI_DS (1) 覆盖结果" MODIFIED="1749044467844" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$roi2json.coverage" NAME="roi2json 覆盖结果" MODIFIED="1749119950676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$auto_c.coverage" NAME="auto_c 覆盖结果" MODIFIED="1749230438028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/_main_py$_main__1_.coverage" NAME="_main (1) 覆盖结果" MODIFIED="1750069148913" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$_AST_Main.coverage" NAME="_AST_Main 覆盖结果" MODIFIED="1749374390108" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../fijiCountFaster28/AST" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$GUI_panel_maker_west.coverage" NAME="GUI_panel_maker_west 覆盖结果" MODIFIED="1749577869624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$_main__1_.coverage" NAME="_main (1) 覆盖结果" MODIFIED="1749581731079" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/_main_py$Util_Java.coverage" NAME="Util_Java 覆盖结果" MODIFIED="1749748628307" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$AST_vimbaX.coverage" NAME="AST_vimbaX 覆盖结果" MODIFIED="1749572688820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$GUI_DS2__1_.coverage" NAME="GUI_DS2 (1) 覆盖结果" MODIFIED="1749042121259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29toEXE$_main__1_.coverage" NAME="_main (1) 覆盖结果" MODIFIED="1749582776732" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$fiji_file_chooser.coverage" NAME="fiji_file_chooser 覆盖结果" MODIFIED="1749229976551" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$AST_preprocess.coverage" NAME="AST_preprocess 覆盖结果" MODIFIED="1749281382601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$GUI.coverage" NAME="GUI 覆盖结果" MODIFIED="1749220304478" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/_main_py$todo.coverage" NAME="todo 覆盖结果" MODIFIED="1749904967035" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../.." />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$main.coverage" NAME="main 覆盖结果" MODIFIED="1749285430684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$GUI_paraSettings.coverage" NAME="GUI_paraSettings 覆盖结果" MODIFIED="1749431079011" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$roi2json_lmh__1_.coverage" NAME="roi2json_lmh (1) 覆盖结果" MODIFIED="1749128235669" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/fijiCountFaster29$try.coverage" NAME="try 覆盖结果" MODIFIED="1749252032385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/_main_py$__try__.coverage" NAME="__try__ 覆盖结果" MODIFIED="1749812169369" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
