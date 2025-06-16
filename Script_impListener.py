@@ -29,7 +29,9 @@ if mode == True:
     ImagePlus.addImageListener(listener)
 else:
     listenerList = ImagePlus.getListeners()
-    print(listenerList)
+    toRemoveList = []
     for listener in listenerList:
+        toRemoveList.append(listener)
+    for listener in toRemoveList:
         ImagePlus.removeImageListener(listener)
 '''
