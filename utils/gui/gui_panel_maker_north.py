@@ -1,7 +1,10 @@
 import tkinter as tk
 
 def create_north_frame(self):
-    """创建北部的空白区域"""
+    """
+    创建北部的空白区域
+    """
+
     north_frame = tk.Frame(self.root, bg='#0278f8', height=30)
     north_frame.grid(row=0, column=1, sticky='ew')
 

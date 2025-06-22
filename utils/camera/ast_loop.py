@@ -1,10 +1,10 @@
 import threading
-from Util_dirSeeker import _delete_entry
+from utils.process.Util_dirSeeker import _delete_entry
 from AST_runner import AST_preprocess, AST_TrackMate, AST_features, AST_impListener
 import time
 import os
 
-def Camera_mode_manager(self, program_list, task_list, para_dict):
+def camera_mode_manager(self, program_list, task_list, para_dict):
     self.progress['value'] = 0
     if program_list[0] == 0:
         self.status_var.set("拍摄中")
@@ -24,11 +24,23 @@ def Camera_mode_manager(self, program_list, task_list, para_dict):
         self.save_step = 0
         self.progress['value'] = 20
         self.status_var.set("拍摄完成")
-    thread = threading.Thread(target=AST_looper, args=(self, program_list, task_list, para_dict), daemon=True)
+    thread = threading.Thread(target=ast_looper, args=(self, program_list, task_list, para_dict), daemon=True)
     thread.start()
+
     return
 
-def AST_looper(self, program_list, task_list, para_dict):
+
+def ast_looper(self, program_list, task_list, para_dict):
+    """
+    (Function)
+
+    Args:
+        program_list:
+        task_list:
+        para_dict:
+
+    """
+
     if not program_list[1] == 0:
         for task in task_list:
             path_dict = task
@@ -47,6 +59,7 @@ def AST_looper(self, program_list, task_list, para_dict):
             _delete_entry(self, frame)
             self.task_canvas.yview_moveto(0.0)
         print("done")
+
     self.running = False
     self.start_btn_var.set("搜索【" + self.nodes[self.program_start] + "】任务文件")
     self.start_btn.config(bg='#4CAF50')
@@ -54,4 +67,5 @@ def AST_looper(self, program_list, task_list, para_dict):
     self.task_mode = None
     self.AST_btn_var.set("任务文件列表已空")
     self.AST_btn.config(bg='#cccccc')
+
     return

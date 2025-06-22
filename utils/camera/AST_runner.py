@@ -1,12 +1,13 @@
-from Util_Java import standardScriptRuner, ij
-from Util_csvOutputer import csv_manager, ID_csv_outputer
-from Script_shakePart import script_shakePart
-from Script_preProcess import script_preProcess
-from Script_LongbacTrackmate import script_LongbacTrackmate
-from Script_subLongbac import script_subLongbac
-from Script_NormalTrackmate import script_NormalTrackmate
-from Script_ReChooser import script_ReChooser
-from Script_impListener import script_impListener
+from utils.process.Util_Java import standardScriptRuner
+from utils.process.Util_csvOutputer import csv_manager, ID_csv_outputer
+from utils.track.Script_shakePart import script_shakePart
+from utils.track.Script_preProcess import script_preProcess
+from utils.track.Script_LongbacTrackmate import script_LongbacTrackmate
+from utils.track.Script_subLongbac import script_subLongbac
+from utils.track.Script_NormalTrackmate import script_NormalTrackmate
+from utils.track.Script_ReChooser import script_ReChooser
+from utils.track.Script_impListener import script_impListener
+
 
 def AST_preprocess(self, path_dict, para_dict, program_end):
     if self.EndEvent.is_set():
@@ -69,10 +70,12 @@ def AST_preprocess(self, path_dict, para_dict, program_end):
         self.status_var.set("噪声过滤出错")
     return
 
+
 def AST_TrackMate(self, path_dict, para_dict, program_end):
     if self.EndEvent.is_set():
         return
     self.status_var.set("开始检测追踪")
+
     try:
         args_LongbacTrackmate = {
             "huge_impurity_filter": para_dict["huge_impurity_filter"],
@@ -157,6 +160,7 @@ def AST_TrackMate(self, path_dict, para_dict, program_end):
         self.status_var.set("检测追踪出错")
     return
 
+
 def AST_features(self, path_dict, para_dict):
     if self.EndEvent.is_set():
         return
@@ -184,6 +188,7 @@ def AST_features(self, path_dict, para_dict):
     except:
         self.status_var.set("特征提取出错")
     return
+
 
 def AST_impListener(self, mode):
     try:

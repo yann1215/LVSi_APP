@@ -3,8 +3,12 @@ from tkinter import ttk
 import scyjava
 import json
 
+
 def update_node_colors(self):
-    """更新节点颜色显示"""
+    """
+    更新节点颜色显示
+    """
+
     # 重置所有节点颜色
     for i in range(len(self.nodes)):
         x, y = self.node_positions[i]
@@ -34,7 +38,10 @@ def update_node_colors(self):
 
 
 def select_left(self, index):
-    """选择左单选按钮"""
+    """
+    选择左单选按钮
+    """
+
     # 更新选择
     self.left_var.set(index)
     self.program_start = index
@@ -88,8 +95,11 @@ def select_left(self, index):
             self.AST_btn_var.set("任务文件列表已空")
             self.AST_btn.config(bg='#cccccc')
 
+
 def select_right(self, index):
-    """选择右单选按钮"""
+    """
+    选择右单选按钮
+    """
 
     # 更新选择
     self.right_var.set(index)
@@ -104,8 +114,12 @@ def select_right(self, index):
     # 更新颜色显示
     update_node_colors(self)
 
+
 def draw_baseline(self):
-    """绘制基线（细线）"""
+    """
+    绘制基线（细线）
+    """
+
     width = self.canvas.winfo_reqwidth()
     y = 30  # 基线的y坐标
 
@@ -116,8 +130,12 @@ def draw_baseline(self):
     # 存储基线y坐标供后续使用
     self.baseline_y = y
 
+
 def create_nodes_and_buttons(self):
-    """创建节点圆形和单选按钮"""
+    """
+    创建节点圆形和单选按钮
+    """
+
     width = self.canvas.winfo_reqwidth()
     node_count = len(self.nodes)
     spacing = (width - 100) // (node_count - 1)  # 节点间距
@@ -153,7 +171,7 @@ def create_nodes_and_buttons(self):
         left_radio = tk.Radiobutton(
             frame, variable=self.left_var, value=i,
             command=lambda idx=i, s=self: select_left(s, idx),
-            bg='#eaeaea', indicatoron=1, selectcolor='#eaeaea',
+            bg='#eaeaea', indicatoron=True, selectcolor='#eaeaea',
             font=('宋体', 8)
         )
         left_radio.pack(side='left', padx=2)
@@ -162,13 +180,16 @@ def create_nodes_and_buttons(self):
         right_radio = tk.Radiobutton(
             frame, variable=self.right_var, value=i,
             command=lambda idx=i, s=self: select_right(s, idx),
-            bg='#eaeaea', indicatoron=1, selectcolor='#eaeaea',
+            bg='#eaeaea', indicatoron=True, selectcolor='#eaeaea',
             font=('宋体', 8)
         )
         right_radio.pack(side='left', padx=2)
 
+
 def create_node_selector(self, parent):
-    """创建节点选择器（使用Canvas绘制）"""
+    """
+    创建节点选择器（使用Canvas绘制）
+    """
 
     # 创建Canvas
     self.canvas = tk.Canvas(parent, bg='#eaeaea', height=65, width=700, highlightthickness=0)
@@ -192,8 +213,11 @@ def create_node_selector(self, parent):
     select_left(self, 0)  # 默认选择A的左单选
     select_right(self, len(self.nodes) - 1)  # 默认选择D的右单选
 
+
 def create_south_frame(self):
-    """创建南部的控制面板"""
+    """
+    创建南部的控制面板
+    """
 
     south_frame = tk.Frame(self.root, bg='#eaeaea', padx=10, pady=10)
     south_frame.grid(row=2, column=1, sticky='ew')

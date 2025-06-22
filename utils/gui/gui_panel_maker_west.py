@@ -1,7 +1,10 @@
 import tkinter as tk
 
 def create_west_frame(self):
-    """创建西部的空白区域"""
+    """
+    创建西部的空白区域
+    """
+
     west_frame = tk.Frame(self.root, bg='#eaeaea', width=10)
     west_frame.grid(row=1, column=0, sticky='ns')
 

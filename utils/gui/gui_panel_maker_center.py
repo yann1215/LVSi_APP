@@ -1,8 +1,11 @@
 import tkinter as tk
-from AST_vimbaX import vimbaXthreading
+from utils.camera.AST_vimbaX import vimbaXthreading
 
 def create_center_frame(self):
-    """创建中间的视频展示区域"""
+    """
+    创建中间的视频展示区域
+    """
+
     center_frame = tk.Frame(self.root, bg='#eaeaea', padx=10, pady=10)
     center_frame.grid(row=1, column=1, sticky='nsew')
 

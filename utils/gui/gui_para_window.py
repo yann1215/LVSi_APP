@@ -1,9 +1,10 @@
 import os
 import tkinter as tk
 from tkinter import ttk
-from GUI_paraSettings import all_para_settings
+from gui_para_settings import all_para_settings
 from _para import *
 import json
+
 
 def create_modal_window(self, params):
     self.detail_button_state = False
@@ -129,6 +130,7 @@ def create_right_frame(self, right_frame):
 
     create_default_settings(self)
 
+
 def create_param_controls(self, parent, title, params, mode):
     self.object_dict_list = []
     for widget in parent.winfo_children():
@@ -179,8 +181,9 @@ def create_param_controls(self, parent, title, params, mode):
     self.modal_canvas.update_idletasks()
     self.modal_canvas.yview_moveto(0.0)
 
+
 def create_default_settings(self):
-    default_path = "fijiCountingFaster30-default"
+    default_path = "../../settings"
     if not os.path.exists(default_path):
         os.makedirs(default_path)
     default_json_list = os.listdir(default_path)
@@ -209,6 +212,7 @@ def toggle_detail(self, params):
         self.detail_button_state = False
         create_param_controls(self, self.modal_scrollable_frame, params, all_para_settings[params], self.detail_button_state)
         self.detail_button.config(text="详细")
+
 
 def create_value(self, frame, value_type, name):
     object = None
@@ -251,7 +255,10 @@ def create_value(self, frame, value_type, name):
 
 
 def validate_numeric_input(new_value):
-    """验证输入是否为数字或空字符串"""
+    """
+    验证输入是否为数字或空字符串
+    """
+
     # 允许空字符串（删除操作）和数字
     if new_value == "":
         return True
@@ -263,10 +270,12 @@ def validate_numeric_input(new_value):
         # 如果转换失败，拒绝输入
         return False
 
+
 def on_focus_out(event, self):
     if self.get().strip() == "":
         self.delete(0, tk.END)
         self.insert(0, "0")
+
 
 def confrim(self):
     for object_dict in self.object_dict_list:
@@ -276,11 +285,12 @@ def confrim(self):
     self.camera_settings = True
     self.modal.destroy()
 
+
 def save(self):
     for widget in self.default_modal_scrollable_frame.winfo_children():
         if widget != self.default_modal_scrollable_frame:
             widget.destroy()
-    path = "fijiCountingFaster30-default"
+    path = "../../settings"
     for object_dict in self.object_dict_list:
         object = object_dict["object"]
         name = object_dict["name"]
@@ -296,9 +306,8 @@ def save(self):
         print("error")
 
 
-
 def load(self):
-    path = "fijiCountingFaster30-default"
+    path = "../../settings"
     default_ID = self.default_setting_name_var.get()
     try:
         with open(os.path.join(path, default_ID + ".json"), 'r', encoding='utf-8') as f:
@@ -310,6 +319,7 @@ def load(self):
             object.set(self.all_para_dict[name])
     except:
         print("error")
+
 
 def get_default_name(event, self, params):
     self.default_setting_name_var.set(params)

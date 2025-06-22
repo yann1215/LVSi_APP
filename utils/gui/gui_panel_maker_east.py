@@ -1,13 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
-from Util_Java import newFileChooser
-from Util_dirSeeker import pathFindingThread
-from AST_loop import Camera_mode_manager
-from GUI_para_window import create_modal_window
-from Util_Java import Preferences
+from utils.process.Util_Java import newFileChooser
+from utils.process.Util_dirSeeker import pathFindingThread
+from utils.camera.ast_loop import camera_mode_manager
+from gui_para_window import create_modal_window
+from utils.process.Util_Java import Preferences
 
 def create_task_frame(self, parent):
-    """创建节点选择器（使用Canvas绘制）"""
+    """
+    创建节点选择器（使用 Canvas 绘制）
+    """
+
     # 创建Canvas
     self.task_canvas = tk.Canvas(parent, bg='#cccccc', width=80 ,highlightthickness=0)
     self.task_canvas.pack(fill='x', padx=5, pady=5)
@@ -33,7 +36,9 @@ def create_task_frame(self, parent):
     self.task_canvas.bind_all("<MouseWheel>", lambda event, s=self: _on_mousewheel(s, event))
 
 def create_east_frame(self):
-    """创建东部的控制面板"""
+    """
+    创建东部的控制面板
+    """
 
     east_frame = tk.Frame(self.root, bg='#eaeaea', padx=10, pady=10,
                           highlightbackground='#cccccc', highlightthickness=1)
@@ -136,17 +141,26 @@ def _on_mousewheel(self, event):
     self.task_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
 def browse_file(self):
-    """浏览文件"""
+    """
+    浏览文件
+    """
+
     self.filepath_list = newFileChooser(self, self.program_start)
     self.path_entry.xview_moveto(1)
 
 def output_browse_file(self):
-    """浏览文件"""
+    """
+    浏览文件
+    """
+
     self.output_filepath = newFileChooser(self, 4)
     self.output_path_entry.xview_moveto(1)
 
 def output_auto(self):
-    """浏览文件"""
+    """
+    浏览文件
+    """
+
     self.output_filepath = "auto"
     self.output_path_var.set("auto")
     self.output_path_entry.xview_moveto(1)
@@ -154,7 +168,10 @@ def output_auto(self):
     prefs.put("outputPath", "auto")
 
 def toggle_start(self):
-    """切换开始/中断按钮状态"""
+    """
+    切换开始/中断按钮状态
+    """
+
     if self.searching == False and self.running == False:
         if self.start_btn_var.get() == "搜索【" + self.nodes[self.program_start] + "】任务文件":
             self.searching = True
@@ -175,9 +192,11 @@ def toggle_start(self):
             all_para_dict = self.all_para_dict
             pathFindingThread(self, filepath_list, mode, all_para_dict)
 
-
 def AST_start(self):
-    """切换开始/中断按钮状态"""
+    """
+    切换开始/中断按钮状态
+    """
+
     if self.searching == False and self.running == False:
         if self.AST_btn_var.get() == "开始运行":
             self.running = True
@@ -191,25 +210,37 @@ def AST_start(self):
             end = self.program_end
             task_list = self.task_list
             all_para_dict = self.all_para_dict
-            Camera_mode_manager(self, [start, end], task_list, all_para_dict)
+            camera_mode_manager(self, [start, end], task_list, all_para_dict)
 
 def open_camera_settings(self):
-    """打开摄像参数设置"""
+    """
+    打开摄像参数设置
+    """
+
     create_modal_window(self, "camera")
     self.status_var.set("打开摄像参数设置")
 
 def open_preprocess_settings(self):
-    """打开处理参数设置"""
+    """
+    打开处理参数设置
+    """
+
     create_modal_window(self, "preprocess")
     self.status_var.set("打开噪声过滤设置")
 
 def open_trackmate_settings(self):
-    """打开处理参数设置"""
+    """
+    打开处理参数设置
+    """
+
     create_modal_window(self, "trackmate")
     self.status_var.set("打开检测追踪设置")
 
 def open_features_settings(self):
-    """打开处理参数设置"""
+    """
+    打开处理参数设置
+    """
+
     create_modal_window(self, "features")
     self.status_var.set("打开特征提取设置")
 

@@ -1,13 +1,14 @@
 import tkinter as tk
-from GUI_panel_maker_center import create_center_frame
-from GUI_panel_maker_north import create_north_frame
-from GUI_panel_maker_west import create_west_frame
-from GUI_panel_maker_east import create_east_frame
-from GUI_panel_maker_south import create_south_frame
+from gui_panel_maker_center import create_center_frame
+from gui_panel_maker_north import create_north_frame
+from gui_panel_maker_west import create_west_frame
+from gui_panel_maker_east import create_east_frame
+from gui_panel_maker_south import create_south_frame
 from _para import *
 import cv2
 from threading import Event
 import time
+
 
 class VideoProcessingApp:
     def __init__(self, root, event, version):
@@ -64,7 +65,8 @@ class VideoProcessingApp:
         time.sleep(1)
         self.root.destroy()
 
-def GUI_init(version):
+
+def gui_init(version):
     root = tk.Tk()
     event = Event()
     app = VideoProcessingApp(root, event, version)

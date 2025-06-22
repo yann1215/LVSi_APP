@@ -3,12 +3,13 @@ import threading
 import cv2
 import win32gui
 import win32con
-
 import os
+
 check_vimba = False
 if os.path.exists("C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"):
     from vmbpy import *
     check_vimba = True
+
 
 def work_thread(self, vmb):
     print("start cam work")
@@ -35,6 +36,7 @@ def work_thread(self, vmb):
     self.img = self.NonePng
     print("stop cam work")
 
+
 def vimbaX_photo_handler(self):
     def frame_handler(cam: Camera, stream: Stream, frame: Frame):
         frame.convert_pixel_format(PixelFormat.Mono8)
@@ -44,6 +46,7 @@ def vimbaX_photo_handler(self):
         self.save_step += 1
         cam.queue_frame(frame)
     return frame_handler
+
 
 def vimbaX_finder_handler(self, vmb):
     def print_device_id(dev , state):
@@ -61,6 +64,7 @@ def vimbaX_finder_handler(self, vmb):
             self.AST_btn.config(bg='#cccccc')
     return print_device_id
 
+
 def startVimbaX(self):
     if check_vimba:
         with VmbSystem.get_instance() as vmb:
@@ -74,6 +78,7 @@ def startVimbaX(self):
             self.EndEvent.wait()
     else:
         self.Alltitle_var.set("大视场散射成像图像处理系统(请安装Vimba X)")
+
 
 def windowManager(self, window_name):
     cv2.namedWindow(window_name)
@@ -103,12 +108,14 @@ def windowManager(self, window_name):
         if self.EndEvent.is_set():
             break
 
+
 def vimbaXthreading(self):
     thread = threading.Thread(target=startVimbaX, args=(self, ), daemon=True)
     thread.start()
     thread = threading.Thread(target=windowManager, args=(self, "vimba X"), daemon=True)
     thread.start()
     return
+
 
 def camera_settings_get(self, cam):
     self.all_para_dict['vimbaX_ExposureTime'] = cam.ExposureTime.get()
