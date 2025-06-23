@@ -1,4 +1,4 @@
-script_subLongbac = r'''
+script_denoise_long = r'''
 #@output imp
 #@ ij.ImagePlus (required=false) original_binary_imp
 #@ int total_frame_spots_num

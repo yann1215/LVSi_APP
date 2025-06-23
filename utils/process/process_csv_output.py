@@ -4,7 +4,19 @@ import re
 import csv
 import math
 
+
 def csv_manager(path_dict, num_1, num_2, frame_num):
+    """
+    (Function)
+
+    Args:
+        path_dict:
+        num_1:
+        num_2:
+        frame_num:
+
+    """
+
     patient = path_dict["patient"]
     name = path_dict["group"]
     time = path_dict["time"]
@@ -19,11 +31,13 @@ def csv_manager(path_dict, num_1, num_2, frame_num):
     # 建立空数据链表
     data_list = []
     data_head = []
+
     # 建立路径
     csv_path = output + "\\" + patient + "-CSV"
-    if os.path.exists(csv_path) == False:
+    if not os.path.exists(csv_path):
         os.mkdir(csv_path)
     csv_file = csv_path + "\\" + patient + ".csv"
+
     # 若已有文件，读原数据
     if os.path.exists(csv_file):
         with open(csv_file, "rt") as f:
@@ -36,25 +50,29 @@ def csv_manager(path_dict, num_1, num_2, frame_num):
     # 若没有文件，设立初值
     else:
         data_head.append("Group")
+
     # 若为新时间点，先添加列
     if time not in data_head:
         data_head.append(time)
         for row in data_list:
             row[time] = ""
+
     # 匹配组别
     find_row = False
     for i in range(len(data_list)):
         if name == data_list[i]["Group"]:
             data_list[i][time] = num
             find_row = True
+
     # 若为新组，增加该组
-    if find_row == False:
+    if not find_row:
         new_row = {}
         for col in data_head:
             new_row[col] = ""
         new_row["Group"] = name
         new_row[time] = num
         data_list.append(new_row)
+
     # 为表头排序
     data_head.remove("Group")
     def time_str2num(str_num):
@@ -65,6 +83,7 @@ def csv_manager(path_dict, num_1, num_2, frame_num):
         return time_num
     data_head.sort(key=lambda str_num: time_str2num(str_num))
     data_head.insert(0, "Group")
+
     # 写入csv
     with open(csv_file, "wt") as f:
         writer = csv.DictWriter(f, fieldnames=data_head, lineterminator='\n')
@@ -72,7 +91,8 @@ def csv_manager(path_dict, num_1, num_2, frame_num):
         writer.writerows(data_list)
     return
 
-def ID_csv_outputer(path_dict, data_dict, ID_data_list):
+
+def id_csv_output(path_dict, data_dict, ID_data_list):
 
     ID_data_list = json.loads(str(ID_data_list))
 
@@ -92,7 +112,7 @@ def ID_csv_outputer(path_dict, data_dict, ID_data_list):
 
     # 建立路径
     csv_path = output + "\\" + patient + "-ID_SPOT_CSV"
-    if os.path.exists(csv_path) == False:
+    if not os.path.exists(csv_path):
         os.mkdir(csv_path)
     csv_file = csv_path + "\\" + name + "-" + time +  "_id_spot.csv"
 
@@ -418,6 +438,5 @@ def ID_csv_outputer(path_dict, data_dict, ID_data_list):
         writer.writeheader()
         for line in track_data_list:
             writer.writerow(line)
-
 
     return

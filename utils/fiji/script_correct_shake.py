@@ -1,5 +1,4 @@
-
-script_shakePart = r'''
+script_correct_shake = r'''
 #@output toStart
 #@output toEnd
 #@output update_dict

@@ -1,4 +1,4 @@
-script_LongbacTrackmate = r'''
+script_track_long = r'''
 #@output origin_imp
 #@output trackSpot_imp
 #@output imp

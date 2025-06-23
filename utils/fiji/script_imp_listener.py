@@ -1,4 +1,4 @@
-script_impListener = r'''
+script_imp_listener = r'''
 #@ boolean mode
 from ij import IJ
 from ij import WindowManager

@@ -65,7 +65,7 @@ def vimbaX_finder_handler(self, vmb):
     return print_device_id
 
 
-def startVimbaX(self):
+def start_vimbaX(self):
     if check_vimba:
         with VmbSystem.get_instance() as vmb:
             self.Alltitle_var.set("大视场散射成像图像处理系统(已检测到Vimba X)")
@@ -80,7 +80,7 @@ def startVimbaX(self):
         self.Alltitle_var.set("大视场散射成像图像处理系统(请安装Vimba X)")
 
 
-def windowManager(self, window_name):
+def window_manager(self, window_name):
     cv2.namedWindow(window_name)
     self.hwnd = win32gui.FindWindow(None, window_name)
     win32gui.SetParent(self.hwnd, self.container_hwnd)
@@ -109,10 +109,10 @@ def windowManager(self, window_name):
             break
 
 
-def vimbaXthreading(self):
-    thread = threading.Thread(target=startVimbaX, args=(self, ), daemon=True)
+def vimbaX_threading(self):
+    thread = threading.Thread(target=start_vimbaX, args=(self,), daemon=True)
     thread.start()
-    thread = threading.Thread(target=windowManager, args=(self, "vimba X"), daemon=True)
+    thread = threading.Thread(target=window_manager, args=(self, "vimba X"), daemon=True)
     thread.start()
     return
 

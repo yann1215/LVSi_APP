@@ -1,4 +1,4 @@
-script_ReChooser = r'''
+script_rechoose = r'''
 #@output ID_data_list
 #@ int ROI_frame_start
 #@ int ROI_frame_stop

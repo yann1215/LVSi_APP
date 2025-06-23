@@ -4,16 +4,18 @@ import tkinter as tk
 from tkinter import ttk
 import json
 
-def pathFindingThread(self, filepath_list, mode, all_para_dict):
-    thread = threading.Thread(target=findAllPaths, args=(self, filepath_list, mode, all_para_dict), daemon=True)
+
+def path_finding_thread(self, filepath_list, mode, all_para_dict):
+    thread = threading.Thread(target=find_all_paths, args=(self, filepath_list, mode, all_para_dict), daemon=True)
     thread.start()
     return
 
+
 # 自嵌套函数，会一直搜寻到文件为止
-def findAllPaths(self, filepath_list, mode, all_para_dict):
+def find_all_paths(self, filepath_list, mode, all_para_dict):
     if self.EndEvent.is_set():
         return
-    pathLists = []
+    path_lists = []
     if not mode == 0:
         for filepath in filepath_list:
             loop_dict = {
@@ -21,10 +23,10 @@ def findAllPaths(self, filepath_list, mode, all_para_dict):
                 "mode": mode,
                 "all_para_dict": all_para_dict,
             }
-            pathList = loop(self, str(filepath), loop_dict, [])
-            pathLists = pathLists + pathList
+            path_list = loop(self, str(filepath), loop_dict, [])
+            path_lists = path_lists + path_list
     else:
-        pathLists = []
+        path_lists = []
         path_dict = {
             "patient": all_para_dict['patient_keyword'],
             "group": "-" + all_para_dict['output_group'] + "-",
@@ -37,7 +39,7 @@ def findAllPaths(self, filepath_list, mode, all_para_dict):
         path_dict["task"] = task_frame
         if not self.output_filepath == "auto":
             path_dict["output"] = self.output_filepath
-        pathLists.append(path_dict)
+        path_lists.append(path_dict)
     self.searching = False
     self.task_mode = mode
     self.start_btn_var.set("搜索【" + self.nodes[self.program_start] + "】任务文件")
@@ -52,13 +54,14 @@ def findAllPaths(self, filepath_list, mode, all_para_dict):
         if mode == 0 and self.camera == False:
             self.AST_btn_var.set("无相机")
             self.AST_btn.config(bg='#cccccc')
-    self.task_list = pathLists
+    self.task_list = path_lists
     return
 
-def loop(self, nextpath, loop_dict, pathList):
+
+def loop(self, next_path, loop_dict, path_list):
     if self.EndEvent.is_set():
         return
-    filepath = nextpath
+    filepath = next_path
     original_path = loop_dict["original_path"]
     mode = loop_dict["mode"]
     all_para_dict = loop_dict["all_para_dict"]
@@ -69,7 +72,8 @@ def loop(self, nextpath, loop_dict, pathList):
     except:
         extensions = [".tif", ".tiff"]
         print("WARNING wrong extensions")
-    if os.path.isdir(filepath) == False:
+
+    if not os.path.isdir(filepath):
         path_dict = {
             "patient": patient_keyword,
             "group": "-",
@@ -119,21 +123,25 @@ def loop(self, nextpath, loop_dict, pathList):
                 path_dict["output"] = self.output_filepath
         task_frame = add_entry(self, path_dict)
         path_dict["task"] = task_frame
-        pathList.append(path_dict)
+        path_list.append(path_dict)
     else:
         next_dir_path_list = next(os.walk(filepath))[1]
         next_file_path_list = next(os.walk(filepath))[2]
         next_file_path_list = [f for f in next_file_path_list
                                if os.path.splitext(f)[1].lower() in extensions]
+
         for next_dir_path in next_dir_path_list:
             next_dir_path = os.path.join(filepath, next_dir_path)
-            pathList = loop(self, next_dir_path, loop_dict, pathList)
+            path_list = loop(self, next_dir_path, loop_dict, path_list)
+
         for next_file_path in next_file_path_list:
             next_file_path = os.path.join(filepath, next_file_path)
-            pathList = loop(self, next_file_path, loop_dict, pathList)
+            path_list = loop(self, next_file_path, loop_dict, path_list)
             if mode == 1:
                 break
-    return pathList
+
+    return path_list
+
 
 def add_entry(self, path_dict):
     # 创建带有删除按钮的条目
@@ -160,6 +168,7 @@ def add_entry(self, path_dict):
     self.task_canvas.yview_moveto(1.0)
 
     return entry_frame
+
 
 def _delete_entry(self, frame):
     # 删除指定条目

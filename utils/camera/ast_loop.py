@@ -1,8 +1,11 @@
 import threading
-from utils.process.Util_dirSeeker import _delete_entry
-from AST_runner import AST_preprocess, AST_TrackMate, AST_features, AST_impListener
+from utils.process.process_dir_seeker import _delete_entry
+from utils.fiji.ast_runner import ast_preprocess, ast_track, ast_features, AST_impListener
 import time
 import os
+
+# 这里是拍摄和fiji处理AST的代码
+# 如果要并行运行，大概把这个部分拆成两个文件？然后看看怎么并行？
 
 def camera_mode_manager(self, program_list, task_list, para_dict):
     self.progress['value'] = 0
@@ -47,13 +50,13 @@ def ast_looper(self, program_list, task_list, para_dict):
             AST_impListener(self, True)
             if program_list[0] == 0:
                 path_dict["path"] = self.save_path
-                AST_preprocess(self, path_dict, para_dict, program_list[1])
+                ast_preprocess(self, path_dict, para_dict, program_list[1])
             elif program_list[0] == 1:
-                AST_preprocess(self, path_dict, para_dict, program_list[1])
+                ast_preprocess(self, path_dict, para_dict, program_list[1])
             elif program_list[0] == 2:
-                AST_TrackMate(self, path_dict, para_dict, program_list[1])
+                ast_track(self, path_dict, para_dict, program_list[1])
             elif program_list[0] == 3:
-                AST_features(self, path_dict, para_dict)
+                ast_features(self, path_dict, para_dict)
             AST_impListener(self, False)
             frame = task["task"]
             _delete_entry(self, frame)

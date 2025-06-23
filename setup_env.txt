@@ -1,0 +1,3 @@
+python -m venv ast_env
+ast_env\Scripts\activate
+pip install -r requirements.txt

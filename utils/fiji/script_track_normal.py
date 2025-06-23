@@ -1,4 +1,4 @@
-script_NormalTrackmate = r'''
+script_track_normal = r'''
 #@output total_frame_spots_num
 #@output frame_num
 #@ ij.ImagePlus imp

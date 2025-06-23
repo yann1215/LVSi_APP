@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.process.Util_Java import newFileChooser
-from utils.process.Util_dirSeeker import pathFindingThread
+from utils.process.process_java import new_file_chooser
+from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
 from gui_para_window import create_modal_window
-from utils.process.Util_Java import Preferences
+from utils.process.process_java import Preferences
 
 def create_task_frame(self, parent):
     """
@@ -145,7 +145,7 @@ def browse_file(self):
     浏览文件
     """
 
-    self.filepath_list = newFileChooser(self, self.program_start)
+    self.filepath_list = new_file_chooser(self, self.program_start)
     self.path_entry.xview_moveto(1)
 
 def output_browse_file(self):
@@ -153,7 +153,7 @@ def output_browse_file(self):
     浏览文件
     """
 
-    self.output_filepath = newFileChooser(self, 4)
+    self.output_filepath = new_file_chooser(self, 4)
     self.output_path_entry.xview_moveto(1)
 
 def output_auto(self):
@@ -190,7 +190,7 @@ def toggle_start(self):
             filepath_list = self.filepath_list
             mode = self.program_start
             all_para_dict = self.all_para_dict
-            pathFindingThread(self, filepath_list, mode, all_para_dict)
+            path_finding_thread(self, filepath_list, mode, all_para_dict)
 
 def AST_start(self):
     """

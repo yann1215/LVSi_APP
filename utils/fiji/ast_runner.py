@@ -1,20 +1,31 @@
-from utils.process.Util_Java import standardScriptRuner
-from utils.process.Util_csvOutputer import csv_manager, ID_csv_outputer
-from utils.track.Script_shakePart import script_shakePart
-from utils.track.Script_preProcess import script_preProcess
-from utils.track.Script_LongbacTrackmate import script_LongbacTrackmate
-from utils.track.Script_subLongbac import script_subLongbac
-from utils.track.Script_NormalTrackmate import script_NormalTrackmate
-from utils.track.Script_ReChooser import script_ReChooser
-from utils.track.Script_impListener import script_impListener
+from utils.process.process_java import standard_script_runer
+from utils.process.process_csv_output import csv_manager, id_csv_output
+from utils.fiji.script_correct_shake import script_correct_shake
+from utils.fiji.script_preprocess import script_preprocess
+from utils.fiji.script_track_long import script_track_long
+from utils.fiji.script_denoise_long import script_denoise_long
+from utils.fiji.script_track_normal import script_track_normal
+from utils.fiji.script_rechoose import script_rechoose
+from utils.fiji.script_imp_listener import script_imp_listener
 
 
-def AST_preprocess(self, path_dict, para_dict, program_end):
+def ast_preprocess(self, path_dict, para_dict, program_end):
+    """
+    Function:
+
+    Args:
+        path_dict:
+        para_dict:
+        program_end:
+
+    """
+
+
     if self.EndEvent.is_set():
         return
     self.status_var.set("开始噪声过滤")
     try:
-        args_shakePart = {
+        args_shake_part = {
             "frame_step": para_dict["frame_step"],
             "shake_binary_threshold": para_dict["shake_binary_threshold"],
             "min_filter_len": para_dict["min_filter_len"],
@@ -28,12 +39,12 @@ def AST_preprocess(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_shakePart = standardScriptRuner(script_shakePart, args_shakePart)
-        toStart = output_shakePart.getOutput("toStart")
-        toEnd = output_shakePart.getOutput("toEnd")
-        update_dict = output_shakePart.getOutput("update_dict")
+        output_shake_part = standard_script_runer(script_correct_shake, args_shake_part)
+        toStart = output_shake_part.getOutput("toStart")
+        toEnd = output_shake_part.getOutput("toEnd")
+        update_dict = output_shake_part.getOutput("update_dict")
         para_dict.update(update_dict)
-        args_preProcess = {
+        args_preprocess = {
             "toStart": toStart,
             "toEnd": toEnd,
             "frame_step": para_dict["frame_step"],
@@ -57,7 +68,7 @@ def AST_preprocess(self, path_dict, para_dict, program_end):
             "contrast_max": para_dict["contrast_max"],
             "contrast_min": para_dict["contrast_min"],
         }
-        output_preProcess = standardScriptRuner(script_preProcess, args_preProcess)
+        output_preProcess = standard_script_runer(script_preprocess, args_preprocess)
         imp_path = output_preProcess.getOutput("imp_path")
         path_dict.update({
             "path": imp_path,
@@ -65,13 +76,24 @@ def AST_preprocess(self, path_dict, para_dict, program_end):
         self.progress['value'] = 45
         self.status_var.set("噪声过滤完成")
         if program_end > 1:
-            AST_TrackMate(self, path_dict, para_dict, program_end)
+            ast_track(self, path_dict, para_dict, program_end)
     except:
         self.status_var.set("噪声过滤出错")
+
     return
 
 
-def AST_TrackMate(self, path_dict, para_dict, program_end):
+def ast_track(self, path_dict, para_dict, program_end):
+    """
+    Function:
+
+    Args:
+        path_dict:
+        para_dict:
+        program_end:
+
+    """
+
     if self.EndEvent.is_set():
         return
     self.status_var.set("开始检测追踪")
@@ -98,7 +120,7 @@ def AST_TrackMate(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_LongbacTrackmate = standardScriptRuner(script_LongbacTrackmate, args_LongbacTrackmate)
+        output_LongbacTrackmate = standard_script_runer(script_track_long, args_LongbacTrackmate)
         origin_imp = output_LongbacTrackmate.getOutput("origin_imp")
         trackSpot_imp = output_LongbacTrackmate.getOutput("trackSpot_imp")
         imp = output_LongbacTrackmate.getOutput("imp")
@@ -118,7 +140,7 @@ def AST_TrackMate(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_subLongbac = standardScriptRuner(script_subLongbac, args_subLongbac)
+        output_subLongbac = standard_script_runer(script_denoise_long, args_subLongbac)
         without_imp = output_subLongbac.getOutput("imp")
         args_NormalTrackmate = {
             "imp": without_imp,
@@ -148,23 +170,26 @@ def AST_TrackMate(self, path_dict, para_dict, program_end):
             "contrast_max": para_dict["contrast_max"],
             "contrast_min": para_dict["contrast_min"],
         }
-        output_NormalTrackmate = standardScriptRuner(script_NormalTrackmate, args_NormalTrackmate)
+        output_NormalTrackmate = standard_script_runer(script_track_normal, args_NormalTrackmate)
         Normal_spots_num = output_NormalTrackmate.getOutput("total_frame_spots_num")
         frame_num = output_NormalTrackmate.getOutput("frame_num")
         csv_manager(path_dict, Longbac_spots_num, Normal_spots_num, frame_num)
         self.progress['value'] = 75
         self.status_var.set("检测追踪完成")
         if program_end > 2:
-            AST_features(self, path_dict, para_dict)
+            ast_features(self, path_dict, para_dict)
     except:
         self.status_var.set("检测追踪出错")
+
     return
 
 
-def AST_features(self, path_dict, para_dict):
+def ast_features(self, path_dict, para_dict):
+
     if self.EndEvent.is_set():
         return
     self.status_var.set("开始特征提取")
+
     try:
         args_ReChooser = {
             "ROI_frame_start": para_dict["ROI_frame_start"],
@@ -180,22 +205,24 @@ def AST_features(self, path_dict, para_dict):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_ReChooser = standardScriptRuner(script_ReChooser, args_ReChooser)
+        output_ReChooser = standard_script_runer(script_rechoose, args_ReChooser)
         ID_data_list = output_ReChooser.getOutput("ID_data_list")
-        ID_csv_outputer(path_dict,  para_dict, ID_data_list)
+        id_csv_output(path_dict, para_dict, ID_data_list)
         self.progress['value'] = 100
         self.status_var.set("特征提取完成")
     except:
         self.status_var.set("特征提取出错")
+
     return
 
 
 def AST_impListener(self, mode):
     try:
-        args_ImpListener = {
+        args_impListener = {
             "mode": mode,
         }
-        standardScriptRuner(script_impListener, args_ImpListener)
+        standard_script_runer(script_imp_listener, args_impListener)
     except:
         print("error in imp listener")
+
     return
