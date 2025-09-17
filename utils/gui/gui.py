@@ -1,9 +1,9 @@
 import tkinter as tk
-from .gui_panel_center import create_center_frame
-from .gui_panel_north import create_north_frame
-from .gui_panel_west import create_west_frame
-from .gui_panel_east import create_east_frame
-from .gui_panel_south import create_south_frame
+from utils.gui.gui_panel_center import create_center_frame
+from utils.gui.gui_panel_north import create_north_frame
+from utils.gui.gui_panel_west import create_west_frame
+from utils.gui.gui_panel_east import create_east_frame
+from utils.gui.gui_panel_south import create_south_frame
 from _para import *
 import cv2
 from threading import Event

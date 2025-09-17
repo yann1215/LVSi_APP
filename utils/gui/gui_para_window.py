@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import ttk
-from .gui_para_settings import all_para_settings
+from utils.gui.gui_para_settings import all_para_settings
 from _para import *
 import json
 

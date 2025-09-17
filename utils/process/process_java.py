@@ -1,14 +1,59 @@
-import scyjava
 from _para import *
+from pathlib import Path
+import os
+# import shutil
+
+# ====== remove system java ======
+def strip_from_path(substrings: list[str]):
+    parts = [x for x in os.environ.get("PATH","").split(os.pathsep) if x]
+    lowered = [x.lower() for x in parts]
+    keep = [p for p,lp in zip(parts, lowered) if not any(s.lower() in lp for s in substrings)]
+    os.environ["PATH"] = os.pathsep.join(keep)
+
+strip_from_path([r"common files\oracle\java\java8path", r"program files (x86)\common files\oracle\java"])
+
+# ====== load project maven&java ======
+# maven path
+maven_home = os.path.join(base_path, "tools", "maven", "apache-maven-3.9.11")
+os.environ["MAVEN_HOME"] = maven_home
+# print("[ImageJ] MAVEN_HOME =>", maven_home)
+
+# maven bin
+maven_bin = os.path.join(maven_home, "bin")
+os.environ["PATH"] = maven_bin + ";" + os.environ.get("PATH","")
+
+# java path
+java_home = os.path.join(base_path, "Fiji.app", "java", "win64", "zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64", "jre")
+os.environ["JAVA_HOME"] = java_home
+# print("[ImageJ] JAVA_HOME =>", java_home)
+# java bin
+java_bin = os.path.join(java_home, "bin")
+os.environ["PATH"] = java_bin + ";" + os.environ["PATH"]
+# print("[ImageJ] bin =>", os.environ["PATH"])
+
+# fiji path
+fiji_path = os.path.join(base_path, "Fiji.app")
+# print("[ImageJ] Fiji dir  =>", fiji_path)
+
+# place project maven&java first
+def ensure_on_path(p: Path, prepend=True):
+    cur = os.environ.get("PATH","")
+    parts = [x for x in cur.split(os.pathsep) if x]
+    sp = str(p.resolve())
+    if sp not in parts:
+        os.environ["PATH"] = (sp + os.pathsep + cur) if prepend else (cur + os.pathsep + sp)
+
+ensure_on_path(Path(java_bin), prepend=True)
+ensure_on_path(Path(maven_bin), prepend=True)
+# print("mvn  =", shutil.which("mvn") or shutil.which("mvn.cmd"))
+# print("java =", shutil.which("java"))
+
+# ====== load scyjava&imagej ======
+import scyjava
 import imagej
 
-
-jre_path = os.path.join(base_path, "Fiji.app\\java\\win64\\zulu8.86.0.25-ca-fx-jdk8.0.452-win_x64\\jre")
-os.environ["JAVA_HOME"] = jre_path
-scyjava.config.add_option('-Xmx8g')
-
-fiji_path = os.path.join(base_path, "Fiji.app")
-ij = imagej.init(fiji_path, 'interactive')
+scyjava.config.add_option('-Xmx8g')     # 调整内存
+ij = imagej.init(fiji_path, mode="interactive")
 
 scyjava.jimport("java.lang.System").setProperty("python.console.redirect", "true")
 scyjava.jimport("java.lang.System").setProperty("python.redirect", "true")

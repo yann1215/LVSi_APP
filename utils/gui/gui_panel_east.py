@@ -3,7 +3,7 @@ from tkinter import ttk
 from utils.process.process_java import new_file_chooser
 from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
-from .gui_para_window import create_modal_window
+from utils.gui.gui_para_window import create_modal_window
 from utils.process.process_java import Preferences
 
 def create_task_frame(self, parent):
