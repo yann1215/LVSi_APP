@@ -13,8 +13,11 @@ import time
 class VideoProcessingApp:
     def __init__(self, root, event, version):
         self.EndEvent = event
+
+        # default image
         self.NonePng = cv2.imread(os.path.join(base_path, "Fiji.app\\__None__.png"))
         self.img = self.NonePng
+
         self.img_shape = (728, 544)
         self.west_img_shape = (364, 272)
         self.save_frame = False

@@ -3,13 +3,30 @@ __pycache__/
 *.py[cod]
 
 # 忽略虚拟环境
-venv/
-ast_env/
+# 虚拟环境（项目内）
+.venv/
+
+# 本地环境变量文件（不是虚拟环境，但通常也要忽略）
 .env
+.env.local
+.env.*        # 可选
+!.env.example # 保留示例模板
+
+# 忽略子文件夹中可能的环境文件
+**/.venv/
+**/venv/
+**/env/
 
 # 忽略 VS Code 和 PyCharm 配置
 .vscode/
-.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/runConfigurations/
+!.idea/vcs.xml
+# 强制忽略易变文件
+.idea/workspace.xml
+.idea/tasks.xml
 
 # 忽略 Jupyter Notebook 检查点
 .ipynb_checkpoints/

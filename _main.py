@@ -1,8 +1,10 @@
-from utils.gui.gui import gui_init
-from _para import *
 import json
 import os
 import sys, time        # debug
+
+from _para import *
+from utils.gui.gui import gui_init  # 1st version gui
+from utils.gui2.gui2 import App     # 2nd version gui - editing
 
 
 def log(msg):
@@ -11,7 +13,7 @@ def log(msg):
 
 if __name__ == "__main__":
     path = "settings"
-    version = "LVSi System (ver 25.09.17)"        # title bar text
+    version = "LVSi Image Processing System (ver 25.09.17)"        # title bar text
 
     log("start")        # debug
 
@@ -32,7 +34,8 @@ if __name__ == "__main__":
         log(f"json step failed: {e}")
 
     log("before gui_init")
-    gui_init(version)
+    # gui_init(version)
+    App().mainloop()
     log("after gui_init")
 
 # pyinstaller --add-data="Fiji.app;Fiji.app" --additional-hooks-dir=__hooks__ _main.py -F -w
