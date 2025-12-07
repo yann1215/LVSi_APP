@@ -3,31 +3,25 @@ import tkinter as tk
 from tkinter import filedialog
 import ttkbootstrap as tb
 from ttkbootstrap import ttk
-from ttkbootstrap.constants import *
 from importlib.resources import files
 from PIL import Image, ImageTk
 
 
-# BRIGHT_BLUE = "#53a7d8"
+# LIGHT_BLUE = "#53a7d8"
 DARK_BLUE = "#135ecb"
+# LIGHT_GREY = "#f4f7fb"
+LIGHT_GREY = "#ffffff"      # background color, temporary changed to white
+MID_GREY = "#e9eef5"
+DARK_GREY = "#53a7d8"
 
 LEFT_WIDTH = 360          # 左列固定宽度
-MID_WIDTH  = 420          # 中列固定宽度=左列
+MID_WIDTH  = 480          # 中列固定宽度=左列
 BASE_MIN_H = 760          # 最小高度
-INIT_W, INIT_H = 1500, 940  # 初始窗口更大，右侧图像区更宽
+INIT_W, INIT_H = 1520, 940  # 初始窗口更大，右侧图像区更宽
+# INIT_W, INIT_H = 1680, 945  # OBS采集比例
 
 ASSETS = files("utils.gui2.gui_assets")  # 指向包
 ICON_SIZE = 24
-
-
-def load_title_icon(icon_w, icon_h):    # 修改图标尺寸
-    res = ASSETS.joinpath("logo.png")
-    img = Image.open(res.open("rb")).convert("RGBA")
-    # 裁成正方形并缩放
-    s = min(img.width, img.height)
-    x = (img.width - s)//2; y = (img.height - s)//2
-    img = img.crop((x, y, x+s, y+s)).resize((icon_w, icon_h), Image.Resampling.LANCZOS)
-    return ImageTk.PhotoImage(img)
 
 
 # ---- 纵向滚动容器 ----
@@ -72,15 +66,16 @@ class VScrolled(ttk.Frame):
         self.canvas.yview_scroll(delta, "units")
 
 class Collapsible(ttk.Labelframe):
-    def __init__(self, master, text="", bootstyle="info", toggle=False, *args, **kwargs):
-        super().__init__(master, text=text, padding=8, bootstyle=bootstyle, *args, **kwargs)
+    def __init__(self, master, text="", toggle=False, *args, **kwargs):
+        super().__init__(master, text=text, padding=8, *args, **kwargs)
         self.columnconfigure(0, weight=1)
         self.body = ttk.Frame(self)
         self.body.grid(row=0, column=0, sticky="ew")
         self._collapsed = False
         self._btn = None
+
         if toggle:
-            self._btn = ttk.Button(self, text="−", width=2, bootstyle="secondary-outline", command=self._toggle)
+            self._btn = ttk.Button(self, text="−", width=2, command=self._toggle)
             self._btn.place(relx=1.0, x=-8, y=-2, anchor="ne")
 
     def _toggle(self):
@@ -100,21 +95,52 @@ class Collapsible(ttk.Labelframe):
 class App(tb.Window):
     def __init__(self):
         super().__init__(themename="minty")
+        # Tk/ttk 本身没有“设置圆角半径”的选项。控件的圆角/直角是由主题的元素贴图决定的。
+        # 尝试了几个主题，没有圆角矩形的按钮
+
         self.title("Image Processing System")
         self.geometry(f"{INIT_W}x{INIT_H}")
         self.minsize(LEFT_WIDTH + MID_WIDTH + 420, BASE_MIN_H)  # 初始一个保守最小宽度
 
-        style = tb.Style()
-        
+        style = tb.Style(theme="minty")
+
         # 改“info/primary”语义色
         style.colors.set("info", DARK_BLUE)
-        style.colors.set("primary", DARK_BLUE)  # 如需，primary 也一起设成蓝
-        # 让已经创建的风格刷新（若你先设色再建控件，可以不用这行）
-        style.theme_use(style.theme.name)
+        style.colors.set("primary", DARK_BLUE)
+        # style.colors.set("secondary", DARK_GREY)
 
-        style.configure("Topbar.TFrame", background="#e9eef5")
-        style.configure("Sidebar.TLabelframe", background="#f4f7fb")
-        style.configure("Param.TLabelframe", background="#f7fafc")
+        # 顶部标题的样式
+        style.configure("Topbar.TFrame", background=MID_GREY)
+        style.configure("Topbar.TFrame.Label",
+                        font=("Segoe UI Semibold", 16))
+        # 左中右部件外层框架的样式
+        style.configure("ParentBox.TLabelframe", background=LIGHT_GREY)
+        style.configure("ParentBox.TLabelframe.Label",
+                        font=("Segoe UI Semibold", 14),
+                        background=LIGHT_GREY,
+                        foreground=DARK_BLUE)
+        # 子框架的样式
+        style.configure("ChildBox.TLabelframe", background=LIGHT_GREY)
+        style.configure("ChildBox.TLabelframe.Label",
+                        font=("Segoe UI Semibold", 12),
+                        background=LIGHT_GREY)
+        # 标签的样式
+        # cur_font_name = style.lookup("TNotebook.Tab", "font") or "TkDefaultFont"
+        # cur_font = tkfont.nametofont(cur_font_name)
+        style.configure("TNotebook.Tab",
+                        font=("Segoe UI Semibold",10))      # 未选中的默认色
+        style.map("TNotebook.Tab",
+                  background=[("selected", DARK_BLUE)],
+                  foreground=[("selected", "#ffffff")])
+
+        # 组件的样式
+        style.configure("ComponentItem.TFrame", background=LIGHT_GREY)
+        style.configure("ComponentItem.TFrame.Label",
+                        # font=("Segoe UI Semibold", 10),
+                        background=LIGHT_GREY)
+
+        # 让已经创建的风格刷新（若先设色再建控件，可以不用这行）
+        style.theme_use(style.theme.name)
 
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
@@ -135,12 +161,22 @@ class App(tb.Window):
 
         # 1) 先创建“图标 Label”
         style = tb.Style()
-        style.configure("TopbarIcon.TLabel", background="#e9eef5", borderwidth=0)
+        style.configure("TopbarIcon.TLabel", background=MID_GREY, borderwidth=0)
         self.title_img_label = ttk.Label(bar, style="TopbarIcon.TLabel")  # 先有这个控件，再去 config
         self.title_img_label.grid(row=0, column=0, sticky="w", padx=(0, 8))
 
         # 2) 再加载图标并设置（记得保存引用）
-        self._title_icon = load_title_icon(80, 80)  # 你的函数：返回 PhotoImage
+        def load_title_icon(icon_w, icon_h):  # 修改图标尺寸
+            res = ASSETS.joinpath("logo.png")
+            img = Image.open(res.open("rb")).convert("RGBA")
+            # 裁成正方形并缩放
+            s = min(img.width, img.height)
+            x = (img.width - s) // 2;
+            y = (img.height - s) // 2
+            img = img.crop((x, y, x + s, y + s)).resize((icon_w, icon_h), Image.Resampling.LANCZOS)
+            return ImageTk.PhotoImage(img)
+
+        self._title_icon = load_title_icon(100, 100)  # 你的函数：返回 PhotoImage
         if self._title_icon:
             self.title_img_label.configure(image=self._title_icon)
         else:
@@ -152,7 +188,7 @@ class App(tb.Window):
             bar,
             text="Image Processing System",
             font=("Segoe UI Semibold", 16),
-            background="#e9eef5"
+            background=MID_GREY
         ).grid(row=0, column=1, sticky="w")
 
         # 4) 系统菜单栏（位置固定在窗口顶，不在 bar 里显示）
@@ -169,10 +205,10 @@ class App(tb.Window):
         menubar.add_cascade(label="Process", menu=m_proc)
 
         m_param = tk.Menu(menubar, tearoff=False)
-        m_param.add_command(label="Save", command=lambda: self._toast("Save Load Preset"))
+        m_param.add_command(label="Save", command=lambda: self._toast("Save Preset"))
         m_param.add_command(label="Save As", command=lambda: self._toast("Save As Preset"))
         m_param.add_command(label="Load", command=lambda: self._toast("Load Preset"))
-        menubar.add_cascade(label="Config", menu=m_param)
+        menubar.add_cascade(label="Configs", menu=m_param)
 
         m_help = tk.Menu(menubar, tearoff=False)
         m_help.add_command(label="Docs", command=lambda: self._toast("Open Docs"))
@@ -205,7 +241,7 @@ class App(tb.Window):
         self.mid.grid(row=0, column=1, sticky="nsw", padx=8)
         self.mid.grid_propagate(False)
         self.mid.pack_propagate(False)
-        self._build_config_groups(self.mid)
+        self._build_parameter_groups(self.mid)
 
         # 右列
         self.right = ttk.Frame(wrap)
@@ -222,8 +258,9 @@ class App(tb.Window):
 
     # ---- 左列：File（两行形式） ----
     def _build_file_group(self, parent):
-        box = ttk.Labelframe(parent, text="File", padding=10, bootstyle="info", style="Sidebar.TLabelframe")
+        box = ttk.Labelframe(parent, text="File", padding=10, style="ParentBox.TLabelframe")
         box.pack(side="top", fill="x")
+
         def add_path(label_text, attr_name):
             ttk.Label(box, text=label_text).pack(anchor="w", pady=(6, 2))
             row = ttk.Frame(box); row.pack(fill="x", pady=(0,4)); row.columnconfigure(0, weight=1)
@@ -231,35 +268,92 @@ class App(tb.Window):
             ttk.Button(row, text="···", width=3, bootstyle="info",
                        command=lambda e=entry: self._browse_file(e)).grid(row=0, column=1, padx=(6,0))
             setattr(self, attr_name, entry)
+
         add_path("Image Path:", "entry_image")
         add_path("Processed Image Path:", "entry_processed")
         add_path("CSV Path:", "entry_csv")
 
+        # 文件命名输入框
+        form = ttk.Frame(box)  # 容器使用 grid，两列布局
+        form.pack(fill="x", pady=(14,0))
+
+        # 让右边输入框可拉伸
+        form.columnconfigure(1, weight=1)
+
+        names = ["Bacteria", "Drug", "Time"]
+
+        self.file_params = {}  # 保存引用，便于后面取值
+        for i, name in enumerate(names):
+            # 直接复用你已有的行渲染方法
+            self._param_row(form, i, name)  # ← 左标签 + 右 Entry
+            # 把刚刚创建的 Entry 引用取出来保存（可选）
+            # _param_row 创建的是该行最后一个 Entry，grid(row=i, column=1)
+            entry = form.grid_slaves(row=i, column=1)[0]
+            self.file_params[name] = entry
+
     def _build_process_group(self, parent):
-        proc = ttk.Labelframe(parent, text="Process", padding=10, bootstyle="info", style="Sidebar.TLabelframe")
+        proc = ttk.Labelframe(parent, text="Process", padding=10, style="ParentBox.TLabelframe")
         proc.pack(side="top", fill="both", expand=True, pady=(8,0))
-        self.var_photo=tk.BooleanVar(value=True); self.var_noise=tk.BooleanVar(value=False)
-        self.var_track=tk.BooleanVar(value=False); self.var_feat=tk.BooleanVar(value=True)
-        for v,t in [(self.var_photo,"Photo"),(self.var_noise,"Noise Filter"),
-                    (self.var_track,"Track"),(self.var_feat,"Feature Extraction")]:
-            ttk.Checkbutton(proc, text=t, variable=v, bootstyle="round-toggle").pack(anchor="w", pady=6)
+
+        # Process各步骤的初始值（默认进行全部操作）
+        self.var_photo=tk.BooleanVar(value=True)
+        self.var_noise=tk.BooleanVar(value=True)
+        self.var_track=tk.BooleanVar(value=True)
+        self.var_feat=tk.BooleanVar(value=True)
+        # self.var_photo = tk.BooleanVar(value=False)
+        # self.var_noise = tk.BooleanVar(value=False)
+        # self.var_track = tk.BooleanVar(value=False)
+        # self.var_feat = tk.BooleanVar(value=False)
+
+        for v,t in [(self.var_photo,"Image Acquisition"),
+                    (self.var_noise,"Noise Filter"),
+                    (self.var_track,"Cell Tracking"),
+                    (self.var_feat,"Feature Extraction")]:
+            ttk.Checkbutton(proc, text=t, variable=v,
+                            bootstyle="round-toggle").pack(anchor="w", pady=8)
 
     # ---- 中列（可滚动参数） ----
-    def _build_config_groups(self, parent):
-        outer = ttk.Labelframe(parent, text="Config", padding=10, bootstyle="info", style="Param.TLabelframe")
+    def _build_parameter_groups(self, parent):
+        outer = ttk.Labelframe(parent, text="Configs",
+                               padding=10, style="ParentBox.TLabelframe")
         outer.pack(fill="both", expand=True)
-        outer.rowconfigure(0, weight=1); outer.columnconfigure(0, weight=1)
-        sc = VScrolled(outer); sc.grid(row=0, column=0, sticky="nsew", pady=(2,0))
+        outer.rowconfigure(0, weight=1)
+        outer.columnconfigure(0, weight=1)
 
-        cam = Collapsible(sc.content, text="Camera", bootstyle="info"); cam.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Exposure (ms)","Gain (dB)","FPS"]): self._param_row(cam.body,i,n)
-        fil = Collapsible(sc.content, text="Filter", bootstyle="info"); fil.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Kernel Size","Sigma","Threshold Low","Threshold High"]): self._param_row(fil.body,i,n)
-        trk = Collapsible(sc.content, text="Track", bootstyle="info"); trk.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Max Distance","Min Area","Max Area","IOU","LR","Momentum","NMS","Score Thresh","Max Lost","Warmup"]):
+        sc = VScrolled(outer)
+        sc.grid(row=0, column=0, sticky="nsew", pady=(2,0))
+
+        cam = Collapsible(sc.content, text="Camera", style="ChildBox.TLabelframe")
+        cam.pack(fill="x", pady=(0,8))
+        for i,n in enumerate(["Exposure (ms)","Gain (dB)","FPS"]):
+            self._param_row(cam.body,i,n)
+
+        fil = Collapsible(sc.content, text="Filter", style="ChildBox.TLabelframe")
+        fil.pack(fill="x", pady=(0,8))
+        for i,n in enumerate(["Kernel Size","Sigma","Threshold Low","Threshold High"]):
+            self._param_row(fil.body,i,n)
+
+        trk = Collapsible(sc.content, text="Tracking", style="ChildBox.TLabelframe")
+        trk.pack(fill="x", pady=(0,8))
+        for i,n in enumerate(["Time Window",
+                              "Long-Cell Radius",
+                              "Long Threshold",
+                              "Long Area-Filter",
+                              "Long Link-Distance",
+                              "Long Track-Ratio",
+                              "Short-Cell Radius",
+                              "Short Threshold",
+                              "Short SNR-Filter",
+                              "Short Link-Distance",
+                              "Short Track-Ratio"]):
             self._param_row(trk.body,i,n)
-        feat = Collapsible(sc.content, text="Feature", bootstyle="info"); feat.pack(fill="x")
-        for i,n in enumerate(["Descriptor Dim","PCA Components"]): self._param_row(feat.body,i,n)
+
+
+
+        feat = Collapsible(sc.content, text="Feature", style="ChildBox.TLabelframe")
+        feat.pack(fill="x")
+        for i,n in enumerate(["Start Frame","End Frame", "Frame Interval"]):
+            self._param_row(feat.body,i,n)
 
     def _param_row(self, parent, r, label):
         parent.columnconfigure(1, weight=1)
@@ -268,10 +362,16 @@ class App(tb.Window):
 
     # ---- 右列：图像 + 标签 ----
     def _build_view_area(self, parent):
-        tabs = ttk.Notebook(parent, bootstyle="info"); tabs.grid(row=0, column=0, sticky="nsew")
+        # tabs = ttk.Notebook(parent, bootstyle="info")
+        tabs = ttk.Notebook(parent, style="TNotebook")
+        tabs.grid(row=0, column=0, sticky="nsew")
+
         for name in ["Direct","Processed","Tracked"]:
-            frame = ttk.Frame(tabs, padding=6); frame.columnconfigure(0, weight=1); frame.rowconfigure(0, weight=1)
+            frame = ttk.Frame(tabs, padding=6)
+            frame.columnconfigure(0, weight=1)
+            frame.rowconfigure(0, weight=1)
             tabs.add(frame, text=name)
+
             canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
             canvas.grid(row=0, column=0, sticky="nsew")
             canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
@@ -292,29 +392,51 @@ class App(tb.Window):
 
     # ---- 右列：按钮 ----
     def _build_run_buttons(self, parent):
-        row = ttk.Frame(parent); row.grid(row=3, column=0, sticky="ew", pady=(6,0))
-        row.columnconfigure(0, weight=1)
-        btns = ttk.Frame(row, name="btns"); btns.grid(row=0, column=0, sticky="w")
-        self.btn_run   = ttk.Button(btns, text="Run",   bootstyle="success", width=10, command=self._run)
-        self.btn_pause = ttk.Button(btns, text="Pause", bootstyle="warning", width=10, command=self._pause)
-        self.btn_stop  = ttk.Button(btns, text="Stop",  bootstyle="danger",  width=10, command=self._stop)
-        self.btn_run.grid(row=0, column=0, padx=(0,8)); self.btn_pause.grid(row=0, column=1, padx=(0,8)); self.btn_stop.grid(row=0, column=2)
+        row = ttk.Frame(parent)
+        row.grid(row=3, column=0, sticky="ew", pady=(6,0))
+
+        # 两侧留白列可伸缩，中间放按钮
+        row.columnconfigure(0, weight=1)  # 左留白
+        row.columnconfigure(1, weight=0)  # 中间按钮容器
+        row.columnconfigure(2, weight=1)  # 右留白
+
+        btns = ttk.Frame(row, name="btns")
+        btns.grid(row=0, column=1)      # 按钮放在中间列
+
+        self.btn_run = ttk.Button(btns, text="Run",   bootstyle="info", width=8, command=self._run)
+        self.btn_run.grid(row=0, column=0, padx=(0, 20))
+        self.btn_pause = ttk.Button(btns, text="Pause", bootstyle="info", width=8, command=self._pause)
+        self.btn_pause.grid(row=0, column=1, padx=(0, 20))
+        self.btn_stop = ttk.Button(btns, text="Stop",  bootstyle="info",  width=8, command=self._stop)
+        self.btn_stop.grid(row=0, column=2)
+
         self._btns_container = btns
 
     # ===== 行为占位 =====
     def _browse_file(self, entry):
         path = filedialog.askopenfilename(title="Choose File")
-        if path: entry.delete(0, tk.END); entry.insert(0, path)
+        if path: entry.delete(0, tk.END)
+        entry.insert(0, path)
     def _file_open(self):
         p = filedialog.askopenfilename(title="Open Image")
-        if p: self.status.config(text=f"Loaded: {os.path.basename(p)}"); self._draw_dummy(self.canvas_direct)
+        if p:
+            self.status.config(text=f"Loaded: {os.path.basename(p)}")
+            self._draw_dummy(self.canvas_direct)
     def _draw_dummy(self, canvas):
-        canvas.delete("content"); w,h=canvas.winfo_width(),canvas.winfo_height(); s=min(w,h)
-        x0,y0=(w-s)//2,(h-s)//2; canvas.create_rectangle(x0,y0,x0+s,y0+s, fill="#1f4f99", outline="", tags="content")
+        canvas.delete("content")
+        w,h=canvas.winfo_width(),canvas.winfo_height()
+        s=min(w,h)
+        x0,y0=(w-s)//2,(h-s)//2
+        canvas.create_rectangle(x0,y0,x0+s,y0+s, fill="#1f4f99", outline="", tags="content")
     def _run(self):
-        self.status.config(text="Running…"); self.prog.configure(value=10); self.after(120, lambda: self.prog.configure(value=35))
-    def _pause(self): self.status.config(text="Paused.")
-    def _stop(self):  self.status.config(text="Stopped."); self.prog.configure(value=0)
+        self.status.config(text="Running…")
+        self.prog.configure(value=10)
+        self.after(120, lambda: self.prog.configure(value=35))
+    def _pause(self):
+        self.status.config(text="Paused.")
+    def _stop(self):
+        self.status.config(text="Stopped.")
+        self.prog.configure(value=0)
     def _toast(self, msg, title="Info", bootstyle="info"):
         tb.ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
 
