@@ -169,9 +169,10 @@ class App(tb.Window):
         menubar.add_cascade(label="Process", menu=m_proc)
 
         m_param = tk.Menu(menubar, tearoff=False)
-        m_param.add_command(label="Load Preset...", command=lambda: self._toast("Load Preset"))
-        m_param.add_command(label="Save Preset...", command=lambda: self._toast("Save Preset"))
-        menubar.add_cascade(label="Parameter", menu=m_param)
+        m_param.add_command(label="Save", command=lambda: self._toast("Save Load Preset"))
+        m_param.add_command(label="Save As", command=lambda: self._toast("Save As Preset"))
+        m_param.add_command(label="Load", command=lambda: self._toast("Load Preset"))
+        menubar.add_cascade(label="Config", menu=m_param)
 
         m_help = tk.Menu(menubar, tearoff=False)
         m_help.add_command(label="Docs", command=lambda: self._toast("Open Docs"))
@@ -204,7 +205,7 @@ class App(tb.Window):
         self.mid.grid(row=0, column=1, sticky="nsw", padx=8)
         self.mid.grid_propagate(False)
         self.mid.pack_propagate(False)
-        self._build_parameter_groups(self.mid)
+        self._build_config_groups(self.mid)
 
         # 右列
         self.right = ttk.Frame(wrap)
@@ -244,8 +245,8 @@ class App(tb.Window):
             ttk.Checkbutton(proc, text=t, variable=v, bootstyle="round-toggle").pack(anchor="w", pady=6)
 
     # ---- 中列（可滚动参数） ----
-    def _build_parameter_groups(self, parent):
-        outer = ttk.Labelframe(parent, text="Parameter", padding=10, bootstyle="info", style="Param.TLabelframe")
+    def _build_config_groups(self, parent):
+        outer = ttk.Labelframe(parent, text="Config", padding=10, bootstyle="info", style="Param.TLabelframe")
         outer.pack(fill="both", expand=True)
         outer.rowconfigure(0, weight=1); outer.columnconfigure(0, weight=1)
         sc = VScrolled(outer); sc.grid(row=0, column=0, sticky="nsew", pady=(2,0))
