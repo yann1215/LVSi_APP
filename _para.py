@@ -3,9 +3,11 @@ import os
 
 
 if hasattr(sys, '_MEIPASS'):
+    # PyInstaller 打包后的临时目录
     base_path = sys._MEIPASS
 else:
-    base_path = os.path.abspath(".")
+    # 使用当前_para.py文件所在目录作为项目根目录
+    base_path = os.path.dirname(os.path.abspath(__file__))
 
 all_para_dict = {
     "default_ID":"DEFAULT",

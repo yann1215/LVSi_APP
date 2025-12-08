@@ -3,7 +3,7 @@ import os
 import sys, time        # debug
 
 from _para import *
-from utils.gui.gui import gui_init  # 1st version gui
+# from utils.gui.gui import gui_init  # 1st version gui
 from utils.gui2.gui2 import App     # 2nd version gui - editing
 
 
