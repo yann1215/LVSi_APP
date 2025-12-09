@@ -8,11 +8,13 @@ from PIL import Image, ImageTk
 import cv2
 import threading
 
+from gui2_config import ConfigMixin
+
 from _para import all_para_dict, base_path
+from utils.gui2.gui2_para import all_para_settings
 from utils.process.process_java import new_file_chooser
 from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
-from utils.gui.gui_para_window import create_modal_window
 
 
 # LIGHT_BLUE = "#53a7d8"
@@ -100,7 +102,7 @@ class Collapsible(ttk.Labelframe):
     #     (self.body.grid_remove() if self._collapsed else self.body.grid())
     #     self._btn.config(text="+" if self._collapsed else "−")
 
-class App(tb.Window):
+class App(ConfigMixin, tb.Window):
     def __init__(self):
         super().__init__(themename="minty")
         # Tk/ttk 本身没有“设置圆角半径”的选项。控件的圆角/直角是由主题的元素贴图决定的。
@@ -125,6 +127,8 @@ class App(tb.Window):
 
         # 参数字典
         self.all_para_dict = all_para_dict.copy()
+        self.param_vars = {}
+        self.config_path = None
 
         # 路径 & 任务
         self.filepath_list = []
@@ -257,9 +261,9 @@ class App(tb.Window):
         menubar.add_cascade(label="Process", menu=m_proc)
 
         m_param = tk.Menu(menubar, tearoff=False)
-        m_param.add_command(label="Save", command=lambda: self._toast("Save Preset"))
-        m_param.add_command(label="Save As", command=lambda: self._toast("Save As Preset"))
-        m_param.add_command(label="Load", command=lambda: self._toast("Load Preset"))
+        m_param.add_command(label="Save", command=self._config_save)
+        m_param.add_command(label="Save As", command=self._config_save_as)
+        m_param.add_command(label="Load", command=self._config_load)
         menubar.add_cascade(label="Configs", menu=m_param)
 
         m_help = tk.Menu(menubar, tearoff=False)
@@ -380,6 +384,10 @@ class App(tb.Window):
 
     # ---- 中列（可滚动参数） ----
     def _build_parameter_groups(self, parent):
+        """
+        中列参数区：直接从 all_para_settings 生成 Camera / Filter / Tracking / Features
+        """
+
         outer = ttk.Labelframe(parent, text="Configs",
                                padding=10, style="ParentBox.TLabelframe")
         outer.pack(fill="both", expand=True)
@@ -388,6 +396,9 @@ class App(tb.Window):
 
         sc = VScrolled(outer)
         sc.grid(row=0, column=0, sticky="nsew", pady=(2,0))
+
+        # 每次重建参数界面时重置变量字典
+        self.param_vars = {}
 
         cam = Collapsible(sc.content, text="Camera", style="ChildBox.TLabelframe")
         cam.pack(fill="x", pady=(0,8))
