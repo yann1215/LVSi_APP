@@ -55,6 +55,14 @@ class ConfigMixin:
                 except Exception:
                     pass
 
+            # 如果是枚举型参数，再把 combobox 的 StringVar 也同步一下
+            if hasattr(self, "enum_meta") and name in self.enum_meta:
+                mapping, combo_var = self.enum_meta[name]  # mapping: {"Adaptive":0,...}
+                val_to_name = {v: k for k, v in mapping.items()}
+                cur_val = self.all_para_dict.get(name)
+                if cur_val in val_to_name:
+                    combo_var.set(val_to_name[cur_val])
+
     # ---------- preset 文件路径选择 ----------
 
     def _ask_preset_path(self, save: bool):

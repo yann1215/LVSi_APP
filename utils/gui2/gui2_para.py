@@ -1,7 +1,7 @@
 all_para_settings = {
     "camera": {
         "brief": [
-            {"str": "摄像参数", "name": "", "type": "label"},
+            {"str": "· 摄像参数", "name": "", "type": "label"},
             {"str": "根目录关键字", "name": "patient_keyword", "type": "str"},
             {"str": "拍摄时间节点", "name": "output_time", "type": "int"},
             {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
@@ -16,9 +16,9 @@ all_para_settings = {
             {"str": "数据类型", "name": "extensions", "type": "str"},
             {"str": "相机参数", "name": "", "type": "label"},
             {"str": "曝光时间", "name": "vimbaX_ExposureTime", "type": "float"},
-            {"str": "", "name": "range=(176.687, 10000009.253)", "type": "label"},
+            # {"str": "", "name": "range=(176.687, 10000009.253)", "type": "label"},
             {"str": "增益", "name": "vimbaX_Gain", "type": "float"},
-            {"str": "", "name": "range=(0.0, 24.0000)", "type": "label"},
+            # {"str": "", "name": "range=(0.0, 24.0000)", "type": "label"},
             {"str": "像素深度", "name": "vimbaX_SensorBitDepth", "type": {
                 "Adaptive":0,
                 "Bpp8":1,
@@ -26,7 +26,7 @@ all_para_settings = {
                 "Bpp12":3,
             }},
             {"str": "帧率", "name": "vimbaX_AcquisitionFrameRate", "type": "float"},
-            {"str": "", "name": "range=(1.0369e-05, 289.04776)", "type": "label"},
+            # {"str": "", "name": "range=(1.0369e-05, 289.04776)", "type": "label"},
             {"str": "处理对比度", "name": "", "type": "label"},
             {"str": "最高亮度", "name": "contrast_max", "type": "float"},
             {"str": "最低亮度", "name": "contrast_min", "type": "float"},

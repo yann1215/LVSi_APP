@@ -19,8 +19,8 @@ from utils.camera.ast_loop import camera_mode_manager
 
 # LIGHT_BLUE = "#53a7d8"
 DARK_BLUE = "#135ecb"
-# LIGHT_GREY = "#f4f7fb"
-LIGHT_GREY = "#ffffff"      # background color, temporary changed to white
+WHITE = "#ffffff"
+LIGHT_GREY = "#f4f7fb"
 MID_GREY = "#e9eef5"
 DARK_GREY = "#53a7d8"
 
@@ -97,10 +97,6 @@ class Collapsible(ttk.Labelframe):
             self.body.grid_remove(); self._btn.config(text="+")
         self._collapsed = not self._collapsed
 
-    # def _toggle(self):
-    #     self._collapsed = not self._collapsed
-    #     (self.body.grid_remove() if self._collapsed else self.body.grid())
-    #     self._btn.config(text="+" if self._collapsed else "−")
 
 class App(ConfigMixin, tb.Window):
     def __init__(self):
@@ -126,9 +122,10 @@ class App(ConfigMixin, tb.Window):
         self.default_ID = ""
 
         # 参数字典
+        self.config_path = None  # 记住当前使用的“参数预设文件”的路径
         self.all_para_dict = all_para_dict.copy()
         self.param_vars = {}
-        self.config_path = None
+        self.enum_meta = {}     # 记录枚举型参数的 mapping + combobox 变量
 
         # 路径 & 任务
         self.filepath_list = []
@@ -168,17 +165,21 @@ class App(ConfigMixin, tb.Window):
         style.configure("Topbar.TFrame", background=MID_GREY)
         style.configure("Topbar.TFrame.Label",
                         font=("Segoe UI Semibold", 16))
+
+        # 菜单栏样式
+        # style.configure("Menubar", background=MID_GREY)
+
         # 左中右部件外层框架的样式
-        style.configure("ParentBox.TLabelframe", background=LIGHT_GREY)
+        style.configure("ParentBox.TLabelframe", background=WHITE)
         style.configure("ParentBox.TLabelframe.Label",
                         font=("Segoe UI Semibold", 14),
-                        background=LIGHT_GREY,
+                        background=WHITE,
                         foreground=DARK_BLUE)
         # 子框架的样式
-        style.configure("ChildBox.TLabelframe", background=LIGHT_GREY)
+        style.configure("ChildBox.TLabelframe", background=WHITE)
         style.configure("ChildBox.TLabelframe.Label",
                         font=("Segoe UI Semibold", 12),
-                        background=LIGHT_GREY)
+                        background=WHITE)
         # 标签的样式
         # cur_font_name = style.lookup("TNotebook.Tab", "font") or "TkDefaultFont"
         # cur_font = tkfont.nametofont(cur_font_name)
@@ -189,10 +190,13 @@ class App(ConfigMixin, tb.Window):
                   foreground=[("selected", "#ffffff")])
 
         # 组件的样式
-        style.configure("ComponentItem.TFrame", background=LIGHT_GREY)
+        style.configure("ComponentItem.TFrame", background=WHITE)
         style.configure("ComponentItem.TFrame.Label",
                         # font=("Segoe UI Semibold", 10),
-                        background=LIGHT_GREY)
+                        background=WHITE)
+        # Combobox 组件样式修改
+        # style.configure("TCombobox", arrowsize=14)
+        # style.configure("TCombobox", padding=(2, 4, 2, 4))
 
         # 让已经创建的风格刷新（若先设色再建控件，可以不用这行）
         style.theme_use(style.theme.name)
@@ -313,6 +317,11 @@ class App(ConfigMixin, tb.Window):
         self._build_run_buttons(self.right)
 
     # ---- 左列：File（两行形式） ----
+    def _param_row(self, parent, r, label):
+        parent.columnconfigure(1, weight=1)
+        ttk.Label(parent, text=label).grid(row=r, column=0, sticky="w", pady=4, padx=(0,6))
+        ttk.Entry(parent).grid(row=r, column=1, sticky="ew", pady=4)
+
     def _build_file_group(self, parent):
         box = ttk.Labelframe(parent, text="File", padding=10, style="ParentBox.TLabelframe")
         box.pack(side="top", fill="x")
@@ -399,50 +408,129 @@ class App(ConfigMixin, tb.Window):
 
         # 每次重建参数界面时重置变量字典
         self.param_vars = {}
+        self.enum_meta = {}
 
-        cam = Collapsible(sc.content, text="Camera", style="ChildBox.TLabelframe")
-        cam.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Exposure (μs)",
-                              "Gain (dB)",
-                              "SensorBitDepth",
-                              "FPS",
-                              "Duration"]):
-            self._param_row(cam.body,i,n)
+        blocks = [
+            ("camera", "Camera"),
+            ("preprocess", "Filter"),
+            ("trackmate", "Tracking"),
+            ("features", "Features"),
+        ]
 
-        fil = Collapsible(sc.content, text="Filter", style="ChildBox.TLabelframe")
-        fil.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Kernel Size",
-                              "Sigma",
-                              "Threshold Low",
-                              "Threshold High"]):
-            self._param_row(fil.body,i,n)
+        for key, title in blocks:
+            box = Collapsible(sc.content, text=title, style="ChildBox.TLabelframe")
+            box.pack(fill="x", pady=(0, 8))
+            # 用 detail 模式，把该类的所有参数都展开到中列
+            self._build_param_block(box.body, key, mode="detail")
 
-        trk = Collapsible(sc.content, text="Tracking", style="ChildBox.TLabelframe")
-        trk.pack(fill="x", pady=(0,8))
-        for i,n in enumerate(["Time Window",
-                              "Long-Cell Radius",
-                              "Long Threshold",
-                              "Long Area-Filter",
-                              "Long Link-Distance",
-                              "Long Track-Ratio",
-                              "Short-Cell Radius",
-                              "Short Threshold",
-                              "Short SNR-Filter",
-                              "Short Link-Distance",
-                              "Short Track-Ratio"]):
-            self._param_row(trk.body,i,n)
+    def _build_param_block(self, parent, block_key: str, mode: str = "detail"):
+        """
+        按 all_para_settings[block_key][mode] 在 parent 里生成控件
+        """
+        settings = all_para_settings.get(block_key, {})
+        items = settings.get(mode, [])
 
-        feat = Collapsible(sc.content, text="Feature", style="ChildBox.TLabelframe")
-        feat.pack(fill="x")
-        for i,n in enumerate(["Start Frame",
-                              "End Frame",
-                              "Frame Interval"]):
-            self._param_row(feat.body,i,n)
+        for item in items:
+            # e.g. {"str": "噪声过滤", "name": "", "type": "label"}
+            value_type = item["type"]
+            name = item["name"]
+            label_text = item["str"]
 
-    def _param_row(self, parent, r, label):
-        parent.columnconfigure(1, weight=1)
-        ttk.Label(parent, text=label).grid(row=r, column=0, sticky="w", pady=4, padx=(0,6))
-        ttk.Entry(parent).grid(row=r, column=1, sticky="ew", pady=4)
+            # 1) 纯 label 型：只显示分组标题 / 小节标题
+            if value_type == "label":
+                text = label_text or name or ""
+                if not text:
+                    continue
+                ttk.Label(parent, text=text, style="ComponentItem.TFrame.Label", \
+                          font=("Segoe UI Semibold", 11)).pack(fill="x", pady=(8, 8))
+                continue
+
+            # 2) 其他类型：一行一个“名称 + 控件”
+            row = ttk.Frame(parent, style="ComponentItem.TFrame")
+            row.pack(fill="x", pady=4)
+
+            ttk.Label(row, text=label_text or name,
+                      style="ComponentItem.TFrame.Label",
+                      width=26, anchor="w").pack(side="left")
+
+            var = self._create_param_var(name, value_type)
+
+            # 数值/字符串：Entry
+            if value_type in ("int", "float", "str"):
+                entry = ttk.Entry(row, textvariable=var, width=12)
+                entry.pack(side="left", fill="x", expand=True)
+
+            # 布尔量：Checkbutton
+            elif value_type == "bool":
+                chk = ttk.Checkbutton(row, variable=var, bootstyle="round-toggle")
+                chk.pack(side="left", padx=4)
+
+            # 字典：Combobox
+            elif isinstance(value_type, dict):
+                # val: 数字类型存储
+                # name: 字符类型存储
+
+                # 1. 真实存储用 IntVar，初始值仍然来自 all_para_dict[name]（0/1/2/3）
+                var_val = self._create_param_var(name, "int")
+
+                # 2. 显示用的选项名列表 & 数值映射
+                # value_type 形如 {"Adaptive":0,"Bpp8":1,"Bpp10":2,"Bpp12":3}
+                options = list(value_type.keys())
+                val_to_name = {i: j for j, i in value_type.items()}     # type == dict
+                name_to_val = {i: j for i, j in value_type.items()}     # type == dict
+
+                # 获取当前选项的 val
+                cur_val = var_val.get()
+                # 通过 val_to_name 字典获取当前选项的 name
+                cur_name = val_to_name.get(cur_val, options[0])
+
+                # 3. 下拉框用 StringVar 保存 "Adaptive"/"Bpp8"...
+                combo_list = tk.StringVar(value=cur_name)
+                combo = ttk.Combobox(row, textvariable=combo_list,
+                    values=options, state="readonly", width=12)
+                combo.pack(side="left", fill="x", expand=True)
+
+                # 4. 当用户选择变化时：反向写回 IntVar
+                def on_combo_changed(*_):
+                    # 获取当前选项的 name
+                    sel_name = combo_list.get()
+                    # 通过 name_to_val 字典获取当前选项的 val
+                    if sel_name in options:
+                        sel_val = name_to_val.get(sel_name, options[0])
+                        var_val.set(sel_val)
+
+                combo_list.trace_add("write", on_combo_changed)
+
+                # 记录这个枚举参数的 mapping + combobox 变量，方便 Load 时反向同步
+                if not hasattr(self, "enum_meta"):
+                    self.enum_meta = {}
+                self.enum_meta[name] = (value_type, combo_list)
+
+    def _create_param_var(self, name: str, value_type):
+        """
+        创建或复用一个 tk.Variable，并用 all_para_dict 里的当前值初始化
+        value_type 可以是 "int"/"float"/"str"/"bool" 或 dict(枚举)
+        """
+        if name in self.param_vars:
+            return self.param_vars[name]
+
+        current = self.all_para_dict.get(name)
+
+        if isinstance(value_type, dict):
+            # 枚举，用 IntVar 保存索引/编号
+            v = tk.IntVar(value=int(current) if current is not None else 0)
+        elif value_type == "int":
+            v = tk.IntVar(value=int(current) if current is not None else 0)
+        elif value_type == "float":
+            v = tk.DoubleVar(value=float(current) if current is not None else 0.0)
+        elif value_type == "bool":
+            v = tk.BooleanVar(value=bool(current) if current is not None else False)
+        else:  # "str" 或其他
+            v = tk.StringVar(value="" if current is None else str(current))
+
+        self.param_vars[name] = v
+        return v
+
 
     # ---- 右列：图像 + 标签 ----
     def _build_view_area(self, parent):
@@ -475,7 +563,7 @@ class App(ConfigMixin, tb.Window):
 
         # 状态文本：用 StringVar，兼容旧的 status_var.set(...)
         self.status_var = tk.StringVar(value="Ready.")
-        self.status = ttk.Label(parent, text=self.status_var, font=("Segoe UI", 9), foreground="#64748b")
+        self.status = ttk.Label(parent, textvariable=self.status_var, font=("Segoe UI", 9), foreground="#64748b")
         self.status.grid(row=2, column=0, sticky="ew", pady=(2,8))
 
     # ---- 右列：按钮 ----
