@@ -3,16 +3,15 @@ import tkinter as tk
 from tkinter import filedialog
 import ttkbootstrap as tb
 from ttkbootstrap import ttk
-from importlib.resources import files
 from PIL import Image, ImageTk
-import cv2
+from importlib.resources import files
 import threading
 
+from gui2_file import FileMixin
 from gui2_config import ConfigMixin
 
 from _para import all_para_dict, base_path
 from utils.gui2.gui2_para import all_para_settings
-from utils.process.process_java import new_file_chooser
 from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
 
@@ -98,13 +97,16 @@ class Collapsible(ttk.Labelframe):
         self._collapsed = not self._collapsed
 
 
-class App(ConfigMixin, tb.Window):
+class App(FileMixin, ConfigMixin, tb.Window):
     def __init__(self):
-        super().__init__(themename="minty")
+
+        super().__init__()
+
         # Tk/ttk 本身没有“设置圆角半径”的选项。控件的圆角/直角是由主题的元素贴图决定的。
         # 尝试了几个主题，没有圆角矩形的按钮
 
-        # ===== 兼容旧 GUI 的核心状态 =====
+        # ========== GUI: 参数、路径、设置 ==========
+
         # 兼容旧代码写法
         self.root = self
 
@@ -130,14 +132,20 @@ class App(ConfigMixin, tb.Window):
         # 路径 & 任务
         self.filepath_list = []
         self.output_filepath = "auto"
+        # 兼容旧版 JFileChooser 的路径变量（process_java.new_file_chooser 会用到）
+        self.path_var = tk.StringVar(self, value="[]")  # 输入路径字符串
+        self.output_path_var = tk.StringVar(self, value="auto")  # 输出路径字符串
+        # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
+        self._ensure_file_exsistence()
+        # 当前预览的单个图像/视频文件（左侧第三行）
+        self.current_file = ""
+
         self.task_list = []
         self.output_root = None
         self.task_mode = None
 
         # 流程节点 0:图像获取 1:噪声过滤 2:检测追踪 3:特征提取
-        # note: not sure
-        self.nodes = ['图像获取', '噪声过滤', '检测追踪', '特征提取']
-        # 节点范围（0:图像获取 → 3:特征提取）
+        self.nodes = ["图像获取", "噪声过滤", "检测追踪", "特征提取"]   # 节点范围（0:图像获取 → 3:特征提取）
         self.program_start = 0
         self.program_end = 3
 
@@ -149,25 +157,25 @@ class App(ConfigMixin, tb.Window):
         # 与参数弹窗共享的列表
         self.object_dict_list = []
 
-        # ========= 新 GUI 的组件 =========
+        # =========== GUI：主题、配色、组件 ===========
+
         self.title("Image Processing System")
         self.geometry(f"{INIT_W}x{INIT_H}")
         self.minsize(LEFT_WIDTH + MID_WIDTH + 420, BASE_MIN_H)  # 初始一个保守最小宽度
 
-        style = tb.Style(theme="minty")
+        style = tb.Style(theme="flatly")
+        # style = tb.Style(theme="minty")
 
         # 改“info/primary”语义色
         style.colors.set("info", DARK_BLUE)
         style.colors.set("primary", DARK_BLUE)
         # style.colors.set("secondary", DARK_GREY)
+        # style.colors.set("selectbg", MID_GREY)    # 修改combobox和menubar的选中背景
 
         # 顶部标题的样式
         style.configure("Topbar.TFrame", background=MID_GREY)
         style.configure("Topbar.TFrame.Label",
                         font=("Segoe UI Semibold", 16))
-
-        # 菜单栏样式
-        # style.configure("Menubar", background=MID_GREY)
 
         # 左中右部件外层框架的样式
         style.configure("ParentBox.TLabelframe", background=WHITE)
@@ -192,11 +200,12 @@ class App(ConfigMixin, tb.Window):
         # 组件的样式
         style.configure("ComponentItem.TFrame", background=WHITE)
         style.configure("ComponentItem.TFrame.Label",
-                        # font=("Segoe UI Semibold", 10),
+                        # font=("Segoe UI Semibold", 10),   # 会同时修改所有的 label
                         background=WHITE)
         # Combobox 组件样式修改
-        # style.configure("TCombobox", arrowsize=14)
-        # style.configure("TCombobox", padding=(2, 4, 2, 4))
+        style.configure("TCombobox", background=WHITE)
+        style.configure("TCombobox", arrowsize=14)
+        style.configure("TCombobox", padding=(2, 4, 2, 4))
 
         # 让已经创建的风格刷新（若先设色再建控件，可以不用这行）
         style.theme_use(style.theme.name)
@@ -253,26 +262,42 @@ class App(ConfigMixin, tb.Window):
 
         # 4) 系统菜单栏（位置固定在窗口顶，不在 bar 里显示）
         menubar = tk.Menu(self)  # 绑定到窗口本身，而不是 bar
+
+        # ----- File -----
         m_file = tk.Menu(menubar, tearoff=False)
-        for lbl, cmd in [("Open...", self._file_open), ("Save", lambda: self._toast("Saved")),
-                         ("Save As...", lambda: self._toast("Save As")), (None, None), ("Exit", self.destroy)]:
-            (m_file.add_separator() if lbl is None else m_file.add_command(label=lbl, command=cmd))
+
+        m_file.add_command(label="Open", command=self._file_open)
+        m_file.add_command(label="Save", command=lambda: self._toast("Saved"))
+        m_file.add_command(label="Save As", command=lambda: self._toast("Save As"))
+        m_file.add_separator()
+        m_file.add_command(label="Exit", command=self.destroy)
+
         menubar.add_cascade(label="File", menu=m_file)
 
+        # ---- Process ----
         m_proc = tk.Menu(menubar, tearoff=False)
-        for lbl, cmd in [("Run", self._run), ("Pause", self._pause), ("Stop", self._stop)]:
-            m_proc.add_command(label=lbl, command=cmd)
+
+        m_proc.add_command(label="Run", command=self._run)
+        m_proc.add_command(label="Pause", command=self._pause)
+        m_proc.add_command(label="Stop", command=self._stop)
+
         menubar.add_cascade(label="Process", menu=m_proc)
 
-        m_param = tk.Menu(menubar, tearoff=False)
-        m_param.add_command(label="Save", command=self._config_save)
-        m_param.add_command(label="Save As", command=self._config_save_as)
-        m_param.add_command(label="Load", command=self._config_load)
-        menubar.add_cascade(label="Configs", menu=m_param)
+        # ---- Config ----
+        m_config = tk.Menu(menubar, tearoff=False)
 
+        m_config.add_command(label="Save", command=self._config_save)
+        m_config.add_command(label="Save As", command=self._config_save_as)
+        m_config.add_command(label="Load", command=self._config_load)
+
+        menubar.add_cascade(label="Configs", menu=m_config)
+
+        # ----- Help -----
         m_help = tk.Menu(menubar, tearoff=False)
+
         m_help.add_command(label="Docs", command=lambda: self._toast("Open Docs"))
         m_help.add_command(label="About", command=lambda: self._toast("Image Processing System"))
+
         menubar.add_cascade(label="Help", menu=m_help)
 
         self.configure(menu=menubar)
@@ -326,35 +351,50 @@ class App(ConfigMixin, tb.Window):
         box = ttk.Labelframe(parent, text="File", padding=10, style="ParentBox.TLabelframe")
         box.pack(side="top", fill="x")
 
-        def add_path(label_text, attr_name):
+        def add_path(label_text, attr_name, text_var, callback):
             ttk.Label(box, text=label_text).pack(anchor="w", pady=(6, 2))
-            row = ttk.Frame(box); row.pack(fill="x", pady=(0,4)); row.columnconfigure(0, weight=1)
-            entry = ttk.Entry(row); entry.grid(row=0, column=0, sticky="ew")
+            row = ttk.Frame(box)
+            row.pack(fill="x", pady=(0,4))
+            row.columnconfigure(0, weight=1)
+
+            # 绑定 StringVar 的行（Input / Output），Current 文件单独一个 entry
+            if text_var is not None:
+                entry = ttk.Entry(row, textvariable=text_var)
+            else:
+                entry = ttk.Entry(row)
+            entry.grid(row=0, column=0, sticky="ew")
+
             ttk.Button(row, text="···", width=3, bootstyle="info",
-                       command=lambda e=entry: self._browse_file(e)).grid(row=0, column=1, padx=(6,0))
+                       command=lambda e=entry: callback(e)).grid(row=0, column=1, padx=(6,0))
+
             setattr(self, attr_name, entry)
 
-        add_path("Image Path:", "entry_image")
-        add_path("Processed Image Path:", "entry_processed")
-        add_path("CSV Path:", "entry_csv")
+        # 1) Input Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
+        add_path("Input Path:", "entry_input", self.path_var, self._browse_input_path)
 
-        # 文件命名输入框
-        form = ttk.Frame(box)  # 容器使用 grid，两列布局
-        form.pack(fill="x", pady=(14,0))
+        # 2) Output Path：沿用旧逻辑的“输出目录”（output_filepath + output_path_var + Preferences）
+        add_path("Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
 
-        # 让右边输入框可拉伸
-        form.columnconfigure(1, weight=1)
+        # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
+        add_path("Current Browse Image File:", "entry_current_file", None, self._browse_current_file)
 
-        names = ["Bacteria", "Drug", "Time"]
-
-        self.file_params = {}  # 保存引用，便于后面取值
-        for i, name in enumerate(names):
-            # 直接复用你已有的行渲染方法
-            self._param_row(form, i, name)  # ← 左标签 + 右 Entry
-            # 把刚刚创建的 Entry 引用取出来保存（可选）
-            # _param_row 创建的是该行最后一个 Entry，grid(row=i, column=1)
-            entry = form.grid_slaves(row=i, column=1)[0]
-            self.file_params[name] = entry
+        # # 文件命名输入框
+        # form = ttk.Frame(box)  # 容器使用 grid，两列布局
+        # form.pack(fill="x", pady=(14,0))
+        #
+        # names = ["Bacteria", "Drug", "Time"]
+        #
+        # # 让右边输入框可拉伸
+        # form.columnconfigure(1, weight=1)
+        #
+        # self.file_params = {}  # 保存引用，便于后面取值
+        # for i, name in enumerate(names):
+        #     # 直接复用你已有的行渲染方法
+        #     self._param_row(form, i, name)  # ← 左标签 + 右 Entry
+        #     # 把刚刚创建的 Entry 引用取出来保存（可选）
+        #     # _param_row 创建的是该行最后一个 Entry，grid(row=i, column=1)
+        #     entry = form.grid_slaves(row=i, column=1)[0]
+        #     self.file_params[name] = entry
 
     def _build_process_group(self, parent):
         proc = ttk.Labelframe(parent, text="Process", padding=10, style="ParentBox.TLabelframe")
@@ -436,13 +476,13 @@ class App(ConfigMixin, tb.Window):
             name = item["name"]
             label_text = item["str"]
 
-            # 1) 纯 label 型：只显示分组标题 / 小节标题
+            # 1) 纯 label 型：只显示分组标题/小节标题（进行字体加粗）
             if value_type == "label":
                 text = label_text or name or ""
                 if not text:
                     continue
-                ttk.Label(parent, text=text, style="ComponentItem.TFrame.Label", \
-                          font=("Segoe UI Semibold", 11)).pack(fill="x", pady=(8, 8))
+                ttk.Label(parent, text=text, style="ComponentItem.TFrame.Label",
+                          font=("Segoe UI Semibold", 10)).pack(fill="x", pady=(12, 8))
                 continue
 
             # 2) 其他类型：一行一个“名称 + 控件”
@@ -589,16 +629,16 @@ class App(ConfigMixin, tb.Window):
         self._btns_container = btns
 
     # =============== 行为占位 ===============
-    def _browse_file(self, entry):
-        path = filedialog.askopenfilename(title="Choose File")
-        if path: entry.delete(0, tk.END)
-        entry.insert(0, path)
-
-    def _file_open(self):
-        p = filedialog.askopenfilename(title="Open Image")
-        if p:
-            self.status_var.set(f"Loaded: {os.path.basename(p)}")
-            self._draw_dummy(self.canvas_direct)
+    # def _browse_file(self, entry):
+    #     path = filedialog.askopenfilename(title="Choose File")
+    #     if path: entry.delete(0, tk.END)
+    #     entry.insert(0, path)
+    #
+    # def _file_open(self):
+    #     p = filedialog.askopenfilename(title="Open Image")
+    #     if p:
+    #         self.status_var.set(f"Loaded: {os.path.basename(p)}")
+    #         self._draw_dummy(self.canvas_direct)
 
     def _draw_dummy(self, canvas):
         canvas.delete("content")

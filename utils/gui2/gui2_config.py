@@ -83,7 +83,7 @@ class ConfigMixin:
                 filetypes=[("JSON files", "*.json")]
             )
 
-    # ---------- 真正读写 JSON ----------
+    # ---------- 读写 JSON ----------
 
     def _write_preset(self, path: str):
         data = dict(self.all_para_dict)
@@ -117,7 +117,9 @@ class ConfigMixin:
     # ---------- 菜单：Configs / Save, Save As, Load ----------
 
     def _config_save(self):
-        """保存到当前 preset（如果还没选过，就等价于 Save As）"""
+        """
+        保存到当前 preset（如果还没选过，就等价于 Save As）
+        """
         self._sync_dict_from_vars()
         if not getattr(self, "config_path", None):
             path = self._ask_preset_path(save=True)
