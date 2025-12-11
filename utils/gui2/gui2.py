@@ -4,11 +4,14 @@ from tkinter import filedialog
 import ttkbootstrap as tb
 from ttkbootstrap import ttk
 from PIL import Image, ImageTk
+import cv2
 from importlib.resources import files
 import threading
+from ttkbootstrap.toast import ToastNotification
 
 from gui2_file import FileMixin
 from gui2_config import ConfigMixin
+from gui2_image import ImageMixin
 
 from _para import all_para_dict, base_path
 from utils.gui2.gui2_para import all_para_settings
@@ -29,7 +32,7 @@ BASE_MIN_H = 760          # 最小高度
 INIT_W, INIT_H = 1520, 940  # 初始窗口更大，右侧图像区更宽
 # INIT_W, INIT_H = 1680, 945  # OBS采集比例
 
-ASSETS = files("utils.gui2.gui_assets")  # 指向包
+ASSETS = files("utils.gui2.gui_assets")  # 指向GUI2使用的资源包
 ICON_SIZE = 24
 
 
@@ -97,25 +100,34 @@ class Collapsible(ttk.Labelframe):
         self._collapsed = not self._collapsed
 
 
-class App(FileMixin, ConfigMixin, tb.Window):
+class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
     def __init__(self):
 
         super().__init__()
-
-        # Tk/ttk 本身没有“设置圆角半径”的选项。控件的圆角/直角是由主题的元素贴图决定的。
-        # 尝试了几个主题，没有圆角矩形的按钮
 
         # ========== GUI: 参数、路径、设置 ==========
 
         # 兼容旧代码写法
         self.root = self
 
+        # 标题字符参数
+        self.Alltitle_var = tk.StringVar(self)
+        # Large Volume Solution Scattering Imaging System 太长了，会看着奇怪
+        self.Alltitle_var.set("LVSi System")
+
         # 关闭窗口时用来通知后台线程
         self.EndEvent = threading.Event()
 
         # 图像尺寸、保存相关标志 —— 保持和旧 gui 一致
         self.img_shape = (728, 544)
-        self.west_img_shape = (364, 272)
+        # self.west_img_shape = (364, 272)      # 旧版本GUI使用的参数；现在似乎不需要使用
+
+        # 供相机模块使用的占位图 / 当前帧缓冲
+        self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
+        if self.NonePng is None:
+            import numpy as np
+            self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
+        self.img = self.NonePng
 
         self.save_frame = False
         self.save_path = None
@@ -132,9 +144,10 @@ class App(FileMixin, ConfigMixin, tb.Window):
         # 路径 & 任务
         self.filepath_list = []
         self.output_filepath = "auto"
-        # 兼容旧版 JFileChooser 的路径变量（process_java.new_file_chooser 会用到）
-        self.path_var = tk.StringVar(self, value="[]")  # 输入路径字符串
+        # 兼容旧版 JFileChooser 的路径变量（process_java.file_chooser 会用到）
+        self.path_var = tk.StringVar(self, value="")  # 输入路径字符串
         self.output_path_var = tk.StringVar(self, value="auto")  # 输出路径字符串
+        self.current_path_var = tk.StringVar(self, value="")   # 预览图像路径字符串
         # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
         self._ensure_file_exsistence()
         # 当前预览的单个图像/视频文件（左侧第三行）
@@ -163,7 +176,9 @@ class App(FileMixin, ConfigMixin, tb.Window):
         self.geometry(f"{INIT_W}x{INIT_H}")
         self.minsize(LEFT_WIDTH + MID_WIDTH + 420, BASE_MIN_H)  # 初始一个保守最小宽度
 
-        style = tb.Style(theme="flatly")
+        # Tk/ttk 本身没有“设置圆角半径”的选项。控件的圆角/直角是由主题的元素贴图决定的。
+        # 尝试了几个主题，没有圆角矩形的按钮
+        style = tb.Style(theme="flatly")        # 选中项的背景是灰色
         # style = tb.Style(theme="minty")
 
         # 改“info/primary”语义色
@@ -255,7 +270,7 @@ class App(FileMixin, ConfigMixin, tb.Window):
         # 3) 标题文字
         ttk.Label(
             bar,
-            text="Image Processing System",
+            textvariable=self.Alltitle_var,
             font=("Segoe UI Semibold", 16),
             background=MID_GREY
         ).grid(row=0, column=1, sticky="w")
@@ -266,9 +281,8 @@ class App(FileMixin, ConfigMixin, tb.Window):
         # ----- File -----
         m_file = tk.Menu(menubar, tearoff=False)
 
-        m_file.add_command(label="Open", command=self._file_open)
-        m_file.add_command(label="Save", command=lambda: self._toast("Saved"))
-        m_file.add_command(label="Save As", command=lambda: self._toast("Save As"))
+        m_file.add_command(label="Input Path", command=lambda: self._browse_input_path(self.entry_input))
+        m_file.add_command(label="Output Path", command=lambda: self._browse_output_path(self.entry_output))
         m_file.add_separator()
         m_file.add_command(label="Exit", command=self.destroy)
 
@@ -376,7 +390,9 @@ class App(FileMixin, ConfigMixin, tb.Window):
         add_path("Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
 
         # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
-        add_path("Current Browse Image File:", "entry_current_file", None, self._browse_current_file)
+        add_path("Current Browse Image File:", "entry_current_file", self.current_path_var, self._browse_current_file)
+
+        # note: 增加按钮，设置 output path 为 auto
 
         # # 文件命名输入框
         # form = ttk.Frame(box)  # 容器使用 grid，两列布局
@@ -417,6 +433,7 @@ class App(FileMixin, ConfigMixin, tb.Window):
         """
         获取Process各步骤
         暂时不能跳步骤执行操作，如果运行了step2和step4，默认会把中间的step3也运行
+        note: 后续把这部分的功能也拆出gui2.py
         """
 
         flags = [self.var_photo.get(),
@@ -578,16 +595,46 @@ class App(FileMixin, ConfigMixin, tb.Window):
         tabs = ttk.Notebook(parent, style="TNotebook")
         tabs.grid(row=0, column=0, sticky="nsew")
 
-        for name in ["Direct","Processed","Tracked"]:
+        # 保存引用，后面 tab 切换和刷新要用
+        self.tabs_view = tabs
+        tabs.bind("<<NotebookTabChanged>>", self._on_view_tab_changed)
+
+        for name in ["Camera", "Original","Processed","Tracked"]:
             frame = ttk.Frame(tabs, padding=6)
             frame.columnconfigure(0, weight=1)
             frame.rowconfigure(0, weight=1)
             tabs.add(frame, text=name)
 
-            canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
-            canvas.grid(row=0, column=0, sticky="nsew")
-            canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
-            setattr(self, f"canvas_{name.lower()}", canvas)
+            if name == "Camera":
+                # 相机专用容器，用来拿 HWND 给 vimbaX
+                cam_frame = tk.Frame(frame, bg="black")
+                cam_frame.grid(row=0, column=0, sticky="nsew")
+
+                # 保存起来，ImageMixin 里会用到
+                self.camera_container = cam_frame
+            else:
+                canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
+                canvas.grid(row=0, column=0, sticky="nsew")
+                canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
+                setattr(self, f"canvas_{name.lower()}", canvas)
+
+    def _on_view_tab_changed(self, event):
+        """
+        切换 Camera / Original / Processed / Tracked 时调用对应更新函数。
+        """
+        tabs = event.widget
+        idx = tabs.index("current")
+        name = tabs.tab(idx, "text")
+
+        if name == "Camera":
+            # 调用 ImageMixin 里的函数，启动相机
+            self._start_camera()
+        elif name == "Original":
+            self._update_original_view()
+        elif name == "Processed":
+            self._update_processed_view()
+        elif name == "Tracked":
+            self._update_tracked_view()
 
     def _ensure_square(self, canvas):
         w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)
@@ -629,18 +676,9 @@ class App(FileMixin, ConfigMixin, tb.Window):
         self._btns_container = btns
 
     # =============== 行为占位 ===============
-    # def _browse_file(self, entry):
-    #     path = filedialog.askopenfilename(title="Choose File")
-    #     if path: entry.delete(0, tk.END)
-    #     entry.insert(0, path)
-    #
-    # def _file_open(self):
-    #     p = filedialog.askopenfilename(title="Open Image")
-    #     if p:
-    #         self.status_var.set(f"Loaded: {os.path.basename(p)}")
-    #         self._draw_dummy(self.canvas_direct)
 
     def _draw_dummy(self, canvas):
+        # note: 检查用处
         canvas.delete("content")
         w,h=canvas.winfo_width(),canvas.winfo_height()
         s=min(w,h)
@@ -660,7 +698,7 @@ class App(FileMixin, ConfigMixin, tb.Window):
         self.prog.configure(value=0)
 
     def _toast(self, msg, title="Info", bootstyle="info"):
-        tb.ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
+        ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
 
     # ====== 最小宽度：动态计算并强制不小于 ======
     def _update_min_width(self):

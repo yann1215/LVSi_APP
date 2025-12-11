@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from utils.process.process_java import new_file_chooser
+from utils.process.process_java import file_chooser
 from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
 from utils.gui.gui_para_window import create_modal_window
@@ -145,7 +145,7 @@ def browse_file(self):
     浏览文件
     """
 
-    self.filepath_list = new_file_chooser(self, self.program_start)
+    self.filepath_list = file_chooser(self, self.program_start)
     self.path_entry.xview_moveto(1)
 
 def output_browse_file(self):
@@ -153,7 +153,7 @@ def output_browse_file(self):
     浏览文件
     """
 
-    self.output_filepath = new_file_chooser(self, 4)
+    self.output_filepath = file_chooser(self, 4)
     self.output_path_entry.xview_moveto(1)
 
 def output_auto(self):

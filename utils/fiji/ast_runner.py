@@ -1,4 +1,4 @@
-from utils.process.process_java import standard_script_runer
+from utils.process.process_java import standard_script_runner
 from utils.process.process_csv_output import csv_manager, id_csv_output
 from utils.fiji.script_correct_shake import script_correct_shake
 from utils.fiji.script_preprocess import script_preprocess
@@ -39,7 +39,7 @@ def ast_preprocess(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_shake_part = standard_script_runer(script_correct_shake, args_shake_part)
+        output_shake_part = standard_script_runner(script_correct_shake, args_shake_part)
         toStart = output_shake_part.getOutput("toStart")
         toEnd = output_shake_part.getOutput("toEnd")
         update_dict = output_shake_part.getOutput("update_dict")
@@ -68,7 +68,7 @@ def ast_preprocess(self, path_dict, para_dict, program_end):
             "contrast_max": para_dict["contrast_max"],
             "contrast_min": para_dict["contrast_min"],
         }
-        output_preProcess = standard_script_runer(script_preprocess, args_preprocess)
+        output_preProcess = standard_script_runner(script_preprocess, args_preprocess)
         imp_path = output_preProcess.getOutput("imp_path")
         path_dict.update({
             "path": imp_path,
@@ -120,7 +120,7 @@ def ast_track(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_LongbacTrackmate = standard_script_runer(script_track_long, args_LongbacTrackmate)
+        output_LongbacTrackmate = standard_script_runner(script_track_long, args_LongbacTrackmate)
         origin_imp = output_LongbacTrackmate.getOutput("origin_imp")
         trackSpot_imp = output_LongbacTrackmate.getOutput("trackSpot_imp")
         imp = output_LongbacTrackmate.getOutput("imp")
@@ -140,7 +140,7 @@ def ast_track(self, path_dict, para_dict, program_end):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_subLongbac = standard_script_runer(script_denoise_long, args_subLongbac)
+        output_subLongbac = standard_script_runner(script_denoise_long, args_subLongbac)
         without_imp = output_subLongbac.getOutput("imp")
         args_NormalTrackmate = {
             "imp": without_imp,
@@ -170,7 +170,7 @@ def ast_track(self, path_dict, para_dict, program_end):
             "contrast_max": para_dict["contrast_max"],
             "contrast_min": para_dict["contrast_min"],
         }
-        output_NormalTrackmate = standard_script_runer(script_track_normal, args_NormalTrackmate)
+        output_NormalTrackmate = standard_script_runner(script_track_normal, args_NormalTrackmate)
         Normal_spots_num = output_NormalTrackmate.getOutput("total_frame_spots_num")
         frame_num = output_NormalTrackmate.getOutput("frame_num")
         csv_manager(path_dict, Longbac_spots_num, Normal_spots_num, frame_num)
@@ -205,7 +205,7 @@ def ast_features(self, path_dict, para_dict):
             "path": path_dict["path"],
             "output": path_dict["output"],
         }
-        output_ReChooser = standard_script_runer(script_rechoose, args_ReChooser)
+        output_ReChooser = standard_script_runner(script_rechoose, args_ReChooser)
         ID_data_list = output_ReChooser.getOutput("ID_data_list")
         id_csv_output(path_dict, para_dict, ID_data_list)
         self.progress['value'] = 100
@@ -221,7 +221,7 @@ def AST_impListener(self, mode):
         args_impListener = {
             "mode": mode,
         }
-        standard_script_runer(script_imp_listener, args_impListener)
+        standard_script_runner(script_imp_listener, args_impListener)
     except:
         print("error in imp listener")
 

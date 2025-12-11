@@ -1,18 +1,20 @@
-import time
+import os, time
 import threading
 import cv2
-import win32gui
-import win32con
-import os
+import win32gui, win32con
 
-check_vimba = False
-if os.path.exists("C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"):
+
+# Vinma X download website: https://www.alliedvision.com/en/products/software/vimba-x-sdk/#c13326
+VIMBAX_FLAG = False
+VIMBAX_PATH = "C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"
+VIMBAX_PATH = "D:\\Vimba X\\api\\bin\\VmbC.dll"     # D盘安装补丁（路径选择待后续优化）
+if os.path.exists(VIMBAX_PATH):
     from vmbpy import *
-    check_vimba = True
+    VIMBAX_FLAG = True
 
 
 def work_thread(self, vmb):
-    print("start cam work")
+    print("Camera starting...")
     handler = vimbaX_photo_handler(self)
     cams = vmb.get_all_cameras()
     with cams[0] as cam:
@@ -56,28 +58,42 @@ def vimbaX_finder_handler(self, vmb):
             thread = threading.Thread(target=work_thread, args=(self, vmb), daemon=True)
             thread.start()
             if self.searching == False and self.running == False and (self.program_start == self.task_mode):
-                self.AST_btn_var.set("开始运行")
+                self.AST_btn_var.set("Camera started")
                 self.AST_btn.config(bg='#4CAF50')
         elif state == 0 or state == 3 or state == 4:
             self.camera = False
-            self.AST_btn_var.set("无相机")
+            self.AST_btn_var.set("Camera not found.")
             self.AST_btn.config(bg='#cccccc')
     return print_device_id
 
 
 def start_vimbaX(self):
-    if check_vimba:
-        with VmbSystem.get_instance() as vmb:
-            self.Alltitle_var.set("大视场散射成像图像处理系统(已检测到Vimba X)")
-            handler = vimbaX_finder_handler(self, vmb)
-            vmb.register_camera_change_handler(handler)
-            vmb.register_interface_change_handler(handler)
-            if vmb.get_all_cameras():
-                self.camera = True
-                work_thread(self, vmb)
-            self.EndEvent.wait()
+    if VIMBAX_FLAG:
+        try:
+            # note: 这里内部出现了VmbTransportLayerError
+            with VmbSystem.get_instance() as vmb:
+                print("Vimba X installed. Camera starting...")
+                self.Alltitle_var.set("LVSi System ( Vimba X Installed )")
+                # 找相机并启用
+                handler = vimbaX_finder_handler(self, vmb)
+                vmb.register_camera_change_handler(handler)
+                vmb.register_interface_change_handler(handler)
+                if vmb.get_all_cameras():
+                    self.camera = True
+                    work_thread(self, vmb)
+                self.EndEvent.wait()
+        except VmbTransportLayerError as e:
+            # Vimba X 没装好 / 没有 TL的情况
+            if hasattr(self, "Alltitle_var"):
+                self.Alltitle_var.set("LVSi System ( Require Vimba X Installation ! )")
+            print("Vimba X TransportLayerError:", e)
+            return      # 直接 return，不再调用 window_manager
+        except Exception as e:
+            # 其它未知错误
+            print("Vimba X error:", e)
+            return
     else:
-        self.Alltitle_var.set("大视场散射成像图像处理系统(请安装Vimba X)")
+        self.Alltitle_var.set("LVSi System ( Require Vimba X Installation ! )")
 
 
 def window_manager(self, window_name):

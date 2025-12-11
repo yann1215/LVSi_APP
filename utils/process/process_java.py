@@ -65,10 +65,15 @@ JFrame = scyjava.jimport("javax.swing.JFrame")
 Window = scyjava.jimport("java.awt.Window")
 
 
-def new_file_chooser(self, mode):
+def file_chooser(self, mode):
 
     prefs = Preferences.userRoot().node("/LMH/fijiCountingFaster/29/file_chooser")
-    key_list = ["cameraPath", "preprocessPath", "trackMatePath", "featuresPath", "outputPath"]
+    key_list = ["cameraPath",
+                "preprocessPath",
+                "trackMatePath",
+                "featuresPath",
+                "outputPath",
+                "browsePath"]
 
     filepath_list = self.filepath_list
     try:
@@ -78,42 +83,68 @@ def new_file_chooser(self, mode):
 
     parent_frame = JFrame()
     parent_frame.setAlwaysOnTop(True)
-    file_chooser = JFileChooser()
+    chooser = JFileChooser()
     last_path = prefs.get(key_list[mode] + "_last", None)
     if last_path:
-        file_chooser.setCurrentDirectory(File(last_path))
+        chooser.setCurrentDirectory(File(last_path))
 
-    if mode <= 1 or mode == 4:
-        file_chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+    # ==================== 设置文件加载格式 ====================
+    #                       No.     file-select     multi-select
+    # "cameraPath"           0          0               0
+    # "preprocessPath"       1          0               1
+    # "trackMatePath"        2          1               1
+    # "featuresPath"         3          1               1
+    # "outputPath"           4          0               0
+    # "browsePath"           5          1               0
+
+    # file-select settings
+    if mode in (0, 1, 4):
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+        # file_select_flag = False
     else:
-        file_chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)
-    if mode == 0 or mode == 4:
-        file_chooser.setMultiSelectionEnabled(False)
+        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)
+        # file_select_flag = True
+    # multi-select settings
+    if mode in (0, 4, 5):
+        chooser.setMultiSelectionEnabled(False)
+        multi_select_flag = False
     else:
-        file_chooser.setMultiSelectionEnabled(True)
-    result = file_chooser.showOpenDialog(parent_frame)
+        chooser.setMultiSelectionEnabled(True)
+        multi_select_flag = True
+
+    if mode == 4:
+        target_var = self.output_path_var
+    elif mode == 5:
+        terget_var = self.current_path_var
+    else:
+        target_var = self.path_var
+
+    result = chooser.showOpenDialog(parent_frame)
     if result == JFileChooser.APPROVE_OPTION:
         filepath_list = []
-        current_dir = file_chooser.getCurrentDirectory().getAbsolutePath()
+        current_dir = chooser.getCurrentDirectory().getAbsolutePath()
         prefs.put(key_list[mode] + "_last", str(current_dir))
-        if mode == 0:
-            selected_file = file_chooser.getSelectedFile()
-            filepath_list.append(str(selected_file))
-            self.path_var.set(str(filepath_list))
-        elif not mode == 4:
-            selected_files = file_chooser.getSelectedFiles()
+        if not multi_select_flag:
+            selected_file = chooser.getSelectedFile()
+            if mode == 0:
+                filepath_list.append(str(selected_file))
+            elif mode ==4:
+                filepath_list = selected_file
+        else:
+            selected_files = chooser.getSelectedFiles()
             for selected_file in selected_files:
                 filepath_list.append(str(selected_file))
-            self.path_var.set(str(filepath_list))
-        else:
-            selected_file = file_chooser.getSelectedFile()
-            filepath_list = selected_file
-            self.output_path_var.set(str(filepath_list))
+
+        if target_var is not None:
+            target_var.set(str(filepath_list))
+
+        # 保存到 prefs，供下次恢复
         prefs.put(key_list[mode], str(filepath_list))
+
     return filepath_list
 
 
-def standard_script_runer(script, args):
+def standard_script_runner(script, args):
     language = "python"
     script_output = ij.py.run_script(language, script, args)
     for window in Window.getWindows():

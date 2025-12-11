@@ -4,7 +4,7 @@ import json
 import tkinter as tk
 from tkinter import filedialog
 
-from utils.process.process_java import new_file_chooser, Preferences
+from utils.process.process_java import file_chooser, Preferences
 
 
 class FileMixin:
@@ -21,8 +21,8 @@ class FileMixin:
     依赖 UI 元件（在 _build_file_group 等 UI 构造函数中创建）：
         - self.entry_image: 主输入路径 Entry
         - （可选）self.entry_processed, self.entry_csv
-        - self.path_var: tk.StringVar  （仅供 new_file_chooser 内部调用，可与 entry 绑定）
-        - self.output_path_var: tk.StringVar  （仅供 new_file_chooser 内部调用）
+        - self.path_var: tk.StringVar  （仅供 file_chooser 内部调用，可与 entry 绑定）
+        - self.output_path_var: tk.StringVar  （仅供 file_chooser 内部调用）
     """
 
     # ---------- 初始化 / 兼容旧版字段 ----------
@@ -37,7 +37,7 @@ class FileMixin:
         if not hasattr(self, "output_filepath"):
             self.output_filepath = "auto"
 
-        # new_file_chooser 里会用到这两个变量
+        # file_chooser 里会用到这两个变量
         if not hasattr(self, "path_var"):
             self.path_var = tk.StringVar(master=self, value="[]")
         if not hasattr(self, "output_path_var"):
@@ -49,11 +49,11 @@ class FileMixin:
         """
         Input Path 的 “···”：
         完全沿用旧版逻辑，调用 Java JFileChooser：
-            - new_file_chooser(self, self.program_start)
+            - file_chooser(self, self.program_start)
             - 回写 self.filepath_list / self.path_var / Preferences
         """
         # 调用旧逻辑
-        self.filepath_list = new_file_chooser(self, self.program_start)
+        self.filepath_list = file_chooser(self, self.program_start)
         # Entry 绑定了 self.path_var，会自动更新文本，这里只把视图拉到末尾
         entry.xview_moveto(1)
 
@@ -65,11 +65,11 @@ class FileMixin:
     def _browse_output_path(self, entry):
         """
         Output Path 的 “···”：
-        调用 new_file_chooser(self, 4)，完全沿用旧版“设置输出目录”的逻辑：
+        调用 file_chooser(self, 4)，完全沿用旧版“设置输出目录”的逻辑：
             - 返回值赋给 self.output_filepath
             - 回写 self.output_path_var / Preferences
         """
-        self.output_filepath = new_file_chooser(self, 4)
+        self.output_filepath = file_chooser(self, 4)
         entry.xview_moveto(1)
 
         if hasattr(self, "status_var") and self.output_filepath not in (None, "auto"):
@@ -81,27 +81,66 @@ class FileMixin:
         暂时只选一个图像/视频文件，更新 entry 和 self.current_file，
         不参与旧 pipeline，只用来做后续预览逻辑。
         """
-        path = filedialog.askopenfilename(
-            title="Choose image file",
+        # 1. 先推断一个初始目录
+        init_dir = None
+
+        # 若已有 current_file，则以它所在目录为初始目录
+        cur = getattr(self, "current_file", "")
+        if cur:
+            if os.path.isdir(cur):
+                init_dir = cur
+            elif os.path.isfile(cur):
+                init_dir = os.path.dirname(cur)
+
+        # 没有 current_file，就退回 Input Path
+        if not init_dir and hasattr(self, "path_var"):
+            path = getattr(self.path_var, "get", lambda: "")()
+            if path:
+                init_dir = path
+
+        # 还没有，就用当前工作目录
+        if not init_dir:
+            init_dir = os.getcwd()
+
+        # 2. 弹出文件选择对话框（这里先做“选文件”版）
+        filename = filedialog.askopenfilename(
+            parent=self,
+            title="Select image file",
+            initialdir=init_dir,
             filetypes=[
-                ("Image/Video", "*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.bmp;*.avi;*.mp4"),
+                ("Image files", "*.tif *.tiff *.png *.jpg *.jpeg *.bmp"),
                 ("All files", "*.*"),
             ],
         )
-        if not path:
-            return
+        if not filename:
+            return  # 用户取消
 
+        # 3. 更新 entry 显示 & current_file 属性
         entry.delete(0, tk.END)
-        entry.insert(0, path)
-        entry.xview_moveto(1)
+        entry.insert(0, filename)
 
-        self.current_file = path
+        # 这里可以是文件也可以是目录路径，_find_first_image 都能处理；
+        # 当前我们通过 askopenfilename 选的是文件。
+        self.current_file = filename
 
+        # 4. 更新状态栏（可选）
         if hasattr(self, "status_var"):
-            self.status_var.set(f"Current file: {os.path.basename(path)}")
+            try:
+                self.status_var.set(f"Current file: {os.path.basename(filename)}")
+            except Exception:
+                pass
 
-        # 预览逻辑以后再接，这里先不动 pipeline
-        # 比如以后可以: self.on_file_loaded(path) 或者在 canvas 上画图
+        # 5. 如果 Original tab 已经存在，直接刷新一下视图
+        if hasattr(self, "_update_original_view"):
+            self._update_original_view()
+
+        # 选完文件后，右侧窗口自动跳到 Original tab
+        if hasattr(self, "tabs_view"):
+            tabs = self.tabs_view
+            for i in range(tabs.index("end")):
+                if tabs.tab(i, "text") == "Original":
+                    tabs.select(i)
+                    break
 
     # ---------- 菜单栏 File -> Open ----------
 
@@ -153,11 +192,11 @@ class FileMixin:
         """
         如果你在新 GUI 中补了“Output Path”的 Entry，可以把按钮绑定到这个方法：
             command=self._browse_output_dir
-        它会调用 new_file_chooser(mode=4) 并维护旧版的 Preferences。
+        调用 file_chooser(mode=4) 并维护旧版的 Preferences。
         """
         self._ensure_file_exsistence()
-        self.output_filepath = new_file_chooser(self, 4)
-        # new_file_chooser 已写入 self.output_path_var
+        self.output_filepath = file_chooser(self, 4)
+        # file_chooser 已写入 self.output_path_var
         if hasattr(self, "status_var") and self.output_filepath not in (None, "auto"):
             self.status_var.set(f"Output dir: {self.output_filepath}")
 
@@ -202,7 +241,7 @@ class FileMixin:
         else:
             output_path_str = str(output_path_prefs)
 
-        # 更新 StringVar（兼容 new_file_chooser 内部和旧习惯）
+        # 更新 StringVar（兼容 file_chooser 内部和旧习惯）
         self.path_var.set(path_list_str)
         self.output_path_var.set(output_path_str)
 
