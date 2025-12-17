@@ -77,27 +77,28 @@ class VScrolled(ttk.Frame):
         delta = -1 if getattr(event, "num", 0) == 4 else (1 if getattr(event, "num", 0) == 5 else -int(event.delta/120))
         self.canvas.yview_scroll(delta, "units")
 
-class Collapsible(ttk.Labelframe):
-    def __init__(self, master, text="", toggle=False, *args, **kwargs):
-        super().__init__(master, text=text, padding=8, *args, **kwargs)
-        self.columnconfigure(0, weight=1)
-        self.body = ttk.Frame(self)
-        self.body.grid(row=0, column=0, sticky="ew")
-        self._collapsed = False
-        self._btn = None
-
-        if toggle:
-            self._btn = ttk.Button(self, text="−", width=2, command=self._toggle)
-            self._btn.place(relx=1.0, x=-8, y=-2, anchor="ne")
-
-    def _toggle(self):
-        if self._btn is None:
-            return  # 关闭了折叠功能
-        if self._collapsed:
-            self.body.grid(); self._btn.config(text="−")
-        else:
-            self.body.grid_remove(); self._btn.config(text="+")
-        self._collapsed = not self._collapsed
+# note: 在中部 Configs 列暂无子模块分区时，不需要启用 Collapsible
+# class Collapsible(ttk.Labelframe):
+#     def __init__(self, master, text="", toggle=False, *args, **kwargs):
+#         super().__init__(master, text=text, padding=8, *args, **kwargs)
+#         self.columnconfigure(0, weight=1)
+#         self.body = ttk.Frame(self)
+#         self.body.grid(row=0, column=0, sticky="ew")
+#         self._collapsed = False
+#         self._btn = None
+#
+#         if toggle:
+#             self._btn = ttk.Button(self, text="−", width=2, command=self._toggle)
+#             self._btn.place(relx=1.0, x=-8, y=-2, anchor="ne")
+#
+#     def _toggle(self):
+#         if self._btn is None:
+#             return  # 关闭了折叠功能
+#         if self._collapsed:
+#             self.body.grid(); self._btn.config(text="−")
+#         else:
+#             self.body.grid_remove(); self._btn.config(text="+")
+#         self._collapsed = not self._collapsed
 
 
 class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
@@ -125,6 +126,7 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         # 供相机模块使用的占位图 / 当前帧缓冲
         self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
         if self.NonePng is None:
+            print("[Camera ERROR] empty.png not found.")
             import numpy as np
             self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
         self.img = self.NonePng
@@ -198,11 +200,14 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
                         font=("Segoe UI Semibold", 14),
                         background=WHITE,
                         foreground=DARK_BLUE)
+
         # 子框架的样式
-        style.configure("ChildBox.TLabelframe", background=WHITE)
-        style.configure("ChildBox.TLabelframe.Label",
-                        font=("Segoe UI Semibold", 12),
-                        background=WHITE)
+        # note: 目前未使用子框架，所以先注释了
+        # style.configure("ChildBox.TLabelframe", background=WHITE)
+        # style.configure("ChildBox.TLabelframe.Label",
+        #                 font=("Segoe UI Semibold", 12),
+        #                 background=WHITE)
+
         # 标签的样式
         # cur_font_name = style.lookup("TNotebook.Tab", "font") or "TkDefaultFont"
         # cur_font = tkfont.nametofont(cur_font_name)
@@ -390,7 +395,7 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         add_path("Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
 
         # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
-        add_path("Current Browse Image File:", "entry_current_file", self.current_path_var, self._browse_current_file)
+        add_path("Current Browse File:", "entry_current_file", self.current_path_var, self._browse_current_file)
 
         # note: 增加按钮，设置 output path 为 auto
 
@@ -454,6 +459,7 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         中列参数区：直接从 all_para_settings 生成 Camera / Filter / Tracking / Features
         """
 
+        # 绘制最外层的 Configs 边框
         outer = ttk.Labelframe(parent, text="Configs",
                                padding=10, style="ParentBox.TLabelframe")
         outer.pack(fill="both", expand=True)
@@ -467,18 +473,29 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self.param_vars = {}
         self.enum_meta = {}
 
-        blocks = [
-            ("camera", "Camera"),
-            ("preprocess", "Filter"),
-            ("trackmate", "Tracking"),
-            ("features", "Features"),
-        ]
+        # 绘制内部子分区的外框
+        # note: 因为目前还没对 gui2_para.py 中的参数作分区适配
+        #       所以暂时延用旧版分区方法，分隔显示直接在 gui2_para.py 中设置，此处先注释
+        # blocks = [
+        #     ("camera", "Camera"),
+        #     ("preprocess", "Filter"),
+        #     ("trackmate", "Tracking"),
+        #     ("features", "Features"),
+        # ]
+        #
+        # for key, title in blocks:
+        #     box = Collapsible(sc.content, text=title, style="ChildBox.TLabelframe")
+        #     box.pack(fill="x", pady=(0, 8))
+        #     # 用 detail 模式，把该类的所有参数都展开到中列
+        #     self._build_param_block(box.body, key, mode="detail")
 
-        for key, title in blocks:
-            box = Collapsible(sc.content, text=title, style="ChildBox.TLabelframe")
-            box.pack(fill="x", pady=(0, 8))
-            # 用 detail 模式，把该类的所有参数都展开到中列
-            self._build_param_block(box.body, key, mode="detail")
+        # 不绘制子分区外框，把参数分区在 gui2_para.py 中设置
+        # 此处仅按顺序绘制出所有的参数
+        section = ttk.Frame(sc.content, style="ComponentItem.TFrame")
+        section.pack(fill="x", padx=6)
+
+        for key in all_para_settings.keys():
+            self._build_param_block(sc.content, key, mode="detail")
 
     def _build_param_block(self, parent, block_key: str, mode: str = "detail"):
         """
@@ -506,9 +523,10 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
             row = ttk.Frame(parent, style="ComponentItem.TFrame")
             row.pack(fill="x", pady=4)
 
+            # 参数名称显示（宽度可调整）
             ttk.Label(row, text=label_text or name,
                       style="ComponentItem.TFrame.Label",
-                      width=26, anchor="w").pack(side="left")
+                      width=18, anchor="w").pack(side="left")
 
             var = self._create_param_var(name, value_type)
 
@@ -599,7 +617,10 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self.tabs_view = tabs
         tabs.bind("<<NotebookTabChanged>>", self._on_view_tab_changed)
 
-        for name in ["Camera", "Original","Processed","Tracked"]:
+        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
+        # for name in ["Camera", "Original","Processed","Tracked"]:
+        for name in ["Camera", "Original","Processed"]:
             frame = ttk.Frame(tabs, padding=6)
             frame.columnconfigure(0, weight=1)
             frame.rowconfigure(0, weight=1)
@@ -618,6 +639,10 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
                 canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
                 setattr(self, f"canvas_{name.lower()}", canvas)
 
+        # 初次启动时，
+        tabs.select(0)  # 确保默认在 Camera
+        self.after_idle(self._start_camera)  # 主动启动一次嵌入链路
+
     def _on_view_tab_changed(self, event):
         """
         切换 Camera / Original / Processed / Tracked 时调用对应更新函数。
@@ -631,10 +656,12 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
             self._start_camera()
         elif name == "Original":
             self._update_original_view()
+        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
         elif name == "Processed":
             self._update_processed_view()
-        elif name == "Tracked":
-            self._update_tracked_view()
+        # elif name == "Tracked":
+        #     self._update_tracked_view()
 
     def _ensure_square(self, canvas):
         w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)

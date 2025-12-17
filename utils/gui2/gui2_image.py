@@ -8,10 +8,10 @@ from utils.camera.ast_vimbaX import vimbaX_threading
 class ImageMixin:
     """
     负责右侧画布的显示。包含以下内容：
-    Camera:
-    Original:
-    Processed:
-    Tracked:
+    1. Camera: 相机直接输出
+    2. Original: 预览文件
+    3. Processed:（暂无）
+    4. Tracked:（暂无）
     """
 
     # ================ 显示画布 ================
@@ -99,6 +99,7 @@ class ImageMixin:
         # 确保有 camera_container（在 _build_view_area 里创建的那个 Frame）
         container = getattr(self, "camera_container", None)
         if container is None:
+            print("[Camera ERROR] Camera container not found.")
             return
 
         # 刷新画面尺寸信息
@@ -110,6 +111,8 @@ class ImageMixin:
         if getattr(self, "_camera_running", False):
             return
         else:
+            self.status_var.set("Starting camera…")
+
             # 关键：告诉 vimbaX 把画面画到这个窗口上
             self.container_hwnd = int(container.winfo_id())
 
@@ -118,6 +121,7 @@ class ImageMixin:
             t.start()
 
             self._camera_running = True
+            self.status_var.set("Camera running.")
 
     # ============ 显示 Camera/Original/Processed/Tracked ============
 
@@ -148,6 +152,8 @@ class ImageMixin:
 
         self._show_image_on_canvas(self.canvas_original, img_path, "_original_photo")
 
+    # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+    #       此处先占位。导入和显示逻辑暂时套用 Original 的内容。
     def _update_processed_view(self):
         """
         根据 Output Path 更新 Processed 画布。
@@ -181,35 +187,37 @@ class ImageMixin:
 
         self._show_image_on_canvas(self.canvas_processed, img_path, "_processed_photo")
 
-    def _update_tracked_view(self):
-        """
-        根据 Output Path 更新 Tracked 画布。
-        """
-        root = self._get_output_root()
-        if not root or not os.path.isdir(root):
-            self.canvas_tracked.delete("content")
-            setattr(self, "_tracked_photo", None)
-            return
-
-        candidates = [
-            os.path.join(root, "tracked"),
-            os.path.join(root, "track"),
-            os.path.join(root, "trackmate"),
-            root,  # 最后退回根目录
-        ]
-
-        img_path = None
-        for p in candidates:
-            if os.path.isdir(p):
-                img_path = self._find_first_image(p)
-                if img_path:
-                    break
-
-        if not img_path:
-            self.canvas_tracked.delete("content")
-            setattr(self, "_tracked_photo", None)
-            if hasattr(self, "status_var"):
-                self.status_var.set("No tracked image found in output path.")
-            return
-
-        self._show_image_on_canvas(self.canvas_tracked, img_path, "_tracked_photo")
+    # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+    #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
+    # def _update_tracked_view(self):
+    #     """
+    #     根据 Output Path 更新 Tracked 画布。
+    #     """
+    #     root = self._get_output_root()
+    #     if not root or not os.path.isdir(root):
+    #         self.canvas_tracked.delete("content")
+    #         setattr(self, "_tracked_photo", None)
+    #         return
+    #
+    #     candidates = [
+    #         os.path.join(root, "tracked"),
+    #         os.path.join(root, "track"),
+    #         os.path.join(root, "trackmate"),
+    #         root,  # 最后退回根目录
+    #     ]
+    #
+    #     img_path = None
+    #     for p in candidates:
+    #         if os.path.isdir(p):
+    #             img_path = self._find_first_image(p)
+    #             if img_path:
+    #                 break
+    #
+    #     if not img_path:
+    #         self.canvas_tracked.delete("content")
+    #         setattr(self, "_tracked_photo", None)
+    #         if hasattr(self, "status_var"):
+    #             self.status_var.set("No tracked image found in output path.")
+    #         return
+    #
+    #     self._show_image_on_canvas(self.canvas_tracked, img_path, "_tracked_photo")
