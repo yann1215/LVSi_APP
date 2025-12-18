@@ -89,7 +89,17 @@ def file_chooser(self, mode):
         chooser.setCurrentDirectory(File(last_path))
 
     # ==================== 设置文件加载格式 ====================
-    #                       No.     file-select     multi-select
+    #                      No.     file-select     multi-select
+    # "cameraPath"          0           0               0
+    # "browsePath"          1           0               1
+    # "inputPath"           2           1               1
+    # "outputPath"          3           1               0
+
+    # auto set path:
+    # "preprocessPath" ?
+    # "featuresPath"
+    # "featuresPath"
+
     # "cameraPath"           0          0               0
     # "preprocessPath"       1          0               1
     # "trackMatePath"        2          1               1

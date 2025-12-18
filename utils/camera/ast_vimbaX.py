@@ -6,7 +6,7 @@ import win32gui, win32con
 
 # Vinma X download website: https://www.alliedvision.com/en/products/software/vimba-x-sdk/#c13326
 VIMBAX_FLAG = False
-VIMBAX_PATH = "C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"
+# VIMBAX_PATH = "C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"
 VIMBAX_PATH = "D:\\Vimba X\\api\\bin\\VmbC.dll"     # D盘安装补丁（路径选择待后续优化）
 if os.path.exists(VIMBAX_PATH):
     from vmbpy import *
@@ -65,7 +65,6 @@ def vimbaX_finder_handler(self, vmb):
             self.AST_btn_var.set("Camera not found.")
             self.AST_btn.config(bg='#cccccc')
     return print_device_id
-
 
 def start_vimbaX(self):
     if VIMBAX_FLAG:

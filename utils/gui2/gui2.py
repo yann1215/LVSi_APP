@@ -10,6 +10,7 @@ import threading
 from ttkbootstrap.toast import ToastNotification
 
 from gui2_file import FileMixin
+from gui2_mode import ModeMixin
 from gui2_config import ConfigMixin
 from gui2_image import ImageMixin
 
@@ -77,7 +78,7 @@ class VScrolled(ttk.Frame):
         delta = -1 if getattr(event, "num", 0) == 4 else (1 if getattr(event, "num", 0) == 5 else -int(event.delta/120))
         self.canvas.yview_scroll(delta, "units")
 
-# note: 在中部 Configs 列暂无子模块分区时，不需要启用 Collapsible
+# note: 在中部 Config 列暂无子模块分区时，不需要启用 Collapsible
 # class Collapsible(ttk.Labelframe):
 #     def __init__(self, master, text="", toggle=False, *args, **kwargs):
 #         super().__init__(master, text=text, padding=8, *args, **kwargs)
@@ -101,7 +102,7 @@ class VScrolled(ttk.Frame):
 #         self._collapsed = not self._collapsed
 
 
-class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
+class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
     def __init__(self):
 
         super().__init__()
@@ -159,10 +160,17 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self.output_root = None
         self.task_mode = None
 
+        # note: 旧版代码，修改中
         # 流程节点 0:图像获取 1:噪声过滤 2:检测追踪 3:特征提取
         self.nodes = ["图像获取", "噪声过滤", "检测追踪", "特征提取"]   # 节点范围（0:图像获取 → 3:特征提取）
         self.program_start = 0
         self.program_end = 3
+
+        # Mode 选择
+        # 0: Capture(默认)  1: Process
+        self.mode = tk.IntVar(value=0)
+        # Capture 是否启动预览
+        self.preview_flag = tk.BooleanVar(value=False)  # 默认关
 
         # 运行状态（防止重复启动）
         self.searching = False
@@ -202,11 +210,10 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
                         foreground=DARK_BLUE)
 
         # 子框架的样式
-        # note: 目前未使用子框架，所以先注释了
-        # style.configure("ChildBox.TLabelframe", background=WHITE)
-        # style.configure("ChildBox.TLabelframe.Label",
-        #                 font=("Segoe UI Semibold", 12),
-        #                 background=WHITE)
+        style.configure("ChildBox.TLabelframe", background=WHITE)
+        style.configure("ChildBox.TLabelframe.Label",
+                        font=("Segoe UI Semibold", 12),
+                        background=WHITE)
 
         # 标签的样式
         # cur_font_name = style.lookup("TNotebook.Tab", "font") or "TkDefaultFont"
@@ -309,7 +316,7 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         m_config.add_command(label="Save As", command=self._config_save_as)
         m_config.add_command(label="Load", command=self._config_load)
 
-        menubar.add_cascade(label="Configs", menu=m_config)
+        menubar.add_cascade(label="Config", menu=m_config)
 
         # ----- Help -----
         m_help = tk.Menu(menubar, tearoff=False)
@@ -321,7 +328,7 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
 
         self.configure(menu=menubar)
 
-    # =============== 主体三列 ===============
+    # =============== 主体三列绘制 ===============
     def _build_main_layout(self):
         wrap = ttk.Frame(self, padding=(12, 12))
         wrap.grid(row=1, column=0, sticky="nsew")
@@ -338,14 +345,14 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self.left.grid_propagate(False)
         self.left.pack_propagate(False)
         self._build_file_group(self.left)
-        self._build_process_group(self.left)
+        self._build_mode_group(self.left)
 
         # 中列（可滚动）
         self.mid = ttk.Frame(wrap, width=MID_WIDTH)
         self.mid.grid(row=0, column=1, sticky="nsw", padx=8)
         self.mid.grid_propagate(False)
         self.mid.pack_propagate(False)
-        self._build_parameter_groups(self.mid)
+        self._build_config_groups(self.mid)
 
         # 右列
         self.right = ttk.Frame(wrap)
@@ -360,107 +367,14 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self._build_progress_and_status(self.right)
         self._build_run_buttons(self.right)
 
-    # ---- 左列：File（两行形式） ----
-    def _param_row(self, parent, r, label):
-        parent.columnconfigure(1, weight=1)
-        ttk.Label(parent, text=label).grid(row=r, column=0, sticky="w", pady=4, padx=(0,6))
-        ttk.Entry(parent).grid(row=r, column=1, sticky="ew", pady=4)
-
-    def _build_file_group(self, parent):
-        box = ttk.Labelframe(parent, text="File", padding=10, style="ParentBox.TLabelframe")
-        box.pack(side="top", fill="x")
-
-        def add_path(label_text, attr_name, text_var, callback):
-            ttk.Label(box, text=label_text).pack(anchor="w", pady=(6, 2))
-            row = ttk.Frame(box)
-            row.pack(fill="x", pady=(0,4))
-            row.columnconfigure(0, weight=1)
-
-            # 绑定 StringVar 的行（Input / Output），Current 文件单独一个 entry
-            if text_var is not None:
-                entry = ttk.Entry(row, textvariable=text_var)
-            else:
-                entry = ttk.Entry(row)
-            entry.grid(row=0, column=0, sticky="ew")
-
-            ttk.Button(row, text="···", width=3, bootstyle="info",
-                       command=lambda e=entry: callback(e)).grid(row=0, column=1, padx=(6,0))
-
-            setattr(self, attr_name, entry)
-
-        # 1) Input Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
-        add_path("Input Path:", "entry_input", self.path_var, self._browse_input_path)
-
-        # 2) Output Path：沿用旧逻辑的“输出目录”（output_filepath + output_path_var + Preferences）
-        add_path("Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
-
-        # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
-        add_path("Current Browse File:", "entry_current_file", self.current_path_var, self._browse_current_file)
-
-        # note: 增加按钮，设置 output path 为 auto
-
-        # # 文件命名输入框
-        # form = ttk.Frame(box)  # 容器使用 grid，两列布局
-        # form.pack(fill="x", pady=(14,0))
-        #
-        # names = ["Bacteria", "Drug", "Time"]
-        #
-        # # 让右边输入框可拉伸
-        # form.columnconfigure(1, weight=1)
-        #
-        # self.file_params = {}  # 保存引用，便于后面取值
-        # for i, name in enumerate(names):
-        #     # 直接复用你已有的行渲染方法
-        #     self._param_row(form, i, name)  # ← 左标签 + 右 Entry
-        #     # 把刚刚创建的 Entry 引用取出来保存（可选）
-        #     # _param_row 创建的是该行最后一个 Entry，grid(row=i, column=1)
-        #     entry = form.grid_slaves(row=i, column=1)[0]
-        #     self.file_params[name] = entry
-
-    def _build_process_group(self, parent):
-        proc = ttk.Labelframe(parent, text="Process", padding=10, style="ParentBox.TLabelframe")
-        proc.pack(side="top", fill="both", expand=True, pady=(8,0))
-
-        # Process各步骤的初始值（默认进行全部操作）
-        self.var_photo=tk.BooleanVar(value=True)
-        self.var_noise=tk.BooleanVar(value=True)
-        self.var_track=tk.BooleanVar(value=True)
-        self.var_feat=tk.BooleanVar(value=True)
-
-        for v,t in [(self.var_photo,"Image Acquisition"),
-                    (self.var_noise,"Noise Filter"),
-                    (self.var_track,"Cell Tracking"),
-                    (self.var_feat,"Feature Extraction")]:
-            ttk.Checkbutton(proc, text=t, variable=v,
-                            bootstyle="round-toggle").pack(anchor="w", pady=8)
-
-    def _update_program_range(self):
-        """
-        获取Process各步骤
-        暂时不能跳步骤执行操作，如果运行了step2和step4，默认会把中间的step3也运行
-        note: 后续把这部分的功能也拆出gui2.py
-        """
-
-        flags = [self.var_photo.get(),
-                 self.var_noise.get(),
-                 self.var_track.get(),
-                 self.var_feat.get()]
-        indices = [i for i, f in enumerate(flags) if f]
-        if not indices:
-            # 如果一个都没选，默认全流程
-            self.program_start, self.program_end = 0, 3
-        else:
-            self.program_start = indices[0]
-            self.program_end   = indices[-1]
-
     # ---- 中列（可滚动参数） ----
-    def _build_parameter_groups(self, parent):
+    def _build_config_groups(self, parent):
         """
         中列参数区：直接从 all_para_settings 生成 Camera / Filter / Tracking / Features
         """
 
-        # 绘制最外层的 Configs 边框
-        outer = ttk.Labelframe(parent, text="Configs",
+        # 绘制最外层的 Config 边框
+        outer = ttk.Labelframe(parent, text="Config",
                                padding=10, style="ParentBox.TLabelframe")
         outer.pack(fill="both", expand=True)
         outer.rowconfigure(0, weight=1)
@@ -606,68 +520,6 @@ class App(FileMixin, ConfigMixin, ImageMixin, tb.Window):
         self.param_vars[name] = v
         return v
 
-
-    # ---- 右列：图像 + 标签 ----
-    def _build_view_area(self, parent):
-        # tabs = ttk.Notebook(parent, bootstyle="info")
-        tabs = ttk.Notebook(parent, style="TNotebook")
-        tabs.grid(row=0, column=0, sticky="nsew")
-
-        # 保存引用，后面 tab 切换和刷新要用
-        self.tabs_view = tabs
-        tabs.bind("<<NotebookTabChanged>>", self._on_view_tab_changed)
-
-        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
-        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
-        # for name in ["Camera", "Original","Processed","Tracked"]:
-        for name in ["Camera", "Original","Processed"]:
-            frame = ttk.Frame(tabs, padding=6)
-            frame.columnconfigure(0, weight=1)
-            frame.rowconfigure(0, weight=1)
-            tabs.add(frame, text=name)
-
-            if name == "Camera":
-                # 相机专用容器，用来拿 HWND 给 vimbaX
-                cam_frame = tk.Frame(frame, bg="black")
-                cam_frame.grid(row=0, column=0, sticky="nsew")
-
-                # 保存起来，ImageMixin 里会用到
-                self.camera_container = cam_frame
-            else:
-                canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
-                canvas.grid(row=0, column=0, sticky="nsew")
-                canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
-                setattr(self, f"canvas_{name.lower()}", canvas)
-
-        # 初次启动时，
-        tabs.select(0)  # 确保默认在 Camera
-        self.after_idle(self._start_camera)  # 主动启动一次嵌入链路
-
-    def _on_view_tab_changed(self, event):
-        """
-        切换 Camera / Original / Processed / Tracked 时调用对应更新函数。
-        """
-        tabs = event.widget
-        idx = tabs.index("current")
-        name = tabs.tab(idx, "text")
-
-        if name == "Camera":
-            # 调用 ImageMixin 里的函数，启动相机
-            self._start_camera()
-        elif name == "Original":
-            self._update_original_view()
-        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
-        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
-        elif name == "Processed":
-            self._update_processed_view()
-        # elif name == "Tracked":
-        #     self._update_tracked_view()
-
-    def _ensure_square(self, canvas):
-        w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)
-        canvas.delete("border")
-        px,py = (w-side)//2,(h-side)//2
-        canvas.create_rectangle(px,py,px+side,py+side, outline="#334155", width=2, tags="border")
 
     # ---- 右列：进度 + 状态 ----
     def _build_progress_and_status(self, parent):

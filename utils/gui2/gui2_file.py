@@ -3,6 +3,7 @@ import os
 import json
 import tkinter as tk
 from tkinter import filedialog
+from ttkbootstrap import ttk
 
 from utils.process.process_java import file_chooser, Preferences
 
@@ -44,6 +45,68 @@ class FileMixin:
             self.output_path_var = tk.StringVar(master=self, value="auto")
 
     # ------- File 区：Input / Output / Current 三个按钮 -------
+    def _param_row(self, parent, r, label):
+        parent.columnconfigure(1, weight=1)
+        ttk.Label(parent, text=label).grid(row=r, column=0, sticky="w", pady=4, padx=(0, 6))
+        ttk.Entry(parent).grid(row=r, column=1, sticky="ew", pady=4)
+
+    def _build_file_group(self, parent):
+        box = ttk.Labelframe(parent, text="File", padding=10, style="ParentBox.TLabelframe")
+        box.pack(side="top", fill="x")
+
+        def add_path(label_text, attr_name, text_var, callback):
+            ttk.Label(box, text=label_text).pack(anchor="w", pady=(6, 2))
+            row = ttk.Frame(box)
+            row.pack(fill="x", pady=(0,4))
+            row.columnconfigure(0, weight=1)
+
+            # 绑定 StringVar 的行（Input / Output），Current 文件单独一个 entry
+            if text_var is not None:
+                entry = ttk.Entry(row, textvariable=text_var)
+            else:
+                entry = ttk.Entry(row)
+            entry.grid(row=0, column=0, sticky="ew")
+
+            ttk.Button(row, text="···", width=3, bootstyle="info",
+                       command=lambda e=entry: callback(e)).grid(row=0, column=1, padx=(6,0))
+
+            setattr(self, attr_name, entry)
+
+        # 1) Camera Save Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
+        add_path("Camera Save Path:", "entry_camera", self.path_var, self._browse_camera_path)
+
+        # 1) Input Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
+        add_path("Input Path:", "entry_input", self.path_var, self._browse_input_path)
+
+        # 2) Output Path：沿用旧逻辑的“输出目录”（output_filepath + output_path_var + Preferences）
+        add_path("Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
+
+        # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
+        add_path("Current Browse File:", "entry_current_file", self.current_path_var, self._browse_current_file)
+
+        # note: 增加按钮，设置 output path 为 auto
+
+        # 文件命名输入框
+        form = ttk.Frame(box)  # 容器使用 grid，两列布局
+        form.pack(fill="x", pady=(14,0))
+
+        names = ["Append 1", "Append 2", "Time"]
+
+        # 让右边输入框可拉伸
+        form.columnconfigure(1, weight=1)
+
+        self.file_params = {}  # 保存引用，便于后面取值
+        for i, name in enumerate(names):
+            # 直接复用你已有的行渲染方法
+            self._param_row(form, i, name)  # ← 左标签 + 右 Entry
+            # 把刚刚创建的 Entry 引用取出来保存（可选）
+            # _param_row 创建的是该行最后一个 Entry，grid(row=i, column=1)
+            entry = form.grid_slaves(row=i, column=1)[0]
+            self.file_params[name] = entry
+
+    def _browse_camera_path(self, entry):
+        # note: 待修改
+        return
 
     def _browse_input_path(self, entry):
         """

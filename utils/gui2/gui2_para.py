@@ -7,12 +7,12 @@ all_para_settings = {
         #     {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
         # ],
         "detail": [
-            {"str": "— 文件与路径 —", "name": "", "type": "label"},
-            {"str": "根目录关键字", "name": "patient_keyword", "type": "str"},
-            {"str": "拍摄组名", "name": "output_group", "type": "str"},
-            {"str": "拍摄时间节点", "name": "output_time", "type": "int"},
-            {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
-            {"str": "数据类型", "name": "extensions", "type": "str"},
+            # {"str": "— 文件与路径 —", "name": "", "type": "label"},
+            # {"str": "根目录关键字", "name": "patient_keyword", "type": "str"},
+            # {"str": "拍摄组名", "name": "output_group", "type": "str"},
+            # {"str": "拍摄时间节点", "name": "output_time", "type": "int"},
+            # {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
+            # {"str": "数据类型", "name": "extensions", "type": "str"},
 
             {"str": "— 相机参数 —", "name": "", "type": "label"},
             {"str": "曝光时间", "name": "vimbaX_ExposureTime", "type": "float"},

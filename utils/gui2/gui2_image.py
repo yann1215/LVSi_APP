@@ -2,6 +2,7 @@
 import os
 import json
 import tkinter as tk
+from ttkbootstrap import ttk
 import threading
 from utils.camera.ast_vimbaX import vimbaX_threading
 
@@ -15,6 +16,66 @@ class ImageMixin:
     """
 
     # ================ 显示画布 ================
+    def _build_view_area(self, parent):
+        # tabs = ttk.Notebook(parent, bootstyle="info")
+        tabs = ttk.Notebook(parent, style="TNotebook")
+        tabs.grid(row=0, column=0, sticky="nsew")
+
+        # 保存引用，后面 tab 切换和刷新要用
+        self.tabs_view = tabs
+        tabs.bind("<<NotebookTabChanged>>", self._on_view_tab_changed)
+
+        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
+        # for name in ["Camera", "Original","Processed","Tracked"]:
+        for name in ["Camera", "Original","Processed"]:
+            frame = ttk.Frame(tabs, padding=6)
+            frame.columnconfigure(0, weight=1)
+            frame.rowconfigure(0, weight=1)
+            tabs.add(frame, text=name)
+
+            if name == "Camera":
+                # 相机专用容器，用来拿 HWND 给 vimbaX
+                cam_frame = tk.Frame(frame, bg="black")
+                cam_frame.grid(row=0, column=0, sticky="nsew")
+
+                # 保存起来，ImageMixin 里会用到
+                self.camera_container = cam_frame
+            else:
+                canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
+                canvas.grid(row=0, column=0, sticky="nsew")
+                canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
+                setattr(self, f"canvas_{name.lower()}", canvas)
+
+        # 初次启动时，
+        tabs.select(0)  # 确保默认在 Camera
+        self.after_idle(self._start_camera)  # 主动启动一次嵌入链路
+
+    def _on_view_tab_changed(self, event):
+        """
+        切换 Camera / Original / Processed / Tracked 时调用对应更新函数。
+        """
+        tabs = event.widget
+        idx = tabs.index("current")
+        name = tabs.tab(idx, "text")
+
+        if name == "Camera":
+            # 调用 ImageMixin 里的函数，启动相机
+            self._start_camera()
+        elif name == "Original":
+            self._update_original_view()
+        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
+        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
+        elif name == "Processed":
+            self._update_processed_view()
+        # elif name == "Tracked":
+        #     self._update_tracked_view()
+
+    def _ensure_square(self, canvas):
+        w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)
+        canvas.delete("border")
+        px,py = (w-side)//2,(h-side)//2
+        canvas.create_rectangle(px,py,px+side,py+side, outline="#334155", width=2, tags="border")
 
     def _find_first_image(self, path: str):
         """
