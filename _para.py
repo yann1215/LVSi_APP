@@ -12,18 +12,24 @@ else:
 all_para_dict = {
     "default_ID":"DEFAULT",
 
-    "patient_keyword": "User",
-    "output_group": "ANY",
-    "video_duration": 10,
-    "output_time": 0,
-    "time_keyword": "min",
-    "extensions": '[".tif", ".tiff"]',
-    "output_data_path": "auto",
+    # "patient_keyword": "User",
+    # "output_group": "ANY",
+    # "video_duration": 10,
+    # "output_time": 0,
+    # "time_keyword": "min",
+    # "extensions": '[".tif", ".tiff"]',
+    # "output_data_path": "auto",
+
+    "sample_num": 1,
+    "vimbaX_AcquisitionFrameRate": 10.0,
+    "video_period": 10,
+    "video_interval": 20,
+    "video_end_time": 120,
 
     "vimbaX_ExposureTime": 5000.0,
     "vimbaX_Gain": 0.0,
     "vimbaX_SensorBitDepth": 2,
-    "vimbaX_AcquisitionFrameRate": 10.0,
+
 
     "contrast_max": 30.0,
     "contrast_min": 0.0,

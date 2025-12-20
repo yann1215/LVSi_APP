@@ -21,6 +21,7 @@ class ModeMixin:
 
         proc = ttk.Labelframe(parent, text="Process", padding=10, style="ParentBox.TLabelframe")
         proc.pack(side="top", fill="both", expand=True, pady=(8, 0))
+        self.mode_group_box = proc
 
         # ---- 确保核心变量存在（也可以放在 gui2.py __init__ 里初始化）----
         if not hasattr(self, "mode"):

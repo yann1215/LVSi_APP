@@ -8,11 +8,13 @@ from utils.camera.ast_vimbaX import vimbaX_threading
 
 class ImageMixin:
     """
-    负责右侧画布的显示。包含以下内容：
-    1. Camera: 相机直接输出
-    2. Original: 预览文件
-    3. Processed:（暂无）
-    4. Tracked:（暂无）
+    负责右侧画布的显示。
+    包含以下内容（mode == 0, capture）：
+        1. Camera: 相机直接输出
+        2. Preview: 预览文件
+    或（mode == 1, process）：
+        1. Original:（暂无）
+        2. Processed:（暂无）
     """
 
     # ================ 显示画布 ================
@@ -27,12 +29,12 @@ class ImageMixin:
 
         # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
         #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
-        # for name in ["Camera", "Original","Processed","Tracked"]:
-        for name in ["Camera", "Original","Processed"]:
+        self._view_frames = {}
+        for name in ["Camera", "Preview", "Original", "Processed"]:
             frame = ttk.Frame(tabs, padding=6)
             frame.columnconfigure(0, weight=1)
             frame.rowconfigure(0, weight=1)
-            tabs.add(frame, text=name)
+            self._view_frames[name] = frame
 
             if name == "Camera":
                 # 相机专用容器，用来拿 HWND 给 vimbaX
@@ -47,29 +49,68 @@ class ImageMixin:
                 canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
                 setattr(self, f"canvas_{name.lower()}", canvas)
 
-        # 初次启动时，
-        tabs.select(0)  # 确保默认在 Camera
-        self.after_idle(self._start_camera)  # 主动启动一次嵌入链路
+        # 根据当前 mode 只显示两个 tab
+        try:
+            mode = int(getattr(self, "mode").get())
+        except Exception:
+            mode = 0
+        self._apply_view_mode(mode)
 
     def _on_view_tab_changed(self, event):
-        """
-        切换 Camera / Original / Processed / Tracked 时调用对应更新函数。
-        """
-        tabs = event.widget
-        idx = tabs.index("current")
-        name = tabs.tab(idx, "text")
+        self._refresh_current_view()
+
+    def _refresh_current_view(self):
+        tabs = getattr(self, "tabs_view", None)
+        if tabs is None or tabs.index("end") == 0:
+            return
+
+        try:
+            name = tabs.tab("current", "text")
+        except Exception:
+            return
 
         if name == "Camera":
-            # 调用 ImageMixin 里的函数，启动相机
             self._start_camera()
+        elif name == "Preview":
+            self._update_preview_view()
         elif name == "Original":
             self._update_original_view()
-        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
-        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
         elif name == "Processed":
             self._update_processed_view()
-        # elif name == "Tracked":
-        #     self._update_tracked_view()
+
+    def _apply_view_mode(self, mode: int):
+        """
+        对外接口：让 gui2.py / Mode 回调调用
+          mode==0: Camera + Preview
+          mode==1: Original + Processed
+        """
+        tabs = getattr(self, "tabs_view", None)
+        if tabs is None:
+            return
+
+        # 清空当前 notebook tab（不销毁 widget）
+        for i in reversed(range(tabs.index("end"))):
+            try:
+                tabs.forget(i)
+            except Exception:
+                pass
+
+        if int(mode) == 0:
+            self._add_view_tab("Camera")
+            self._add_view_tab("Preview")
+        else:
+            self._add_view_tab("Original")
+            self._add_view_tab("Processed")
+
+        if tabs.index("end") > 0:
+            tabs.select(0)
+            self.after_idle(self._refresh_current_view)
+
+    def _add_view_tab(self, name: str):
+        frame = getattr(self, "_view_frames", {}).get(name)
+        if frame is None:
+            return
+        self.tabs_view.add(frame, text=name)
 
     def _ensure_square(self, canvas):
         w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)
@@ -153,7 +194,7 @@ class ImageMixin:
     # ================== 启用相机 ==================
     def _start_camera(self):
         """
-        在 Camera tab 被选中时调用
+        在 Camera tab 被选中时调用     # note: 把启动条件修改了，改在gui.py进行app_init的时候启动？
         启动一次 vimbaX_threading。
         """
 
@@ -248,37 +289,22 @@ class ImageMixin:
 
         self._show_image_on_canvas(self.canvas_processed, img_path, "_processed_photo")
 
-    # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
-    #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
-    # def _update_tracked_view(self):
-    #     """
-    #     根据 Output Path 更新 Tracked 画布。
-    #     """
-    #     root = self._get_output_root()
-    #     if not root or not os.path.isdir(root):
-    #         self.canvas_tracked.delete("content")
-    #         setattr(self, "_tracked_photo", None)
-    #         return
-    #
-    #     candidates = [
-    #         os.path.join(root, "tracked"),
-    #         os.path.join(root, "track"),
-    #         os.path.join(root, "trackmate"),
-    #         root,  # 最后退回根目录
-    #     ]
-    #
-    #     img_path = None
-    #     for p in candidates:
-    #         if os.path.isdir(p):
-    #             img_path = self._find_first_image(p)
-    #             if img_path:
-    #                 break
-    #
-    #     if not img_path:
-    #         self.canvas_tracked.delete("content")
-    #         setattr(self, "_tracked_photo", None)
-    #         if hasattr(self, "status_var"):
-    #             self.status_var.set("No tracked image found in output path.")
-    #         return
-    #
-    #     self._show_image_on_canvas(self.canvas_tracked, img_path, "_tracked_photo")
+    def _update_preview_view(self):
+        """
+        Preview：这里先按最稳妥逻辑，复用 current_file 的显示（与 Original 一致）。
+        """
+        canvas = getattr(self, "canvas_preview", None)
+        if canvas is None:
+            return
+
+        path = getattr(self, "current_file", "")
+        img_path = self._find_first_image(path) if path else None
+
+        if not img_path:
+            canvas.delete("content")
+            setattr(self, "_preview_photo", None)
+            if hasattr(self, "status_var") and path:
+                self.status_var.set("No image found for Preview.")
+            return
+
+        self._show_image_on_canvas(canvas, img_path, "_preview_photo")

@@ -144,15 +144,15 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self.param_vars = {}
         self.enum_meta = {}     # 记录枚举型参数的 mapping + combobox 变量
 
+        # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
+        # self.camera_path_var = tk.StringVar(self, value="")  # 相机拍摄存储路径字符串
+        # self.input_path_var = tk.StringVar(self, value="")  # 输入路径字符串
+        # self.output_path_var = tk.StringVar(self, value="")  # 输出路径字符串
+        # self.current_path_var = tk.StringVar(self, value="")  # 预览图像路径字符串
+        self._ensure_file_exsistence()
         # 路径 & 任务
         self.filepath_list = []
         self.output_filepath = "auto"
-        # 兼容旧版 JFileChooser 的路径变量（process_java.file_chooser 会用到）
-        self.path_var = tk.StringVar(self, value="")  # 输入路径字符串
-        self.output_path_var = tk.StringVar(self, value="auto")  # 输出路径字符串
-        self.current_path_var = tk.StringVar(self, value="")   # 预览图像路径字符串
-        # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
-        self._ensure_file_exsistence()
         # 当前预览的单个图像/视频文件（左侧第三行）
         self.current_file = ""
 
@@ -244,9 +244,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self._build_main_layout()
 
         # 根据按钮实际宽度“动态锁定”最小宽度；并在窗口尺寸变化时强制不小于该宽度
-        self.after(80, self._update_min_width)
-        self.bind("<Configure>", self._enforce_min_width)
-
+        self.after(80, self._update_min_constraints)
+        self.bind("<Configure>", self._enforce_min_constraints)
 
     # =============== 顶部菜单 ===============
     def _build_menubar(self):
@@ -254,6 +253,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         bar = ttk.Frame(self, padding=(12, 6), style="Topbar.TFrame")
         bar.grid(row=0, column=0, sticky="ew")
         bar.columnconfigure(1, weight=1)  # 让标题文本可向右展开
+        self.topbar = bar
 
         # 1) 先创建“图标 Label”
         style = tb.Style()
@@ -293,8 +293,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         # ----- File -----
         m_file = tk.Menu(menubar, tearoff=False)
 
-        m_file.add_command(label="Input Path", command=lambda: self._browse_input_path(self.entry_input))
-        m_file.add_command(label="Output Path", command=lambda: self._browse_output_path(self.entry_output))
+        m_file.add_command(label="Process Input Path", command=lambda: self._browse_input_path(self.entry_input))
+        m_file.add_command(label="Process Output Path", command=lambda: self._browse_output_path(self.entry_output))
         m_file.add_separator()
         m_file.add_command(label="Exit", command=self.destroy)
 
@@ -345,7 +345,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self.left.grid_propagate(False)
         self.left.pack_propagate(False)
         self._build_file_group(self.left)
-        self._build_mode_group(self.left)
+        self._build_mode_group(self.left, on_mode_changed=self._on_mode_changed_main)
 
         # 中列（可滚动）
         self.mid = ttk.Frame(wrap, width=MID_WIDTH)
@@ -579,31 +579,96 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
     def _toast(self, msg, title="Info", bootstyle="info"):
         ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
 
-    # ====== 最小宽度：动态计算并强制不小于 ======
-    def _update_min_width(self):
+    # ====== 右侧显示的 tabs 随 self.mode 改变 ======
+    def _on_mode_changed_main(self, mode: int):
         """
-        根据左/中固定宽度 + 右侧按钮所需宽度 + 边距，计算并锁定窗口最小宽度
+        ModeMixin 回调：切换右侧 Tab 组合，并刷新 minsize 约束。
+        """
+        if hasattr(self, "_apply_view_mode"):
+            try:
+                self._apply_view_mode(int(mode))
+            except Exception:
+                pass
+        self.after_idle(self._update_min_constraints)
+
+    # ====== 最小宽度 & 高度：动态计算并强制不小于 ======
+    def _calc_min_height(self) -> int:
+        """
+        计算最小高度：保证左侧 File + Mode 完整显示。
         """
         self.update_idletasks()
+
+        top_h = 0
+        if hasattr(self, "topbar") and self.topbar is not None:
+            try:
+                top_h = self.topbar.winfo_reqheight()
+            except Exception:
+                top_h = 0
+
+        file_h = 0
+        if hasattr(self, "file_group_box") and self.file_group_box is not None:
+            try:
+                file_h = self.file_group_box.winfo_reqheight()
+            except Exception:
+                file_h = 0
+
+        mode_h = 0
+        if hasattr(self, "mode_group_box") and self.mode_group_box is not None:
+            try:
+                mode_h = self.mode_group_box.winfo_reqheight()
+            except Exception:
+                mode_h = 0
+
+        # wrap padding(top/bottom)=12*2；Mode pack 有 pady=(8,0) -> gap=8
+        wrap_pad = 12 * 2
+        gap = 8
+        extra = 24  # 安全余量（OS 装饰/字体差异）
+
+        min_h = top_h + wrap_pad + file_h + gap + mode_h + extra
+        return max(BASE_MIN_H, int(min_h))
+
+    def _update_min_constraints(self):
+        """
+        锁定最小宽度 + 最小高度。
+        """
+        self.update_idletasks()
+
         left_w = LEFT_WIDTH
-        mid_w  = MID_WIDTH
-        btns_w = self._btns_container.winfo_reqwidth()
-        # 外层左右内边距：wrap 的 padding(12) × 2，加三列之间的 padx：8+8
-        margins = 12*2 + 8 + 8
-        min_w = left_w + mid_w + btns_w + margins + 24  # 额外余量
-        # 锁定：不能小于 min_w
-        self.wm_minsize(min_w, BASE_MIN_H)
-        self._min_w_cached = min_w
+        mid_w = MID_WIDTH
+        btns_w = self._btns_container.winfo_reqwidth() if hasattr(self, "_btns_container") else 0
+
+        # wrap padding(12)*2 + column gaps: 左列/中列/右列间 8+8
+        margins = 12 * 2 + 8 + 8
+        min_w = left_w + mid_w + btns_w + margins + 24
+        min_h = self._calc_min_height()
+
+        self.wm_minsize(int(min_w), int(min_h))
+        self._min_w_cached = int(min_w)
+        self._min_h_cached = int(min_h)
+
+    def _enforce_min_constraints(self, event):
+        """
+        拖拽缩放时，防止小于最小宽/高。
+        """
+        if getattr(self, "_min_w_cached", None) is None or getattr(self, "_min_h_cached", None) is None:
+            return
+
+        cur_w = self.winfo_width()
+        cur_h = self.winfo_height()
+
+        min_w = self._min_w_cached
+        min_h = self._min_h_cached
+
+        if cur_w < min_w or cur_h < min_h:
+            self.geometry(f"{max(cur_w, min_w)}x{max(cur_h, min_h)}")
+
+    # 兼容旧名字（如果你别处仍调用）
+    def _update_min_width(self):
+        self._update_min_constraints()
 
     def _enforce_min_width(self, event):
-        """
-        拖拽缩放时，若宽度小于计算值，立即回弹到最小宽度
-        """
-        if getattr(self, "_min_w_cached", None) is None:
-            return
-        cur_w = self.winfo_width()
-        if cur_w < self._min_w_cached:
-            self.geometry(f"{self._min_w_cached}x{max(self.winfo_height(), BASE_MIN_H)}")
+        self._enforce_min_constraints(event)
+
 
 if __name__ == "__main__":
     App().mainloop()

@@ -65,7 +65,7 @@ JFrame = scyjava.jimport("javax.swing.JFrame")
 Window = scyjava.jimport("java.awt.Window")
 
 
-def file_chooser(self, mode):
+def file_chooser(self, path_mode):
 
     prefs = Preferences.userRoot().node("/LMH/fijiCountingFaster/29/file_chooser")
     key_list = ["cameraPath",
@@ -84,61 +84,54 @@ def file_chooser(self, mode):
     parent_frame = JFrame()
     parent_frame.setAlwaysOnTop(True)
     chooser = JFileChooser()
-    last_path = prefs.get(key_list[mode] + "_last", None)
+    last_path = prefs.get(key_list[path_mode] + "_last", None)
     if last_path:
         chooser.setCurrentDirectory(File(last_path))
 
     # ==================== 设置文件加载格式 ====================
     #                      No.     file-select     multi-select
     # "cameraPath"          0           0               0
-    # "browsePath"          1           0               1
-    # "inputPath"           2           1               1
-    # "outputPath"          3           1               0
+    # "inputPath"           1           0               1
+    # "outputPath"          2           0               0
+    # "browsePath"          3           1               0
 
-    # auto set path:
-    # "preprocessPath" ?
-    # "featuresPath"
+    # auto-set path:
+    # "preprocessPath"
+    # "trackMatePath"
     # "featuresPath"
 
-    # "cameraPath"           0          0               0
-    # "preprocessPath"       1          0               1
-    # "trackMatePath"        2          1               1
-    # "featuresPath"         3          1               1
-    # "outputPath"           4          0               0
-    # "browsePath"           5          1               0
+    target_path_dict = [self.camera_path_var,
+                        self.input_path_var,
+                        self.output_path_var,
+                        self.current_path_var]
+    target_var = target_path_dict(path_mode)
 
     # file-select settings
-    if mode in (0, 1, 4):
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
-        # file_select_flag = False
-    else:
+    if path_mode == 3:
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)
         # file_select_flag = True
-    # multi-select settings
-    if mode in (0, 4, 5):
-        chooser.setMultiSelectionEnabled(False)
-        multi_select_flag = False
     else:
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)
+        # file_select_flag = False
+
+    # multi-select settings
+    if path_mode == 1:
         chooser.setMultiSelectionEnabled(True)
         multi_select_flag = True
-
-    if mode == 4:
-        target_var = self.output_path_var
-    elif mode == 5:
-        terget_var = self.current_path_var
     else:
-        target_var = self.path_var
+        chooser.setMultiSelectionEnabled(False)
+        multi_select_flag = False
 
     result = chooser.showOpenDialog(parent_frame)
     if result == JFileChooser.APPROVE_OPTION:
         filepath_list = []
         current_dir = chooser.getCurrentDirectory().getAbsolutePath()
-        prefs.put(key_list[mode] + "_last", str(current_dir))
+        prefs.put(key_list[path_mode] + "_last", str(current_dir))
         if not multi_select_flag:
             selected_file = chooser.getSelectedFile()
-            if mode == 0:
+            if path_mode == 0:
                 filepath_list.append(str(selected_file))
-            elif mode ==4:
+            elif path_mode ==4:
                 filepath_list = selected_file
         else:
             selected_files = chooser.getSelectedFiles()
@@ -149,7 +142,7 @@ def file_chooser(self, mode):
             target_var.set(str(filepath_list))
 
         # 保存到 prefs，供下次恢复
-        prefs.put(key_list[mode], str(filepath_list))
+        prefs.put(key_list[path_mode], str(filepath_list))
 
     return filepath_list
 
