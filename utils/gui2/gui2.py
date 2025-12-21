@@ -1,18 +1,21 @@
-import os
+import os, sys
 import tkinter as tk
 from tkinter import filedialog
 import ttkbootstrap as tb
 from ttkbootstrap import ttk
 from PIL import Image, ImageTk
 import cv2
+import importlib
 from importlib.resources import files
 import threading
 from ttkbootstrap.toast import ToastNotification
+from pathlib import Path
 
 from gui2_file import FileMixin
 from gui2_mode import ModeMixin
 from gui2_config import ConfigMixin
 from gui2_image import ImageMixin
+from gui2_button import ButtonMixin
 
 from _para import all_para_dict, base_path
 from utils.gui2.gui2_para import all_para_settings
@@ -102,7 +105,7 @@ class VScrolled(ttk.Frame):
 #         self._collapsed = not self._collapsed
 
 
-class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
+class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window):
     def __init__(self):
 
         super().__init__()
@@ -122,7 +125,9 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
 
         # 图像尺寸、保存相关标志 —— 保持和旧 gui 一致
         self.img_shape = (728, 544)
-        # self.west_img_shape = (364, 272)      # 旧版本GUI使用的参数；现在似乎不需要使用
+
+        # ---- 让 camera/ process 目录可 import（与 gui2 文件夹同级）----
+        self._ensure_project_root_on_syspath()
 
         # 供相机模块使用的占位图 / 当前帧缓冲
         self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
@@ -131,6 +136,10 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
             import numpy as np
             self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
         self.img = self.NonePng
+
+        # ---- 准备按钮 actions（ButtonMixin 会调用）----
+        self._capture_actions = self._make_capture_actions()
+        self._process_actions = self._make_process_actions()
 
         self.save_frame = False
         self.save_path = None
@@ -145,10 +154,10 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self.enum_meta = {}     # 记录枚举型参数的 mapping + combobox 变量
 
         # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
-        # self.camera_path_var = tk.StringVar(self, value="")  # 相机拍摄存储路径字符串
-        # self.input_path_var = tk.StringVar(self, value="")  # 输入路径字符串
-        # self.output_path_var = tk.StringVar(self, value="")  # 输出路径字符串
-        # self.current_path_var = tk.StringVar(self, value="")  # 预览图像路径字符串
+        self.camera_path_var = tk.StringVar(self, value="")  # 相机拍摄存储路径字符串
+        self.input_path_var = tk.StringVar(self, value="")  # 输入路径字符串
+        self.output_path_var = tk.StringVar(self, value="")  # 输出路径字符串
+        self.current_path_var = tk.StringVar(self, value="")  # 预览图像路径字符串
         self._ensure_file_exsistence()
         # 路径 & 任务
         self.filepath_list = []
@@ -160,7 +169,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self.output_root = None
         self.task_mode = None
 
-        # note: 旧版代码，修改中
+        # ==== note: 旧版代码，修改中 ====
         # 流程节点 0:图像获取 1:噪声过滤 2:检测追踪 3:特征提取
         self.nodes = ["图像获取", "噪声过滤", "检测追踪", "特征提取"]   # 节点范围（0:图像获取 → 3:特征提取）
         self.program_start = 0
@@ -293,8 +302,10 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         # ----- File -----
         m_file = tk.Menu(menubar, tearoff=False)
 
+        m_file.add_command(label="Camera Save Path", command=lambda: self._browse_camera_path(self.entry_camera))
         m_file.add_command(label="Process Input Path", command=lambda: self._browse_input_path(self.entry_input))
         m_file.add_command(label="Process Output Path", command=lambda: self._browse_output_path(self.entry_output))
+        m_file.add_command(label="Current Browse File", command=lambda: self._browse_current_path(self.entry_current))
         m_file.add_separator()
         m_file.add_command(label="Exit", command=self.destroy)
 
@@ -303,9 +314,9 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         # ---- Process ----
         m_proc = tk.Menu(menubar, tearoff=False)
 
-        m_proc.add_command(label="Run", command=self._run)
-        m_proc.add_command(label="Pause", command=self._pause)
-        m_proc.add_command(label="Stop", command=self._stop)
+        # m_proc.add_command(label="Run", command=self._run)
+        # m_proc.add_command(label="Pause", command=self._pause)
+        # m_proc.add_command(label="Stop", command=self._stop)
 
         menubar.add_cascade(label="Process", menu=m_proc)
 
@@ -365,7 +376,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
 
         self._build_view_area(self.right)
         self._build_progress_and_status(self.right)
-        self._build_run_buttons(self.right)
+        self._build_button_bar(self.right, self._capture_actions, self._process_actions)
 
     # ---- 中列（可滚动参数） ----
     def _build_config_groups(self, parent):
@@ -532,28 +543,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         self.status = ttk.Label(parent, textvariable=self.status_var, font=("Segoe UI", 9), foreground="#64748b")
         self.status.grid(row=2, column=0, sticky="ew", pady=(2,8))
 
-    # ---- 右列：按钮 ----
-    def _build_run_buttons(self, parent):
-        row = ttk.Frame(parent)
-        row.grid(row=3, column=0, sticky="ew", pady=(6,0))
-
-        # 两侧留白列可伸缩，中间放按钮
-        row.columnconfigure(0, weight=1)  # 左留白
-        row.columnconfigure(1, weight=0)  # 中间按钮容器
-        row.columnconfigure(2, weight=1)  # 右留白
-
-        btns = ttk.Frame(row, name="btns")
-        btns.grid(row=0, column=1)      # 按钮放在中间列
-
-        self.btn_run = ttk.Button(btns, text="Run",   bootstyle="info", width=8, command=self._run)
-        self.btn_run.grid(row=0, column=0, padx=(0, 20))
-        self.btn_pause = ttk.Button(btns, text="Pause", bootstyle="info", width=8, command=self._pause)
-        self.btn_pause.grid(row=0, column=1, padx=(0, 20))
-        self.btn_stop = ttk.Button(btns, text="Stop",  bootstyle="info",  width=8, command=self._stop)
-        self.btn_stop.grid(row=0, column=2)
-
-        self._btns_container = btns
-
     # =============== 行为占位 ===============
 
     def _draw_dummy(self, canvas):
@@ -564,32 +553,65 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         x0,y0=(w-s)//2,(h-s)//2
         canvas.create_rectangle(x0,y0,x0+s,y0+s, fill="#1f4f99", outline="", tags="content")
 
-    def _run(self):
-        self.status_var.set("Running…")
-        self.prog.configure(value=10)
-        self.after(120, lambda: self.prog.configure(value=35))
-
-    def _pause(self):
-        self.status_var.set("Paused.")
-
-    def _stop(self):
-        self.status_var.set("Stopped.")
-        self.prog.configure(value=0)
-
     def _toast(self, msg, title="Info", bootstyle="info"):
         ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
 
     # ====== 右侧显示的 tabs 随 self.mode 改变 ======
     def _on_mode_changed_main(self, mode: int):
         """
-        ModeMixin 回调：切换右侧 Tab 组合，并刷新 minsize 约束。
+        ModeMixin 回调：
+            1. 切换右侧 Tab 组合
+            2. 切换右侧按钮组
+            3. 刷新 minsize 约束
         """
+
+        # 切换 tab 显示
         if hasattr(self, "_apply_view_mode"):
             try:
                 self._apply_view_mode(int(mode))
             except Exception:
                 pass
+
+        # 切换底部按钮
+        if hasattr(self, "_apply_button_mode"):
+            self._apply_button_mode(int(mode))
+
+        # 重新计算最小宽度 & 高度
         self.after_idle(self._update_min_constraints)
+
+    def _ensure_project_root_on_syspath(self):
+        """
+        你的工程结构：camera/ 与 gui2/ 同级，process/ 与 gui2/ 同级。
+        这里把“gui2 文件夹的上一级”加入 sys.path，确保 `import camera.xxx` 可用。
+        """
+        here = Path(__file__).resolve()
+        # 如果 gui2.py 在 gui2/ 目录里，则 project_root = gui2/ 的父目录
+        project_root = here.parent.parent if here.parent.name.lower() == "gui2" else here.parent
+        p = str(project_root)
+        if p not in sys.path:
+            sys.path.insert(0, p)
+
+    def _import_func(self, module_name: str, func_name: str):
+        """
+        note:
+        动态导入 module 并取出函数。
+        你只需要把下面 _make_capture_actions/_make_process_actions 里
+        的 module_name/func_name 改成你真实文件里的名字。
+        """
+        mod = importlib.import_module(module_name)
+        fn = getattr(mod, func_name)
+        return fn
+
+    def _call_maybe_with_self(self, fn):
+        """
+        兼容两种实现：
+        - 外部函数签名：fn(self)   （推荐，便于拿到 GUI 状态）
+        - 外部函数签名：fn()       （也支持）
+        """
+        try:
+            return fn(self)
+        except TypeError:
+            return fn()
 
     # ====== 最小宽度 & 高度：动态计算并强制不小于 ======
     def _calc_min_height(self) -> int:
@@ -662,12 +684,74 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, tb.Window):
         if cur_w < min_w or cur_h < min_h:
             self.geometry(f"{max(cur_w, min_w)}x{max(cur_h, min_h)}")
 
-    # 兼容旧名字（如果你别处仍调用）
+    # 兼容旧名字（如果别处仍调用）
     def _update_min_width(self):
         self._update_min_constraints()
 
     def _enforce_min_width(self, event):
         self._enforce_min_constraints(event)
+
+    # ==================== 函数映射 ====================
+    # 在 gui2.py 里实现两个 action 映射（把真实函数绑进来）
+
+    def _make_capture_actions(self) -> dict:
+        """
+        note:
+        Capture 模式按钮 -> camera 文件夹里的功能函数
+        你需要把 module/function 名称改成你真实的实现。
+        """
+        return {
+            # 相机实时显示
+            "cam_live": lambda: self._call_maybe_with_self(
+                self._import_func("camera.camera_live", "start_live")
+            ),
+
+            # 相机暂停实时显示
+            "cam_pause": lambda: self._call_maybe_with_self(
+                self._import_func("camera.camera_live", "stop_live")
+            ),
+
+            # 拍摄单张图像
+            "cam_snap": lambda: self._call_maybe_with_self(
+                self._import_func("camera.camera_capture", "capture_single")
+            ),
+
+            # 录制视频
+            "cam_rec": lambda: self._call_maybe_with_self(
+                self._import_func("camera.camera_record", "start_record")
+            ),
+
+            # 结束录制视频
+            "cam_rec_stop": lambda: self._call_maybe_with_self(
+                self._import_func("camera.camera_record", "stop_record")
+            ),
+        }
+
+    def _make_process_actions(self) -> dict:
+        """
+        Process 模式按钮 -> process 文件夹里的功能函数
+        你需要把 module/function 名称改成你真实的实现。
+        """
+        return {
+            "play": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_player", "play")
+            ),
+            "pause": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_player", "pause")
+            ),
+            "to_start": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_player", "seek_to_start")
+            ),
+            "back_2s": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_player", "seek_back_2s")
+            ),
+            "forward_2s": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_player", "seek_forward_2s")
+            ),
+            "run_proc": lambda: self._call_maybe_with_self(
+                self._import_func("process.process_runner", "run_processing")
+            ),
+        }
 
 
 if __name__ == "__main__":

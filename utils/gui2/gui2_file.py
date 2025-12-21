@@ -37,16 +37,42 @@ class FileMixin:
             self.filepath_list = []
         if not hasattr(self, "output_filepath"):
             self.output_filepath = "auto"
+        if not hasattr(self, "current_file"):
+            self.current_file = ""
 
-        all_path_dict = ["camera_path_var",
-                        "input_path_var",
-                        "output_path_var",
-                        "current_path_var"]
-        for i_path in all_path_dict:
-            if not hasattr(self, i_path):
-                setattr(self, i_path, tk.StringVar(master=self, value=""))
+            # var_name -> entry_attr（如果 Entry 已经创建，则需要 rebind）
+            var_entry_map = {
+                "camera_path_var": ("entry_camera", ""),
+                "input_path_var": ("entry_input", ""),
+                "output_path_var": ("entry_output", ""),
+                "current_path_var": ("entry_current", ""),
+            }
 
-    # ------- File 区：Input / Output / Current 三个按钮 -------
+            for var_name, (entry_attr, default) in var_entry_map.items():
+                v = getattr(self, var_name, None)
+                if not isinstance(v, tk.StringVar):
+                    new_v = tk.StringVar(master=self, value=str(default))
+                    setattr(self, var_name, new_v)
+                    if hasattr(self, entry_attr):
+                        try:
+                            getattr(self, entry_attr).configure(textvariable=new_v)
+                        except Exception:
+                            pass
+
+            # UI 值与业务值对齐（尤其是 output auto）
+            try:
+                if isinstance(self.output_path_var, tk.StringVar):
+                    out = getattr(self, "output_filepath", "auto") or "auto"
+                    if self.output_path_var.get() == "":
+                        self.output_path_var.set(str(out))
+                if isinstance(self.current_path_var, tk.StringVar):
+                    cur = getattr(self, "current_file", "") or ""
+                    if self.current_path_var.get() == "" and cur:
+                        self.current_path_var.set(cur)
+            except Exception:
+                pass
+
+    # ------- File 区：Camrea / Input / Output / Current -------
     def _param_row(self, parent, r, label):
         parent.columnconfigure(1, weight=1)
         ttk.Label(parent, text=label).grid(row=r, column=0, sticky="w", pady=4, padx=(0, 6))
@@ -63,11 +89,10 @@ class FileMixin:
             row.pack(fill="x", pady=(0,4))
             row.columnconfigure(0, weight=1)
 
-            # 绑定 StringVar 的行（Input / Output），Current 文件单独一个 entry
             if text_var is not None:
-                entry = ttk.Entry(row, textvariable=text_var)
+                entry = ttk.Entry(row, textvariable=text_var, state="readonly")
             else:
-                entry = ttk.Entry(row)
+                entry = ttk.Entry(row, state="readonly")
             entry.grid(row=0, column=0, sticky="ew")
 
             ttk.Button(row, text="···", width=3, bootstyle="info",
@@ -78,14 +103,14 @@ class FileMixin:
         # 1) Camera Save Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
         add_path("Camera Save Path:", "entry_camera", self.camera_path_var, self._browse_camera_path)
 
-        # 1) Input Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
+        # 2) Input Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
         add_path("Process Input Path:", "entry_input", self.input_path_var, self._browse_input_path)
 
-        # 2) Output Path：沿用旧逻辑的“输出目录”（output_filepath + output_path_var + Preferences）
+        # 3) Output Path：沿用旧逻辑的“输出目录”（output_filepath + output_path_var + Preferences）
         add_path("Process Output Path:", "entry_output", self.output_path_var, self._browse_output_path)
 
-        # 3) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
-        add_path("Current Browse File:", "entry_current_file", self.current_path_var, self._browse_current_file)
+        # 4) 当前浏览的单个图像文件（暂时只记录，不参与 pipeline）
+        add_path("Current Browse File:", "entry_current", self.current_path_var, self._browse_current_path)
 
         # note: 增加按钮，设置 output path 为 auto
 
@@ -108,192 +133,99 @@ class FileMixin:
             self.file_params[name] = entry
 
     def _browse_camera_path(self, entry):
-        # note: 待修改
-        self.camera_path_var = file_chooser(self, 0)
+        self._ensure_file_exsistence()
+        sel = file_chooser(self, 0)
+        if not sel:
+            return
+
+        cam_dir = str(sel)
+        # 业务值（供相机保存用）
+        self.camera_save_dir = cam_dir
+
+        # UI 显示（Entry 绑定 StringVar）
+        self.camera_path_var.set(cam_dir)
+
+        # 把视图拉到末尾
         entry.xview_moveto(1)
 
-        if hasattr(self, "status_var") and self.camera_path_var:
-            path_name = os.path.basename(str(self.camera_path_var))
+        if hasattr(self, "status_var"):
+            path_name = os.path.basename(os.path.normpath(cam_dir))
             self.status_var.set(f"Camera save path set: {path_name}")
 
     def _browse_input_path(self, entry):
-        """
-        Input Path 的 “···”：
-        完全沿用旧版逻辑，调用 Java JFileChooser：
-            - file_chooser(self, 1)
-            - 回写 self.filepath_list / self.path_var / Preferences       # note: 注释我还没完全修改；以代码为准
-        """
-        # 调用旧逻辑
-        self.input_path_var = file_chooser(self, 1)
-        # Entry(?) 绑定了 self.path_var，会自动更新文本，这里只把视图拉到末尾
+        self._ensure_file_exsistence()
+        sel = file_chooser(self, 1)
+        if not sel:
+            return
+
+        if isinstance(sel, list):
+            paths = [str(p) for p in sel]
+        else:
+            paths = [str(sel)]
+
+        # 业务值（供 process pipeline 用）
+        self.filepath_list = paths
+
+        # UI 显示：建议用 ; 分隔（比 \"['a','b']\" 更可读，也不依赖 json/replace）
+        self.input_path_var.set("; ".join(paths))
+
         entry.xview_moveto(1)
 
         # 状态栏提示（可选）
-        if hasattr(self, "status_var") and self.filepath_list:
-            path_name = os.path.basename(str(self.input_path_var))
+        if hasattr(self, "status_var"):
+            path_name = os.path.basename(os.path.normpath(paths[0]))
             self.status_var.set(f"Process input path set: {path_name}")
 
     def _browse_output_path(self, entry):
-        """
-        Output Path 的 “···”：
-        调用 file_chooser(self, 2)，完全沿用旧版“设置输出目录”的逻辑：
-            - 返回值赋给 self.output_filepath
-            - 回写 self.output_path_var / Preferences
-        """
-        self.output_path_var = file_chooser(self, 2)
-        entry.xview_moveto(1)
-
-        if hasattr(self, "status_var") and self.output_path_var:
-            path_name = os.path.basename(str(self.output_path_var))
-            self.status_var.set(f"Process output path set: {path_name}")
-
-    def _browse_current_file(self, entry):
-
-        self.current_path_var = file_chooser(self, 3)
-        entry.xview_moveto(1)
-
-        if hasattr(self, "status_var") and self.current_path_var:
-            path_name = os.path.basename(str(self.current_path_var))
-            self.status_var.set(f"Browsing file: {path_name}")
-
-        if self.mode == 1:
-            # 如果 Original tab 已经存在，直接刷新一下视图
-            if hasattr(self, "_update_original_view"):
-                self._update_original_view()
-
-            # 选完文件后，右侧窗口自动跳到 Original tab
-            if hasattr(self, "tabs_view"):
-                tabs = self.tabs_view
-                for i in range(tabs.index("end")):
-                    if tabs.tab(i, "text") == "Original":
-                        tabs.select(i)
-                        break
-
-    # ---------- 菜单栏 File -> Open ----------
-
-    def _file_open(self):
-        """
-        菜单栏 File -> Open...
-        默认行为：选择一个文件，更新主输入路径和 filepath_list，
-        然后触发可选的 self.on_file_loaded(path) 钩子（由 App 实现具体显示逻辑）。
-        """
         self._ensure_file_exsistence()
-
-        p = filedialog.askopenfilename(
-            title="Open Image",
-            filetypes=[
-                ("Image / Video", "*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.bmp;*.avi;*.mp4"),
-                ("All files", "*.*"),
-            ],
-        )
-        if not p:
+        sel = file_chooser(self, 2)
+        if not sel:
             return
 
-        # 同步到旧版管线字段
-        self.filepath_list = [p]
-        self.path_var.set(str(self.filepath_list))
+        out_dir = str(sel)
+        # 业务值（供右侧 Processed/导出用）
+        self.output_filepath = out_dir
 
-        # 更新左侧主路径 Entry（若存在）
-        if hasattr(self, "entry_image"):
-            self.entry_image.delete(0, tk.END)
-            self.entry_image.insert(0, p)
-            self.entry_image.xview_moveto(1)
+        # UI 显示
+        self.output_path_var.set(out_dir)
 
-        # 状态栏提示
-        if hasattr(self, "status_var"):
-            basename = os.path.basename(p)
-            self.status_var.set(f"Loaded: {basename}")
-
-        # 交给 App 自己决定如何在右侧显示
-        if hasattr(self, "on_file_loaded"):
-            try:
-                self.on_file_loaded(p)
-            except Exception as e:
-                # 不让 GUI 因为预览失败直接崩
-                if hasattr(self, "status_var"):
-                    self.status_var.set(f"Load done, preview failed: {e}")
-
-    # ---------- 输出目录：旧版 output_auto / output_browse_file ----------
-
-    def _browse_output_dir(self):
-        """
-        如果你在新 GUI 中补了“Output Path”的 Entry，可以把按钮绑定到这个方法：
-            command=self._browse_output_dir
-        调用 file_chooser(mode=4) 并维护旧版的 Preferences。
-        """
-        self._ensure_file_exsistence()
-        self.output_filepath = file_chooser(self, 4)
-        # file_chooser 已写入 self.output_path_var
-        if hasattr(self, "status_var") and self.output_filepath not in (None, "auto"):
-            self.status_var.set(f"Output dir: {self.output_filepath}")
-
-    def _set_output_auto(self):
-        """
-        对应旧版 output_auto 行为。
-        如果你有一个“Auto”按钮，可以直接绑定到这个方法。
-        """
-        self._ensure_file_exsistence()
-        self.output_filepath = "auto"
-        self.output_path_var.set("auto")
-
-        # 写回 Java Preferences，保持与旧 GUI 一致的 key
-        prefs = Preferences.userRoot().node("/LMH/fijiCountingFaster/29/fileChooser")
-        prefs.put("outputPath", "auto")
+        entry.xview_moveto(1)
 
         if hasattr(self, "status_var"):
-            self.status_var.set("Output dir: auto")
+            path_name = os.path.basename(os.path.normpath(out_dir))
+            self.status_var.set(f"Process output path set: {path_name}")
 
-    # ---------- 从 Preferences 读回某节点的路径（旧 select_left 的路径部分） ----------
-
-    def load_paths_for_node(self, index: int):
-        """
-        复刻旧版 select_left() 中“根据节点 index，从 Preferences 恢复路径”的逻辑。
-        仅做路径 / 状态同步，不处理单选按钮 / 颜色等 UI。
-        """
+    def _browse_current_path(self, entry):
         self._ensure_file_exsistence()
-        self.program_start = index
+        sel = file_chooser(self, 3)
+        if not sel:
+            return
 
-        KEY_list = ["cameraPath", "preprocessPath", "trackMatePath", "featuresPath", "outputPath"]
-        prefs = Preferences.userRoot().node("/LMH/fijiCountingFaster/29/fileChooser")
+        cur = str(sel)
+        # 业务值（gui2_image._update_original_view 用的是 current_file）
+        self.current_file = cur
 
-        path_list_prefs = prefs.get(KEY_list[index], None)
-        if not path_list_prefs:
-            path_list_str = "[]"
-        else:
-            path_list_str = str(path_list_prefs)
+        # UI 显示
+        self.current_path_var.set(cur)
 
-        output_path_prefs = prefs.get(KEY_list[4], None)
-        if not output_path_prefs or output_path_prefs == "auto":
-            output_path_str = "auto"
-        else:
-            output_path_str = str(output_path_prefs)
+        entry.xview_moveto(1)
 
-        # 更新 StringVar（兼容 file_chooser 内部和旧习惯）
-        self.path_var.set(path_list_str)
-        self.output_path_var.set(output_path_str)
+        if hasattr(self, "status_var"):
+            path_name = os.path.basename(cur)
+            self.status_var.set(f"Browsing file: {path_name}")
 
-        # 把字符串转回列表
-        path_list_str_json = path_list_str.replace("'", '"')
         try:
-            path_list = json.loads(path_list_str_json)
+            if int(self.mode.get()) == 1:
+                # 如果 Original tab 已经存在，直接刷新一下视图
+                if hasattr(self, "_update_original_view"):
+                    self._update_original_view()
+
+                # 选完文件后，右侧窗口自动跳到 Original tab
+                if hasattr(self, "tabs_view"):
+                    tabs = self.tabs_view
+                    for i in range(tabs.index("end")):
+                        if tabs.tab(i, "text") == "Original":
+                            tabs.select(i)
+                            break
         except Exception:
-            path_list = []
-
-        self.filepath_list = path_list
-        self.output_filepath = output_path_str
-
-        # 若主 Entry 存在，则更新显示
-        if hasattr(self, "entry_image"):
-            self.entry_image.delete(0, tk.END)
-            self.entry_image.insert(0, "; ".join(map(str, path_list)))
-            self.entry_image.xview_moveto(1)
-
-        if hasattr(self, "status_var"):
-            if path_list:
-                node_name = None
-                if hasattr(self, "nodes") and 0 <= index < len(self.nodes):
-                    node_name = self.nodes[index]
-                suffix = f"【{node_name}】" if node_name else f"节点 {index}"
-                self.status_var.set(f"已加载 {suffix} 的路径设置")
-            else:
-                self.status_var.set("尚未为该节点配置路径")
+            pass

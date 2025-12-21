@@ -1,6 +1,7 @@
 from _para import *
 from pathlib import Path
 import os
+import json
 # import shutil
 
 # ====== remove system java ======
@@ -100,11 +101,16 @@ def file_chooser(self, path_mode):
     # "trackMatePath"
     # "featuresPath"
 
-    target_path_dict = [self.camera_path_var,
-                        self.input_path_var,
-                        self.output_path_var,
-                        self.current_path_var]
-    target_var = target_path_dict(path_mode)
+    target_map = {
+        0: ("cameraPath", self.camera_path_var),
+        1: ("inputPath", self.input_path_var),
+        2: ("outputPath", self.output_path_var),
+        3: ("browsePath", self.current_path_var),
+    }
+    try:
+        target_key, target_var = target_map[path_mode]
+    except KeyError:
+        raise ValueError(f"Invalid path_mode={path_mode}, expected one of {sorted(target_map)}")
 
     # file-select settings
     if path_mode == 3:
@@ -124,25 +130,33 @@ def file_chooser(self, path_mode):
 
     result = chooser.showOpenDialog(parent_frame)
     if result == JFileChooser.APPROVE_OPTION:
-        filepath_list = []
         current_dir = chooser.getCurrentDirectory().getAbsolutePath()
         prefs.put(key_list[path_mode] + "_last", str(current_dir))
-        if not multi_select_flag:
-            selected_file = chooser.getSelectedFile()
-            if path_mode == 0:
-                filepath_list.append(str(selected_file))
-            elif path_mode ==4:
-                filepath_list = selected_file
-        else:
-            selected_files = chooser.getSelectedFiles()
-            for selected_file in selected_files:
-                filepath_list.append(str(selected_file))
 
-        if target_var is not None:
-            target_var.set(str(filepath_list))
+        if multi_select_flag:
+            selected_files = chooser.getSelectedFiles()
+            paths = [str(f.getAbsolutePath()) for f in selected_files]
+            filepath_list = paths
+            display = "; ".join(paths)
+            prefs.put(target_key, json.dumps(paths))
+        else:
+            f = chooser.getSelectedFile()
+            path = str(f.getAbsolutePath()) if f else ""
+            filepath_list = path
+            display = path
+            prefs.put(target_key, path)
+
+        if target_var is not None and hasattr(target_var, "set"):
+            target_var.set(display)
 
         # 保存到 prefs，供下次恢复
         prefs.put(key_list[path_mode], str(filepath_list))
+
+    # 返回前确认 filepath_list 类型
+    if isinstance(filepath_list, list):
+        assert all(isinstance(x, str) for x in filepath_list)
+    else:
+        assert isinstance(filepath_list, str)
 
     return filepath_list
 
