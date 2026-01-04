@@ -1,5 +1,5 @@
 import tkinter as tk
-from utils.camera.ast_vimbaX import vimbaX_threading
+from utils.camera.camera_vimbaX import vimbaX_threading
 
 def create_center_frame(self):
     """

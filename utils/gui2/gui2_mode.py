@@ -40,7 +40,7 @@ class ModeMixin:
         mode_row = ttk.Frame(proc)
         mode_row.pack(fill="x", pady=(2, 10))
 
-        ttk.Label(mode_row, text="Mode:").pack(side="left")
+        # ttk.Label(mode_row, text="Mode:").pack(side="left")
 
         ttk.Radiobutton(
             mode_row, text="Capture", value=0, variable=self.mode,

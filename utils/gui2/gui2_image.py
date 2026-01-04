@@ -4,7 +4,7 @@ import json
 import tkinter as tk
 from ttkbootstrap import ttk
 import threading
-from utils.camera.ast_vimbaX import vimbaX_threading
+from utils.camera.camera_vimbaX import vimbaX_threading
 
 class ImageMixin:
     """

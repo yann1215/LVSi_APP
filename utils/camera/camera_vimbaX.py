@@ -7,7 +7,9 @@ import win32gui, win32con
 # Vinma X download website: https://www.alliedvision.com/en/products/software/vimba-x-sdk/#c13326
 VIMBAX_FLAG = False
 # VIMBAX_PATH = "C:\\Program Files\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"
-VIMBAX_PATH = "D:\\Vimba X\\api\\bin\\VmbC.dll"     # D盘安装补丁（路径选择待后续优化）
+# VIMBAX_PATH = "D:\\Vimba X\\api\\bin\\VmbC.dll"     # D盘安装补丁（路径选择待后续优化）
+VIMBAX_PATH = "D:\\Allied Vision\\Vimba X\\api\\bin\\VmbC.dll"
+
 if os.path.exists(VIMBAX_PATH):
     from vmbpy import *
     VIMBAX_FLAG = True
