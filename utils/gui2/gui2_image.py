@@ -4,7 +4,9 @@ import json
 import tkinter as tk
 from ttkbootstrap import ttk
 import threading
-from utils.camera.camera_vimbaX import vimbaX_threading
+
+from utils.camera.camera_status import start_camera
+
 
 class ImageMixin:
     """
@@ -70,7 +72,7 @@ class ImageMixin:
             return
 
         if name == "Camera":
-            self._start_camera()
+            self._ensure_camera_running()
         elif name == "Preview":
             self._update_preview_view()
         elif name == "Original":
@@ -191,39 +193,181 @@ class ImageMixin:
         # 重画边框
         self._ensure_square(canvas)
 
-    # ================== 启用相机 ==================
-    def _start_camera(self):
+    # ================== 启用相机（新：后端 + GUI 窗口嵌入分离） ==================
+    def _ensure_camera_running(self):
         """
-        在 Camera tab 被选中时调用     # note: 把启动条件修改了，改在gui.py进行app_init的时候启动？
-        启动一次 vimbaX_threading。
+        在 Camera tab 被选中时调用：
+        1) 通过 camera_status.start_camera 启动后端（只启动一次）
+        2) 启动 GUI 侧 window manager（只启动一次），将 OpenCV 窗口嵌入 camera_container
         """
-
-        # 确保有 camera_container（在 _build_view_area 里创建的那个 Frame）
         container = getattr(self, "camera_container", None)
         if container is None:
-            print("[Camera ERROR] Camera container not found.")
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Camera ERROR] camera_container not found.")
             return
 
-        # 刷新画面尺寸信息
-        container.update_idletasks()
-        self.video_frame_width = container.winfo_width()
-        self.video_frame_height = container.winfo_height()
+        # 1) 启动/确保后端（由 camera_status 统一管理 container_hwnd / width / height / resize bind）
+        start_camera(self, container, start_backend=True, allow_restart=True, update_status=True)
 
-        # 如果相机已经启动，就不重复启动.
-        if getattr(self, "_camera_running", False):
+        # 2) 启动 GUI window manager（只启动一次）
+        self._start_camera_window()
+
+    def _start_camera_window(self):
+        """
+        启动一次 window manager 线程（OpenCV 窗口嵌入 Tk 容器 + resize + 居中显示）。
+        """
+        if getattr(self, "_camera_window_running", False):
             return
-        else:
-            self.status_var.set("Starting camera…")
 
-            # 关键：告诉 vimbaX 把画面画到这个窗口上
-            self.container_hwnd = int(container.winfo_id())
+        self._camera_window_running = True
+        t = threading.Thread(
+            target=self._window_manager_loop,
+            args=("vimba X",),  # window title，可自行改
+            daemon=True,
+            name="vimbaX-window-manager",
+        )
+        self._camera_window_thread = t
+        t.start()
 
-            # 调用 vimbaX_threading(self) 启动线程
-            t = threading.Thread(target=vimbaX_threading, args=(self,), daemon=True)
-            t.start()
+    def _window_manager_loop(self, window_name: str = "vimba X"):
+        """
+        GUI侧的 window manager：
+        - 创建 OpenCV window
+        - SetParent 到 self.container_hwnd（Tk Frame 的 HWND）
+        - 循环 MoveWindow 适配容器尺寸变化
+        - 将 self.img 缩放并居中（letterbox，不拉伸变形）
+        """
+        import os
+        import time
+        import cv2
+        import numpy as np
 
-            self._camera_running = True
-            self.status_var.set("Camera running.")
+        # 仅 Windows 支持 SetParent/MoveWindow
+        if os.name != "nt":
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Camera WARN] window embedding only supported on Windows.")
+            return
+
+        try:
+            import win32gui
+            import win32con
+        except Exception as e:
+            if hasattr(self, "status_var"):
+                self.status_var.set(f"[Camera ERROR] pywin32 not available: {e}")
+            return
+
+        # 取容器 hwnd（camera_status.start_camera 已设置；这里做兜底）
+        container = getattr(self, "camera_container", None)
+        if container is None:
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Camera ERROR] camera_container not found.")
+            return
+
+        try:
+            if not getattr(self, "container_hwnd", 0):
+                self.container_hwnd = int(container.winfo_id())
+        except Exception:
+            pass
+
+        if not getattr(self, "container_hwnd", 0):
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Camera ERROR] container_hwnd not ready (winfo_id==0).")
+            return
+
+        # 创建 OpenCV 窗口并确保 HWND 可被 FindWindow 找到
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+
+        # 先显示一帧 dummy，避免 FindWindow 找不到
+        dummy = np.zeros((2, 2), dtype=np.uint8)
+        cv2.imshow(window_name, dummy)
+        cv2.waitKey(1)
+
+        hwnd = 0
+        for _ in range(50):  # 最多约 2.5s
+            hwnd = win32gui.FindWindow(None, window_name)
+            if hwnd:
+                break
+            time.sleep(0.05)
+
+        if not hwnd:
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Camera ERROR] FindWindow failed for OpenCV window.")
+            return
+
+        self._camera_cv_hwnd = hwnd
+
+        # 嵌入到 Tk 容器
+        try:
+            win32gui.SetParent(hwnd, int(self.container_hwnd))
+            style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+            style &= ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME |
+                       win32con.WS_MINIMIZEBOX | win32con.WS_MAXIMIZEBOX |
+                       win32con.WS_BORDER | win32con.WS_SIZEBOX)
+            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style)
+        except Exception as e:
+            if hasattr(self, "status_var"):
+                self.status_var.set(f"[Camera ERROR] SetParent/style failed: {e}")
+            return
+
+        last_w, last_h = -1, -1
+
+        # 主循环
+        while True:
+            # 退出条件：App 关闭时 EndEvent 会 set
+            if getattr(self, "EndEvent", None) is not None and self.EndEvent.is_set():
+                break
+
+            w = int(getattr(self, "video_frame_width", 1) or 1)
+            h = int(getattr(self, "video_frame_height", 1) or 1)
+            w = max(2, w)
+            h = max(2, h)
+
+            # 容器尺寸变化 -> 调整 OpenCV 子窗口
+            if w != last_w or h != last_h:
+                try:
+                    win32gui.MoveWindow(hwnd, 0, 0, w, h, True)
+                    last_w, last_h = w, h
+                except Exception:
+                    pass
+
+            img = getattr(self, "img", None)
+            if img is None:
+                frame = dummy
+            else:
+                frame = img
+
+            # letterbox 居中显示（保持纵横比）
+            try:
+                if frame.ndim == 2:
+                    ih, iw = frame.shape[:2]
+                    canvas = np.zeros((h, w), dtype=frame.dtype)
+                else:
+                    ih, iw = frame.shape[:2]
+                    canvas = np.zeros((h, w, frame.shape[2]), dtype=frame.dtype)
+
+                scale = min(w / max(1, iw), h / max(1, ih))
+                nw = max(1, int(iw * scale))
+                nh = max(1, int(ih * scale))
+
+                resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_AREA)
+                x0 = (w - nw) // 2
+                y0 = (h - nh) // 2
+                canvas[y0:y0 + nh, x0:x0 + nw] = resized
+            except Exception:
+                canvas = frame
+
+            cv2.imshow(window_name, canvas)
+            cv2.waitKey(1)
+
+            time.sleep(0.01)
+
+        # 清理
+        try:
+            cv2.destroyWindow(window_name)
+        except Exception:
+            pass
+
+        self._camera_window_running = False
 
     # ============ 显示 Camera/Original/Processed/Tracked ============
 
