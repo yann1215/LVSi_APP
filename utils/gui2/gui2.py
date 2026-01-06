@@ -129,14 +129,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         # ---- 让 camera/ process 目录可 import（与 gui2 文件夹同级）----
         self._ensure_project_root_on_syspath()
 
-        # 供相机模块使用的占位图 / 当前帧缓冲
-        self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
-        if self.NonePng is None:
-            print("[Camera ERROR] empty.png not found.")
-            import numpy as np
-            self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
-        self.img = self.NonePng
-
         # ---- 准备按钮 actions（ButtonMixin 会调用）----
         self._capture_actions = self._make_capture_actions()
         self._process_actions = self._make_process_actions()
@@ -169,17 +161,34 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.output_root = None
         self.task_mode = None
 
-        # ==== note: 旧版代码，修改中 ====
+        # note: 旧版代码，修改中
         # 流程节点 0:图像获取 1:噪声过滤 2:检测追踪 3:特征提取
         self.nodes = ["图像获取", "噪声过滤", "检测追踪", "特征提取"]   # 节点范围（0:图像获取 → 3:特征提取）
         self.program_start = 0
         self.program_end = 3
+
+        # 供相机模块使用的占位图 / 当前帧缓冲
+        self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
+        if self.NonePng is None:
+            print("[Camera ERROR] empty.png not found.")
+            import numpy as np
+            self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
+        self.img = self.NonePng
+        self._img_lock = threading.Lock()
+
+        self.live_flag = False
+        self.img_froze = None
 
         # Mode 选择
         # 0: Capture(默认)  1: Process
         self.mode = tk.IntVar(value=0)
         # Capture 是否启动预览
         self.preview_flag = tk.BooleanVar(value=False)  # 默认关
+
+        # Preview background (in-memory)
+        self.preview_background = None  # numpy.ndarray or None
+        # self.preview_background_meta = None  # dict: dtype/shape/pixfmt/time etc.
+        self.img_preview = None
 
         # 运行状态（防止重复启动）
         self.searching = False

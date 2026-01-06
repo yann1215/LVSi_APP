@@ -61,6 +61,10 @@ class ModeMixin:
             cap_box, text="Preview", variable=self.preview_flag,
             bootstyle="round-toggle",
         ).pack(anchor="w", pady=6)
+        ttk.Button(
+            cap_box, text="Update Preview Background",
+            command=self._update_preview_background
+        ).pack(anchor="w", pady=(6, 0))
 
         # ---- Process ChildBox ----
         pro_box = ttk.Labelframe(proc, text="Process", padding=10, style="ChildBox.TLabelframe")
@@ -80,6 +84,31 @@ class ModeMixin:
 
         # 初始化一次状态（禁用另一侧 + program_range）
         self._on_mode_changed()
+
+    def _update_preview_background(self):
+        """
+        将当前相机帧保存为 preview background（内存 numpy.ndarray）。
+        后续 Preview tab 可以用 frame - background 实时显示。
+        """
+        import time
+        import numpy as np
+
+        # 取当前帧（尽量线程安全）
+        if hasattr(self, "_img_lock") and self._img_lock is not None:
+            with self._img_lock:
+                frame = getattr(self, "img", None)
+                frame = None if frame is None else frame.copy()
+        else:
+            frame = getattr(self, "img", None)
+            frame = None if frame is None else frame.copy()
+
+        if frame is None:
+            if hasattr(self, "status_var"):
+                self.status_var.set("[Preview] No camera frame available; cannot update background.")
+            return
+
+        if hasattr(self, "status_var"):
+            self.status_var.set(f"[Preview] Background updated: {frame.shape}, {frame.dtype}")
 
     # ----------------- 互斥模式控制 -----------------
     def _set_children_state(self, parent, enabled: bool):

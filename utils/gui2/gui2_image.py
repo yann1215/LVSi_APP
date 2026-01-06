@@ -4,6 +4,8 @@ import json
 import tkinter as tk
 from ttkbootstrap import ttk
 import threading
+import numpy as np
+from PIL import Image, ImageTk
 
 from utils.camera.camera_status import start_camera
 
@@ -74,7 +76,9 @@ class ImageMixin:
         if name == "Camera":
             self._ensure_camera_running()
         elif name == "Preview":
-            self._update_preview_view()
+            # 如果在 live,就刷新画面，否则不刷新
+            if self.preview_flag and self.live_flag:
+                self._update_preview_view()
         elif name == "Original":
             self._update_original_view()
         elif name == "Processed":
@@ -156,7 +160,6 @@ class ImageMixin:
         """
         把 img_path 显示到指定 canvas 上，并把 PhotoImage 挂在 self 上防止被 GC。
         """
-        from PIL import Image, ImageTk  # gui2 顶部已经 import 过，这里再 import 一次也没关系
 
         if not img_path or not os.path.isfile(img_path):
             # 清空内容但保留边框
@@ -369,7 +372,7 @@ class ImageMixin:
 
         self._camera_window_running = False
 
-    # ============ 显示 Camera/Original/Processed/Tracked ============
+    # ============ 显示 Original/Processed/Preview ============
 
     def _get_output_root(self):
         """把 self.output_filepath 转成可用的本地路径（排除 'auto'）。"""
@@ -433,6 +436,7 @@ class ImageMixin:
 
         self._show_image_on_canvas(self.canvas_processed, img_path, "_processed_photo")
 
+
     def _update_preview_view(self):
         """
         Preview：这里先按最稳妥逻辑，复用 current_file 的显示（与 Original 一致）。
@@ -441,14 +445,80 @@ class ImageMixin:
         if canvas is None:
             return
 
-        path = getattr(self, "current_file", "")
-        img_path = self._find_first_image(path) if path else None
+        lock = getattr(self, "_img_lock", None)
+        if lock is not None:
+            with self._img_lock:
+                temp = self.img_preview
+                self._show_ndarray_on_canvas(canvas, temp)
+        else:
+            temp = self.img_preview
+            self._show_ndarray_on_canvas(canvas, temp)
 
-        if not img_path:
-            canvas.delete("content")
-            setattr(self, "_preview_photo", None)
-            if hasattr(self, "status_var") and path:
-                self.status_var.set("No image found for Preview.")
-            return
 
-        self._show_image_on_canvas(canvas, img_path, "_preview_photo")
+def _to_uint8_for_display(self, arr):
+    """
+    把任意数值类型的图像转成 uint8 便于显示（不改变原始数据用于计算）。
+    """
+
+    if arr is None:
+        return None
+
+    a = np.asarray(arr)
+
+    # 如果是彩色且是 BGR（OpenCV 常见），这里不强制判断来源；
+    # 我们在后面转 PIL 时再做 BGR->RGB（仅对 3 通道）。
+    if a.dtype == np.uint8:
+        return a
+
+    a = a.astype(np.float32)
+    mn = float(np.nanmin(a))
+    mx = float(np.nanmax(a))
+    if mx <= mn:
+        return np.zeros(a.shape, dtype=np.uint8)
+
+    a = (a - mn) * (255.0 / (mx - mn))
+    return np.clip(a, 0, 255).astype(np.uint8)
+
+
+def _show_ndarray_on_canvas(self, canvas, arr):
+    """
+    把 ndarray 显示到 Tk canvas（等比缩放 + 居中），并保存 PhotoImage 引用防止被 GC。
+    """
+
+    if arr is None:
+        canvas.delete("content")
+        return
+
+    # 确保 canvas 有真实尺寸
+    canvas.update_idletasks()
+    cw = max(2, int(canvas.winfo_width()))
+    ch = max(2, int(canvas.winfo_height()))
+
+    a = self._to_uint8_for_display(arr)
+    if a is None:
+        canvas.delete("content")
+        return
+
+    # ndarray -> PIL Image
+    if a.ndim == 2:
+        pil = Image.fromarray(a, mode="L")
+    elif a.ndim == 3 and a.shape[2] == 3:
+        # OpenCV 通常是 BGR；这里按 BGR->RGB 转一下更符合直觉
+        rgb = a[:, :, ::-1]
+        pil = Image.fromarray(rgb, mode="RGB")
+    elif a.ndim == 3 and a.shape[2] == 4:
+        pil = Image.fromarray(a, mode="RGBA")
+    else:
+        # 兜底：强行压成灰度
+        pil = Image.fromarray(a.reshape(a.shape[0], a.shape[1]), mode="L")
+
+    iw, ih = pil.size
+    scale = min(cw / max(1, iw), ch / max(1, ih))
+    nw = max(1, int(iw * scale))
+    nh = max(1, int(ih * scale))
+    pil = pil.resize((nw, nh), Image.Resampling.LANCZOS)
+
+    photo = ImageTk.PhotoImage(pil)
+
+    canvas.delete("content")
+    canvas.create_image(cw // 2, ch // 2, image=photo, anchor="center", tags="content")

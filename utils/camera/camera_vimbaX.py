@@ -42,6 +42,7 @@ def work_thread(self, vmb):
 
 def vimbaX_photo_handler(self):
     def frame_handler(cam: Camera, stream: Stream, frame: Frame):
+        # 图像转换为单通道 8-bit 灰度
         frame.convert_pixel_format(PixelFormat.Mono8)
         self.img = frame.as_opencv_image()
         if self.save_frame:
@@ -53,6 +54,11 @@ def vimbaX_photo_handler(self):
 
 def vimbaX_finder_handler(self, vmb):
     def print_device_id(dev , state):
+        """
+        当相机插拔、接口状态变化时，print_device_id(dev, state) 会被 SDK 调用
+        state == 1 or 2：认为设备可用;
+        state == 0/3/4：认为设备不可用.
+        """
         print(state)
         if state == 1 or state == 2:
             self.camera = True
