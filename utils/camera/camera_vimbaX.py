@@ -1,6 +1,7 @@
 import os, time
 import threading
-import cv2
+
+from utils.camera.camera_capture import handle_new_frame   # 注意你的实际模块路径
 
 
 # Vinma X download website: https://www.alliedvision.com/en/products/software/vimba-x-sdk/#c13326
@@ -41,14 +42,15 @@ def work_thread(self, vmb):
 
 
 def vimbaX_photo_handler(self):
-    def frame_handler(cam: Camera, stream: Stream, frame: Frame):
-        # 图像转换为单通道 8-bit 灰度
+    # 创建一个 frame 回调函数，同时传递 self
+    def frame_handler(cam, stream, frame):
         frame.convert_pixel_format(PixelFormat.Mono8)
-        self.img = frame.as_opencv_image()
-        if self.save_frame:
-            cv2.imwrite(self.save_path + "\\" + "1_" + str(self.save_step) +'.tiff', self.img)
-        self.save_step += 1
+        img = frame.as_opencv_image()  # ndarray
+
+        handle_new_frame(self, img)  # 这里会用 _img_lock 写入 self.img（不 per-frame copy）
+
         cam.queue_frame(frame)
+
     return frame_handler
 
 
