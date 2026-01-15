@@ -61,7 +61,7 @@ class ButtonMixin:
     def _build_capture_buttons(self):
         specs = [
             ("cam_live",   "Live"),
-            ("cam_live_stop",  "Stop Live"),
+            ("cam_stop_live",  "Stop Live"),
             ("cam_snap",   "Snapshot"),
             ("cam_rec",    "Record"),
             ("cam_rec_stop", "Stop Record"),

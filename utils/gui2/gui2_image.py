@@ -1,6 +1,5 @@
 # gui2_image.py
-import os
-import json
+import os, json, time
 import tkinter as tk
 from ttkbootstrap import ttk
 import threading
@@ -31,8 +30,6 @@ class ImageMixin:
         self.tabs_view = tabs
         tabs.bind("<<NotebookTabChanged>>", self._on_view_tab_changed)
 
-        # note: 因为之前处理的代码未导出 process 和 tracked 图像，仅导出 .CSV
-        #       所以此处先注释掉相关代码，仅作为占位。后续可以再启用。
         self._view_frames = {}
         for name in ["Camera", "Preview", "Original", "Processed"]:
             frame = ttk.Frame(tabs, padding=6)
@@ -40,18 +37,24 @@ class ImageMixin:
             frame.rowconfigure(0, weight=1)
             self._view_frames[name] = frame
 
-            if name == "Camera":
-                # 相机专用容器，用来拿 HWND 给 vimbaX
-                cam_frame = tk.Frame(frame, bg="black")
-                cam_frame.grid(row=0, column=0, sticky="nsew")
+            # 创建四个 tab 的 canvas
+            canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
+            canvas.grid(row=0, column=0, sticky="nsew")
+            canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
+            setattr(self, f"canvas_{name.lower()}", canvas)
 
-                # 保存起来，ImageMixin 里会用到
-                self.camera_container = cam_frame
-            else:
-                canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
-                canvas.grid(row=0, column=0, sticky="nsew")
-                canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
-                setattr(self, f"canvas_{name.lower()}", canvas)
+            # if name == "Camera":
+            #     # 相机专用容器，用来拿 HWND 给 vimbaX
+            #     cam_frame = tk.Frame(frame, bg="black")
+            #     cam_frame.grid(row=0, column=0, sticky="nsew")
+            #
+            #     # 保存起来，ImageMixin 里会用到
+            #     self.camera_container = cam_frame
+            # else:
+            #     canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
+            #     canvas.grid(row=0, column=0, sticky="nsew")
+            #     canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
+            #     setattr(self, f"canvas_{name.lower()}", canvas)
 
         # 根据当前 mode 只显示两个 tab
         try:
@@ -75,10 +78,10 @@ class ImageMixin:
 
         if name == "Camera":
             self._ensure_camera_running()
+            self._draw_live_view_once()
         elif name == "Preview":
-            # 如果在 live,就刷新画面，否则不刷新
-            if self.preview_flag and self.live_flag:
-                self._update_preview_view()
+            self._ensure_camera_running()
+            self._draw_live_view_once()
         elif name == "Original":
             self._update_original_view()
         elif name == "Processed":
@@ -201,181 +204,170 @@ class ImageMixin:
         """
         在 Camera tab 被选中时调用：
         1) 通过 camera_status.start_camera 启动后端（只启动一次）
-        2) 启动 GUI 侧 window manager（只启动一次），将 OpenCV 窗口嵌入 camera_container
+        2) 启动 GUI 侧 window manager（只启动一次）
         """
-        container = getattr(self, "camera_container", None)
+
+        # 1) 用 Canvas 作为“容器”（Camera/Preview 同理）
+        container = getattr(self, "canvas_camera", None)
         if container is None:
             if hasattr(self, "status_var"):
-                self.status_var.set("[Camera ERROR] camera_container not found.")
+                self.status_var.set("[Camera ERROR] camera_canvas not found.")
             return
 
-        # 1) 启动/确保后端（由 camera_status 统一管理 container_hwnd / width / height / resize bind）
+        # 2) 启动/确保后端（由 camera_status 统一管理 container_hwnd / width / height / resize bind）
         start_camera(self, container, start_backend=True, allow_restart=True, update_status=True)
 
-        # 2) 启动 GUI window manager（只启动一次）
-        self._start_camera_window()
+        # 3) Pillow 刷新循环：一定要启动（否则只会 single_shot 刷一次）
+        self._start_live_view_loop()
 
-    def _start_camera_window(self):
+    def _window_manager_loop(self, *args, **kwargs):
         """
-        启动一次 window manager 线程（OpenCV 窗口嵌入 Tk 容器 + resize + 居中显示）。
+        兼容旧接口（camera_vimbaX.vimbaX_threading 可能会调用）：
+        Pillow/Canvas 模式下不需要任何 window embedding。
+        这里仅确保 UI 刷新 loop 已启动，并返回。
+        注意：可能被后台线程调用，所以只做 thread-safe 的 after 调度。
         """
-        if getattr(self, "_camera_window_running", False):
-            return
-
-        self._camera_window_running = True
-        t = threading.Thread(
-            target=self._window_manager_loop,
-            args=("vimba X",),  # window title，可自行改
-            daemon=True,
-            name="vimbaX-window-manager",
-        )
-        self._camera_window_thread = t
-        t.start()
-
-    def _window_manager_loop(self, window_name: str = "vimba X"):
-        """
-        GUI侧的 window manager：
-        - 创建 OpenCV window
-        - SetParent 到 self.container_hwnd（Tk Frame 的 HWND）
-        - 循环 MoveWindow 适配容器尺寸变化
-        - 将 self.img 缩放并居中（letterbox，不拉伸变形）
-        """
-        import os
-        import time
-        import cv2
-        import numpy as np
-
-        # 仅 Windows 支持 SetParent/MoveWindow
-        if os.name != "nt":
-            if hasattr(self, "status_var"):
-                self.status_var.set("[Camera WARN] window embedding only supported on Windows.")
-            return
-
         try:
-            import win32gui
-            import win32con
-        except Exception as e:
-            if hasattr(self, "status_var"):
-                self.status_var.set(f"[Camera ERROR] pywin32 not available: {e}")
-            return
+            self.after(0, self._start_live_view_loop)
+            self.after(0, self._draw_live_view_once)
+        except Exception:
+            pass
+        return
 
-        # 取容器 hwnd（camera_status.start_camera 已设置；这里做兜底）
-        container = getattr(self, "camera_container", None)
-        if container is None:
-            if hasattr(self, "status_var"):
-                self.status_var.set("[Camera ERROR] camera_container not found.")
-            return
+    # ============ 显示各窗口 ============
 
+    def _start_live_view_loop(self):
+        """
+        启动一次 after loop：只刷新当前可见的 Camera/Preview canvas。
+        """
+        if getattr(self, "_live_view_loop_running", False):
+            return
+        self._live_view_loop_running = True
+        self.after(0, self._live_view_tick)
+
+    def _draw_live_view_once(self):
+        """
+        切 tab 时主动刷新一次（不依赖定时器节拍）。
+        """
         try:
-            if not getattr(self, "container_hwnd", 0):
-                self.container_hwnd = int(container.winfo_id())
+            self._live_view_tick(single_shot=True)
         except Exception:
             pass
 
-        if not getattr(self, "container_hwnd", 0):
-            if hasattr(self, "status_var"):
-                self.status_var.set("[Camera ERROR] container_hwnd not ready (winfo_id==0).")
-            return
-
-        # 创建 OpenCV 窗口并确保 HWND 可被 FindWindow 找到
-        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-
-        # 先显示一帧 dummy，避免 FindWindow 找不到
-        dummy = np.zeros((2, 2), dtype=np.uint8)
-        cv2.imshow(window_name, dummy)
-        cv2.waitKey(1)
-
-        hwnd = 0
-        for _ in range(50):  # 最多约 2.5s
-            hwnd = win32gui.FindWindow(None, window_name)
-            if hwnd:
-                break
-            time.sleep(0.05)
-
-        if not hwnd:
-            if hasattr(self, "status_var"):
-                self.status_var.set("[Camera ERROR] FindWindow failed for OpenCV window.")
-            return
-
-        self._camera_cv_hwnd = hwnd
-
-        # 嵌入到 Tk 容器
-        try:
-            win32gui.SetParent(hwnd, int(self.container_hwnd))
-            style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-            style &= ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME |
-                       win32con.WS_MINIMIZEBOX | win32con.WS_MAXIMIZEBOX |
-                       win32con.WS_BORDER | win32con.WS_SIZEBOX)
-            win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style)
-        except Exception as e:
-            if hasattr(self, "status_var"):
-                self.status_var.set(f"[Camera ERROR] SetParent/style failed: {e}")
-            return
-
-        last_w, last_h = -1, -1
-
-        # 主循环
-        while True:
-            # 退出条件：App 关闭时 EndEvent 会 set
-            if getattr(self, "EndEvent", None) is not None and self.EndEvent.is_set():
-                break
-
-            w = int(getattr(self, "video_frame_width", 1) or 1)
-            h = int(getattr(self, "video_frame_height", 1) or 1)
-            w = max(2, w)
-            h = max(2, h)
-
-            # 容器尺寸变化 -> 调整 OpenCV 子窗口
-            if w != last_w or h != last_h:
-                try:
-                    win32gui.MoveWindow(hwnd, 0, 0, w, h, True)
-                    last_w, last_h = w, h
-                except Exception:
-                    pass
-
-            img = getattr(self, "img", None)
-            if img is None:
-                frame = dummy
-            else:
-                frame = img
-
-            # letterbox 居中显示（保持纵横比）
+    def _snapshot_frame(self, attr: str):
+        """
+        锁内取图，返回 copy；无图则 None。
+        """
+        lock = getattr(self, "_img_lock", None)
+        if lock is not None:
             try:
-                if frame.ndim == 2:
-                    ih, iw = frame.shape[:2]
-                    canvas = np.zeros((h, w), dtype=frame.dtype)
-                else:
-                    ih, iw = frame.shape[:2]
-                    canvas = np.zeros((h, w, frame.shape[2]), dtype=frame.dtype)
-
-                scale = min(w / max(1, iw), h / max(1, ih))
-                nw = max(1, int(iw * scale))
-                nh = max(1, int(ih * scale))
-
-                resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_AREA)
-                x0 = (w - nw) // 2
-                y0 = (h - nh) // 2
-                canvas[y0:y0 + nh, x0:x0 + nw] = resized
+                with lock:
+                    v = getattr(self, attr, None)
+                    return None if v is None else v.copy()
             except Exception:
-                canvas = frame
+                v = getattr(self, attr, None)
+                return None if v is None else v.copy()
+        v = getattr(self, attr, None)
+        return None if v is None else v.copy()
 
-            cv2.imshow(window_name, canvas)
-            cv2.waitKey(1)
-
-            time.sleep(0.01)
-
-        # 清理
+    def _get_empty_frame(self):
+        """
+        无信号时显示的占位图（优先使用 gui2.py 里加载的 empty.png）。
+        """
+        empty = getattr(self, "NonePng", None)
+        if empty is None:
+            return None
         try:
-            cv2.destroyWindow(window_name)
+            return empty.copy()
         except Exception:
-            pass
+            return empty
 
-        self._camera_window_running = False
+    def _live_view_tick(self, single_shot: bool = False):
+        """
+        after loop：只刷新当前可见 tab 的 canvas。
+        single_shot 让 _live_view_tick() “只执行一轮绘制，不再自己 after() 安排下一次”。
+        目前只有 Camera 和 Preview 相关的显示代码。
+        """
 
-    # ============ 显示 Original/Processed/Preview ============
+        # 退出条件：程序结束就停止 loop
+        if getattr(self, "EndEvent", None) is not None and self.EndEvent.is_set():
+            self._live_view_loop_running = False
+            return
+
+        # 保护性检查：tabs 不存在或还没建好就延迟再试
+        tabs = getattr(self, "tabs_view", None)
+        if tabs is None or tabs.index("end") == 0:
+            if not single_shot:
+                self.after(200, self._live_view_tick)
+            return
+
+        # 获取当前 tab 名称
+        try:
+            name = tabs.tab("current", "text")
+        except Exception:
+            name = ""
+
+        # 非实时视图：不刷新
+        # 降低 CPU、降低锁竞争、避免后台浪费
+        if name not in ("Camera", "Preview"):
+            if not single_shot:
+                self.after(200, self._live_view_tick)
+            return
+
+        # 选择要刷新的 Canvas（Camera / Preview 各自一个）
+        canvas = getattr(self, "canvas_camera" if name == "Camera" else "canvas_preview", None)
+        if canvas is None:
+            if not single_shot:
+                self.after(200, self._live_view_tick)
+            return
+
+        # live_flag=False 时，Camera 优先显示冻结帧（不影响相机后端采集）
+        live_flag = bool(getattr(self, "live_flag", True))
+        if live_flag:
+            if name == "Camera":
+                frame = self._snapshot_frame("img")
+                frame_to_show = frame
+
+            elif name == "Preview":
+                try:
+                    p_flag = bool(getattr(self, "preview_flag").get())  # BooleanVar
+                except Exception:
+                    p_flag = False
+
+                if p_flag:
+                    preview = self._snapshot_frame("img_preview")
+                    frame_to_show = preview
+                else:
+                    if not single_shot:
+                        self.after(200, self._live_view_tick)
+                    return
+
+        else:
+            frame_to_show = self._snapshot_frame("img_froze") or self._snapshot_frame("img")
+            if frame_to_show is None:
+                frame_to_show = self._get_empty_frame()
+
+            _show_ndarray_on_canvas(canvas, frame_to_show)
+
+            if not single_shot:
+                self.after(200, self._live_view_tick)
+
+            return
+
+        if frame_to_show is None:
+            frame_to_show = self._get_empty_frame()
+
+        _show_ndarray_on_canvas(canvas, frame_to_show)
+
+        if not single_shot:
+            interval_ms = _calc_live_view_delay_ms(self)
+            self.after(interval_ms, self._live_view_tick)  # 显示的最大刷新率为 30 fps
+
 
     def _get_output_root(self):
-        """把 self.output_filepath 转成可用的本地路径（排除 'auto'）。"""
+        """
+        把 self.output_filepath 转成可用的本地路径（排除 'auto'）。
+        """
         out = getattr(self, "output_filepath", None)
         if not out or str(out) == "auto":
             return None
@@ -437,25 +429,7 @@ class ImageMixin:
         self._show_image_on_canvas(self.canvas_processed, img_path, "_processed_photo")
 
 
-    def _update_preview_view(self):
-        """
-        Preview：这里先按最稳妥逻辑，复用 current_file 的显示（与 Original 一致）。
-        """
-        canvas = getattr(self, "canvas_preview", None)
-        if canvas is None:
-            return
-
-        lock = getattr(self, "_img_lock", None)
-        if lock is not None:
-            with self._img_lock:
-                temp = self.img_preview
-                self._show_ndarray_on_canvas(canvas, temp)
-        else:
-            temp = self.img_preview
-            self._show_ndarray_on_canvas(canvas, temp)
-
-
-def _to_uint8_for_display(self, arr):
+def _to_uint8_for_display(arr):
     """
     把任意数值类型的图像转成 uint8 便于显示（不改变原始数据用于计算）。
     """
@@ -480,7 +454,7 @@ def _to_uint8_for_display(self, arr):
     return np.clip(a, 0, 255).astype(np.uint8)
 
 
-def _show_ndarray_on_canvas(self, canvas, arr):
+def _show_ndarray_on_canvas(canvas, arr):
     """
     把 ndarray 显示到 Tk canvas（等比缩放 + 居中），并保存 PhotoImage 引用防止被 GC。
     """
@@ -494,7 +468,7 @@ def _show_ndarray_on_canvas(self, canvas, arr):
     cw = max(2, int(canvas.winfo_width()))
     ch = max(2, int(canvas.winfo_height()))
 
-    a = self._to_uint8_for_display(arr)
+    a = _to_uint8_for_display(arr)
     if a is None:
         canvas.delete("content")
         return
@@ -522,3 +496,32 @@ def _show_ndarray_on_canvas(self, canvas, arr):
 
     canvas.delete("content")
     canvas.create_image(cw // 2, ch // 2, image=photo, anchor="center", tags="content")
+
+    # 关键：必须保存引用，否则会被 GC 回收，出现“偶尔空白/闪烁”
+    # 强引用（strong reference）保活 ImageTk.PhotoImage 对象，防止被 Python 垃圾回收
+    canvas._photo = photo
+
+
+def _calc_live_view_delay_ms(app, cap_fps: float = 30.0, fallback_fps: float = 5.0) -> int:
+    """
+    根据相机采集帧率动态决定 UI 刷新间隔（ms）。
+    建议设置显示上限(30fps)，避免 120fps 在 Tk+PIL 下过载。
+    """
+
+    # 相机 fps
+    try:
+        fps = float(getattr(app, "all_para_dict", {}).get("vimbaX_AcquisitionFrameRate", fallback_fps))
+    except Exception:
+        fps = None
+
+    if fps is None or fps <= 0:
+        fps = fallback_fps
+
+    # 设置显示 fps 的下限为 1 fps，上限为 30 fps
+    # 不影响保存 fps
+    fps = max(1.0, min(fps, float(cap_fps)))
+
+    interval_ms = max(1, int(round(1000.0 / fps)))
+
+    # 计算间隔（ms），至少 1ms
+    return interval_ms

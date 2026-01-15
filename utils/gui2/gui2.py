@@ -168,12 +168,13 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.program_end = 3
 
         # 供相机模块使用的占位图 / 当前帧缓冲
-        self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
-        if self.NonePng is None:
-            print("[Camera ERROR] empty.png not found.")
-            import numpy as np
-            self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
-        self.img = self.NonePng
+        # self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
+        # if self.NonePng is None:
+        #     print("[Camera ERROR] empty.png not found.")
+        #     import numpy as np
+        #     self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
+        # self.img = self.NonePng
+        self.img = None
         self._img_lock = threading.Lock()
 
         self.live_flag = False
@@ -716,7 +717,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
             ),
 
             # 相机暂停实时显示
-            "cam_pause": lambda: self._call_maybe_with_self(
+            "cam_stop_live": lambda: self._call_maybe_with_self(
                 self._import_func("camera.camera_live", "stop_live")
             ),
 

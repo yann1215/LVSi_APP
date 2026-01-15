@@ -131,112 +131,23 @@ def start_vimbaX_backend_thread(self):
     return t
 
 
-def window_manager_legacy(self, window_name):
+def vimbaX_threading(self, start_window: bool = False, window_name: str = "vimba X"):
     """
-       LEGACY ONLY：旧版 window_manager。
-       新版 GUI2 请使用 gui2_image.ImageMixin._window_manager_loop。
-       """
-    import time
-    import cv2
 
-    try:
-        import win32gui
-        import win32con
-    except Exception as e:
-        print("[LEGACY window_manager] pywin32 not available:", e)
-        return
-
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-
-    hwnd = win32gui.FindWindow(None, window_name)
-    if not hwnd:
-        # 给一点时间让窗口创建出来
-        cv2.imshow(window_name, getattr(self, "img", None))
-        cv2.waitKey(1)
-        for _ in range(20):
-            hwnd = win32gui.FindWindow(None, window_name)
-            if hwnd:
-                break
-            time.sleep(0.05)
-
-    if not hwnd:
-        print("[LEGACY window_manager] FindWindow failed.")
-        return
-
-    win32gui.SetParent(hwnd, int(getattr(self, "container_hwnd", 0) or 0))
-
-    style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
-    style &= ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME |
-               win32con.WS_MINIMIZEBOX | win32con.WS_MAXIMIZEBOX |
-               win32con.WS_BORDER | win32con.WS_SIZEBOX)
-    win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, style)
-
-    last_w, last_h = -1, -1
-
-    while True:
-        if getattr(self, "EndEvent", None) is not None and self.EndEvent.is_set():
-            break
-
-        w = int(getattr(self, "video_frame_width", 1) or 1)
-        h = int(getattr(self, "video_frame_height", 1) or 1)
-        w = max(2, w)
-        h = max(2, h)
-
-        if w != last_w or h != last_h:
-            try:
-                win32gui.MoveWindow(hwnd, 0, 0, w, h, True)
-                last_w, last_h = w, h
-            except Exception:
-                pass
-
-        img = getattr(self, "img", None)
-        if img is not None:
-            cv2.imshow(window_name, img)
-            cv2.waitKey(1)
-
-        time.sleep(0.01)
-
-    try:
-        cv2.destroyWindow(window_name)
-    except Exception:
-        pass
-
-
-def vimbaX_threading(self, start_window: bool = True, window_name: str = "vimba X"):
-    """
-    DEPRECATED（兼容旧调用）：
-    - 旧逻辑：同时启动 start_vimbaX + window_manager（在本文件）
-    - 新逻辑：只推荐启动后端 start_vimbaX_backend_thread；
-            window_manager 由 GUI（gui2_image.py）提供的 _window_manager_loop 管理。
-
-    参数：
-    - start_window: 为兼容旧 GUI，默认仍尝试启动窗口管理
-    - window_name: OpenCV 窗口名称
     """
     print("[DEPRECATED] vimbaX_threading(): prefer camera_status.start_camera() + GUI _window_manager_loop().")
 
     # 1) 启动后端
     t_backend = start_vimbaX_backend_thread(self)
 
-    # 2) 启动 window manager（优先 GUI 的 _window_manager_loop；否则退回 legacy）
-    if start_window:
-        if hasattr(self, "_window_manager_loop"):
-            t_win = threading.Thread(
-                target=self._window_manager_loop,
-                args=(window_name,),
-                daemon=True,
-                name="vimbaX-window-manager(GUI)",
-            )
-            t_win.start()
-        else:
-            # 兼容旧 GUI：仍提供 legacy window_manager
-            t_win = threading.Thread(
-                target=window_manager_legacy,
-                args=(self, window_name),
-                daemon=True,
-                name="vimbaX-window-manager(legacy)",
-            )
-            t_win.start()
+    # 2) 启动 window manager（使用 GUI2 的 _window_manager_loop）
+    if start_window and hasattr(self, "_window_manager_loop"):
+        try:
+            # thread-safe：交给 Tk 主线程
+            self.after(0, lambda: self._window_manager_loop(window_name))
+        except Exception:
+            # 没有 Tk 环境就忽略
+            pass
 
     return t_backend
 
