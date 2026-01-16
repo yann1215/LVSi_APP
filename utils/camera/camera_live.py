@@ -2,78 +2,78 @@
 # Camera/Preview 的 live更新
 # 这些函数保存绑定在 button 上
 
-def start_live(self):
+def start_live(app):
     # 修改 live_flag 为 True
-    self.live_flag = True
+    app.live_flag = True
 
-    run_live(self)
+    run_live(app)
 
     return
 
-def stop_live(self):
+def stop_live(app):
     # 修改 live_flag 为 False
-    self.live_flag = False
+    app.live_flag = False
 
-    lock = getattr(self, "_img_lock", None)
+    lock = getattr(app, "_img_lock", None)
     if lock is not None:
         with lock:
-            img = getattr(self, "img", None)
-            self.img_froze = None if img is None else img.copy()
+            img = getattr(app, "img", None)
+            app.img_froze = None if img is None else img.copy()
     else:
-        img = getattr(self, "img", None)
-        self.img_froze = None if img is None else img.copy()
+        img = getattr(app, "img", None)
+        app.img_froze = None if img is None else img.copy()
     return
 
-def run_live(self):
+def run_live(app):
     """
-    画布上显示 self.img_live，通过 run_live() 更新
-    live_flag 不影响 camera 采集 self.img/保存等相关操作，之影响显示
+    画布上显示 app.img_live，通过 run_live() 更新
+    live_flag 不影响 camera 采集 app.img/保存等相关操作，之影响显示
     """
     # import time
 
-    if not self.live_flag:
+    if not app.live_flag:
         return
 
     # 取当前帧（尽量线程安全）
-    frame, bg = snapshot_frame_and_bg(self)
-    if self.preview_flag:
+    frame, bg = snapshot_frame_and_bg(app)
+    if app.preview_flag:
         diff = subtract_background(frame, bg)
-        setattr(self, "img_preview", diff)
+        setattr(app, "img_preview", diff)
     return
 
 
-def snapshot_frame_and_bg(self):
+def snapshot_frame_and_bg(app):
     frame = None
     bg = None
 
-    lock = getattr(self, "_img_lock", None)
+    lock = getattr(app, "_img_lock", None)
     # 有锁就锁，锁出故障了就不用锁
     if lock is not None:
         with lock:
-            f = getattr(self, "img", None)
-            b = getattr(self, "preview_background", None)
+            f = getattr(app, "img", None)
+            b = getattr(app, "preview_background", None)
             frame = None if f is None else f.copy()
             if b is None or f.shape != b.shape:
-                # 更新 self.preview_background
+                # 更新 app.preview_background
                 bg = f.copy()
-                self.preview_background = bg
+                app.preview_background = bg
             else:
                 bg = b.copy()
     else:
-        f = getattr(self, "img", None)
-        b = getattr(self, "preview_background", None)
+        f = getattr(app, "img", None)
+        b = getattr(app, "preview_background", None)
         frame = None if f is None else f.copy()
         if bg is None or frame.shape != bg.shape:
-            # 更新 self.preview_background
+            # 更新 app.preview_background
             bg = f.copy()
-            self.preview_background = bg
+            app.preview_background = bg
         else:
             bg = b.copy()
 
     return frame, bg
 
 
-def subtract_background(self, frame, bg):
+def subtract_background(app, frame, bg):
     import numpy as np
 
     if frame is None or bg is None:

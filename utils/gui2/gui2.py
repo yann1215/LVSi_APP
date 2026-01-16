@@ -236,6 +236,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         except Exception as e:
             print("[Camera WARN] empty.png load failed:", e)
             self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype=np.uint8)
+
+        # 若相机未连接，self.img为None，则无法成功保存
         # self.img = self.NonePng
         self.img = None
         self._img_lock = threading.Lock()
