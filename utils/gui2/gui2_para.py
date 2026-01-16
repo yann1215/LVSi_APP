@@ -32,25 +32,25 @@ all_para_settings = {
             {"str": "最低亮度", "name": "contrast_min", "type": "float"},
         ],
     },
-    "load":{
-        # "brief": [],
-        "detail":[
-            # {"str": "— 文件与路径 —", "name": "", "type": "label"},
-            # {"str": "根目录关键字", "name": "patient_keyword", "type": "str"},
-            # {"str": "拍摄组名", "name": "output_group", "type": "str"},
-            # {"str": "拍摄时间节点", "name": "output_time", "type": "int"},
-            # {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
-            # {"str": "数据类型", "name": "extensions", "type": "str"},
-        ],
-    },
+    # "load":{
+    #     "brief": [],
+    #     "detail":[
+    #         {"str": "— 文件与路径 —", "name": "", "type": "label"},
+    #         {"str": "根目录关键字", "name": "patient_keyword", "type": "str"},
+    #         {"str": "拍摄组名", "name": "output_group", "type": "str"},
+    #         {"str": "拍摄时间节点", "name": "output_time", "type": "int"},
+    #         {"str": "末目录关键字", "name": "time_keyword", "type": "str"},
+    #         {"str": "数据类型", "name": "extensions", "type": "str"},
+    #     ],
+    # },
     "preprocess": {
-        # "brief": [
-        #     {"str": "— 噪声过滤 —", "name": "", "type": "label"},
-        #     {"str": "视频间隔帧数", "name": "frame_step", "type": "int"},
-        #     {"str": "抖动怀疑阈值", "name": "sus_threshold", "type": "float"},
-        #     {"str": "局部最小值步长", "name": "local_min_len", "type": "int"},
-        #     {"str": "中值滤波半径", "name": "subtract_rolling", "type": "float"},
-        # ],
+        "brief": [
+            {"str": "— 噪声过滤 —", "name": "", "type": "label"},
+            {"str": "视频间隔帧数", "name": "frame_step", "type": "int"},
+            {"str": "抖动怀疑阈值", "name": "sus_threshold", "type": "float"},
+            {"str": "局部最小值步长", "name": "local_min_len", "type": "int"},
+            {"str": "中值滤波半径", "name": "subtract_rolling", "type": "float"},
+        ],
         "detail": [
             {"str": "— 视频除抖 —", "name": "", "type": "label"},
             {"str": "视频间隔帧数", "name": "frame_step", "type": "int"},
@@ -79,20 +79,20 @@ all_para_settings = {
         ],
     },
     "trackmate": {
-        # "brief": [
-        #     {"str": "— 检测追踪 —", "name": "", "type": "label"},
-        #     {"str": "开启杂志过滤", "name": "huge_impurity_filter", "type": "bool"},
-        #     {"str": "过滤时间限定", "name": "huge_impurity_time", "type": "int"},
-        #     {"str": "长菌判定阈值", "name": "LD_intensity_threshold", "type": "float"},
-        #     {"str": "长菌面积筛选", "name": "LDF_area", "type": "float"},
-        #     {"str": "长菌追踪最大距离", "name": "LT_linking_max_distance", "type": "float"},
-        #     {"str": "长菌轨迹约束比", "name": "LTF_confinement_ratio", "type": "float"},
-        #     {"str": "短菌检测半径", "name": "ND_radius", "type": "float"},
-        #     {"str": "短菌检测阈值", "name": "ND_threshold", "type": "float"},
-        #     {"str": "短菌信噪比筛选", "name": "NDF_snr", "type": "float"},
-        #     {"str": "短菌追踪最大距离", "name": "NT_linking_max_distance", "type": "float"},
-        #     {"str": "短菌轨迹约束比", "name": "NTF_confinement_ratio", "type": "float"},
-        # ],
+        "brief": [
+            {"str": "— 检测追踪 —", "name": "", "type": "label"},
+            {"str": "开启杂志过滤", "name": "huge_impurity_filter", "type": "bool"},
+            {"str": "过滤时间限定", "name": "huge_impurity_time", "type": "int"},
+            {"str": "长菌判定阈值", "name": "LD_intensity_threshold", "type": "float"},
+            {"str": "长菌面积筛选", "name": "LDF_area", "type": "float"},
+            {"str": "长菌追踪最大距离", "name": "LT_linking_max_distance", "type": "float"},
+            {"str": "长菌轨迹约束比", "name": "LTF_confinement_ratio", "type": "float"},
+            {"str": "短菌检测半径", "name": "ND_radius", "type": "float"},
+            {"str": "短菌检测阈值", "name": "ND_threshold", "type": "float"},
+            {"str": "短菌信噪比筛选", "name": "NDF_snr", "type": "float"},
+            {"str": "短菌追踪最大距离", "name": "NT_linking_max_distance", "type": "float"},
+            {"str": "短菌轨迹约束比", "name": "NTF_confinement_ratio", "type": "float"},
+        ],
         "detail": [
             {"str": "— 大体积杂质过滤 —", "name": "", "type": "label"},
             {"str": "开启杂志过滤", "name": "huge_impurity_filter", "type": "bool"},
@@ -147,11 +147,11 @@ all_para_settings = {
         ],
     },
     "features": {
-        # "brief": [
-        #     {"str": "— 特征提取 —", "name": "", "type": "label"},
-        #     {"str": "重框选起始帧", "name": "ROI_frame_start", "type": "int"},
-        #     {"str": "重框选结束帧", "name": "ROI_frame_stop", "type": "int"},
-        # ],
+        "brief": [
+            {"str": "— 特征提取 —", "name": "", "type": "label"},
+            {"str": "重框选起始帧", "name": "ROI_frame_start", "type": "int"},
+            {"str": "重框选结束帧", "name": "ROI_frame_stop", "type": "int"},
+        ],
         "detail": [
             {"str": "— 重框选 —", "name": "", "type": "label"},
             {"str": "重框选起始帧", "name": "ROI_frame_start", "type": "int"},

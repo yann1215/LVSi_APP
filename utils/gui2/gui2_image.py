@@ -40,21 +40,7 @@ class ImageMixin:
             # 创建四个 tab 的 canvas
             canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
             canvas.grid(row=0, column=0, sticky="nsew")
-            canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
             setattr(self, f"canvas_{name.lower()}", canvas)
-
-            # if name == "Camera":
-            #     # 相机专用容器，用来拿 HWND 给 vimbaX
-            #     cam_frame = tk.Frame(frame, bg="black")
-            #     cam_frame.grid(row=0, column=0, sticky="nsew")
-            #
-            #     # 保存起来，ImageMixin 里会用到
-            #     self.camera_container = cam_frame
-            # else:
-            #     canvas = tk.Canvas(frame, bg="#0b0c0e", highlightthickness=0)
-            #     canvas.grid(row=0, column=0, sticky="nsew")
-            #     canvas.bind("<Configure>", lambda e, c=canvas: self._ensure_square(c))
-            #     setattr(self, f"canvas_{name.lower()}", canvas)
 
         # 根据当前 mode 只显示两个 tab
         try:
@@ -115,17 +101,13 @@ class ImageMixin:
             tabs.select(0)
             self.after_idle(self._refresh_current_view)
 
+
     def _add_view_tab(self, name: str):
         frame = getattr(self, "_view_frames", {}).get(name)
         if frame is None:
             return
         self.tabs_view.add(frame, text=name)
 
-    def _ensure_square(self, canvas):
-        w,h = canvas.winfo_width(), canvas.winfo_height(); side = min(w,h)
-        canvas.delete("border")
-        px,py = (w-side)//2,(h-side)//2
-        canvas.create_rectangle(px,py,px+side,py+side, outline="#334155", width=2, tags="border")
 
     def _find_first_image(self, path: str):
         """
@@ -191,13 +173,12 @@ class ImageMixin:
 
         photo = ImageTk.PhotoImage(img)
         canvas.delete("content")
+        canvas.delete("border")
         canvas.create_image(w // 2, h // 2, image=photo, anchor="center", tags="content")
 
         # 保存引用，防止被垃圾回收
         setattr(self, photo_attr_name, photo)
 
-        # 重画边框
-        self._ensure_square(canvas)
 
     # ================== 启用相机（新：后端 + GUI 窗口嵌入分离） ==================
     def _ensure_camera_running(self):
@@ -293,6 +274,15 @@ class ImageMixin:
         if getattr(self, "EndEvent", None) is not None and self.EndEvent.is_set():
             self._live_view_loop_running = False
             return
+
+        # 窗口最小化时，不刷新
+        try:
+            if not self.winfo_viewable() or self.state() == "iconic":
+                if not single_shot:
+                    self.after(200, self._live_view_tick)
+                return
+        except Exception:
+            pass
 
         # 保护性检查：tabs 不存在或还没建好就延迟再试
         tabs = getattr(self, "tabs_view", None)
@@ -461,6 +451,7 @@ def _show_ndarray_on_canvas(canvas, arr):
 
     if arr is None:
         canvas.delete("content")
+        canvas.delete("border")
         return
 
     # 确保 canvas 有真实尺寸
@@ -471,6 +462,9 @@ def _show_ndarray_on_canvas(canvas, arr):
     a = _to_uint8_for_display(arr)
     if a is None:
         canvas.delete("content")
+        canvas.delete("border")
+        canvas._photo = None
+        canvas._img_item = None
         return
 
     # ndarray -> PIL Image
@@ -490,12 +484,23 @@ def _show_ndarray_on_canvas(canvas, arr):
     scale = min(cw / max(1, iw), ch / max(1, ih))
     nw = max(1, int(iw * scale))
     nh = max(1, int(ih * scale))
-    pil = pil.resize((nw, nh), Image.Resampling.LANCZOS)
+
+    # 窗口缩放期间使用 BILINEAR 降低刷新压力
+    resample = Image.Resampling.BILINEAR if getattr(canvas.winfo_toplevel(), "_is_resizing",
+                                                    False) else Image.Resampling.LANCZOS
+    pil = pil.resize((nw, nh), resample)
 
     photo = ImageTk.PhotoImage(pil)
 
-    canvas.delete("content")
-    canvas.create_image(cw // 2, ch // 2, image=photo, anchor="center", tags="content")
+    # canvas.delete("content")
+    # canvas.delete("border")
+    # canvas.create_image(cw // 2, ch // 2, image=photo, anchor="center", tags="content")
+    item = getattr(canvas, "_img_item", None)
+    if item is None:
+        canvas._img_item = canvas.create_image(cw // 2, ch // 2, image=photo, anchor="center", tags="content")
+    else:
+        canvas.itemconfig(item, image=photo)
+        canvas.coords(item, cw // 2, ch // 2)
 
     # 关键：必须保存引用，否则会被 GC 回收，出现“偶尔空白/闪烁”
     # 强引用（strong reference）保活 ImageTk.PhotoImage 对象，防止被 Python 垃圾回收
@@ -507,6 +512,10 @@ def _calc_live_view_delay_ms(app, cap_fps: float = 30.0, fallback_fps: float = 5
     根据相机采集帧率动态决定 UI 刷新间隔（ms）。
     建议设置显示上限(30fps)，避免 120fps 在 Tk+PIL 下过载。
     """
+
+    # 如果窗口正在缩放，使用低帧率
+    if getattr(app, "_is_resizing", False):
+        return 80  # ~12.5 fps
 
     # 相机 fps
     try:

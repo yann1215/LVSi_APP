@@ -4,7 +4,7 @@ from tkinter import filedialog
 import ttkbootstrap as tb
 from ttkbootstrap import ttk
 from PIL import Image, ImageTk
-import cv2
+import numpy as np
 import importlib
 from importlib.resources import files
 import threading
@@ -42,24 +42,80 @@ ICON_SIZE = 24
 
 # ---- 纵向滚动容器 ----
 class VScrolled(ttk.Frame):
-    def __init__(self, master, **kw):
+    """纵向滚动容器：内容高度不足时自动隐藏滚动条。"""
+
+    def __init__(self, master, bg=WHITE, **kw):
         super().__init__(master, **kw)
         self.columnconfigure(0, weight=1)
-        self.canvas = tk.Canvas(self, highlightthickness=0)
-        self.vsb = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.vsb.set)
-        self.canvas.grid(row=0, column=0, sticky="nsew")
-        self.vsb.grid(row=0, column=1, sticky="ns", padx=(8,0))
         self.rowconfigure(0, weight=1)
+
+        self.canvas = tk.Canvas(self, highlightthickness=0, bd=0, bg=bg)
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.vsb = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.vsb.grid(row=0, column=1, sticky="ns", padx=(8, 0))
+
+        # 关键：先有 vsb，才能设置 yscrollcommand
+        self.canvas.configure(yscrollcommand=self.vsb.set)
 
         self.content = ttk.Frame(self.canvas)
         self._win = self.canvas.create_window((0, 0), window=self.content, anchor="nw")
-        self.content.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>", self._on_canvas_config)
+
+        self._content_w = 0
+        self._content_h = 0
+        self._vsb_visible = True
+        self._update_job = None
+
+        self.content.bind("<Configure>", self._on_content_config, add="+")
+        self.canvas.bind("<Configure>", self._on_canvas_config, add="+")
         self._bind_wheel(self)
 
+        # 初始先判断一次（内容可能为空）
+        self.after_idle(self._apply_update)
+
+    def _on_content_config(self, event):
+        self._content_w = int(event.width)
+        self._content_h = int(event.height)
+        self._schedule_update()
+
     def _on_canvas_config(self, event):
-        self.canvas.itemconfig(self._win, width=event.width)
+        # 让 content 宽度跟随 canvas（内容会因此换行/高度变化）
+        self.canvas.itemconfig(self._win, width=int(event.width))
+        self._schedule_update()
+
+    def _schedule_update(self):
+        if self._update_job is not None:
+            try:
+                self.after_cancel(self._update_job)
+            except Exception:
+                pass
+        self._update_job = self.after_idle(self._apply_update)
+
+    def _apply_update(self):
+        self._update_job = None
+
+        cw = max(1, int(self.canvas.winfo_width()))
+        ch = max(1, int(self._content_h))
+
+        # 用 content 实际尺寸设置 scrollregion（比 bbox("all") 更稳定）
+        self.canvas.configure(scrollregion=(0, 0, max(cw, self._content_w), ch))
+
+        self._update_vsb_visibility()
+
+    def _update_vsb_visibility(self):
+        canvas_h = max(1, int(self.canvas.winfo_height()))
+        content_h = int(self._content_h)
+
+        # 余量，避免临界抖动
+        need_scroll = content_h > (canvas_h + 2)
+
+        if need_scroll and not self._vsb_visible:
+            self.vsb.grid()  # 恢复显示
+            self._vsb_visible = True
+        elif (not need_scroll) and self._vsb_visible:
+            self.vsb.grid_remove()  # 隐藏但保留 grid 配置
+            self._vsb_visible = False
+            self.canvas.yview_moveto(0)
 
     def _bind_wheel(self, widget):
         widget.bind("<Enter>", lambda e: self._wheel_bind(True), add="+")
@@ -76,9 +132,11 @@ class VScrolled(ttk.Frame):
             self.canvas.unbind_all("<Button-5>")
 
     def _on_mousewheel(self, event):
-        # 鼠标滚轮进入组件时 bind_all，离开时 unbind_all
-        # 兼容 Win（<MouseWheel>）和类 Unix（<Button-4/5>）
-        delta = -1 if getattr(event, "num", 0) == 4 else (1 if getattr(event, "num", 0) == 5 else -int(event.delta/120))
+        # 不需要滚动时，直接忽略滚轮，避免“空滚”
+        if not self._vsb_visible:
+            return
+
+        delta = -1 if getattr(event, "num", 0) == 4 else (1 if getattr(event, "num", 0) == 5 else -int(event.delta / 120))
         self.canvas.yview_scroll(delta, "units")
 
 # note: 在中部 Config 列暂无子模块分区时，不需要启用 Collapsible
@@ -168,17 +226,27 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.program_end = 3
 
         # 供相机模块使用的占位图 / 当前帧缓冲
-        # self.NonePng = cv2.imread(os.path.join(ASSETS.joinpath("empty.png")))
-        # if self.NonePng is None:
-        #     print("[Camera ERROR] empty.png not found.")
-        #     import numpy as np
-        #     self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype="uint8")
+        try:
+            with ASSETS.joinpath("empty.png").open("rb") as f:
+                img = Image.open(f).convert("RGB")
+                arr = np.array(img, dtype=np.uint8)
+                # _show_ndarray_on_canvas 对 3 通道默认做 BGR->RGB，
+                # 所以这里建议存成 BGR，避免颜色颠倒
+                self.NonePng = arr[:, :, ::-1]
+        except Exception as e:
+            print("[Camera WARN] empty.png load failed:", e)
+            self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype=np.uint8)
         # self.img = self.NonePng
         self.img = None
         self._img_lock = threading.Lock()
 
         self.live_flag = False
         self.img_froze = None
+
+        # 窗口缩放相关设置
+        self._is_resizing = False
+        self._resize_job = None
+        self.bind("<Configure>", self._on_root_resize, add="+")
 
         # Mode 选择
         # 0: Capture(默认)  1: Process
@@ -429,8 +497,32 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         section = ttk.Frame(sc.content, style="ComponentItem.TFrame")
         section.pack(fill="x", padx=6)
 
-        for key in all_para_settings.keys():
-            self._build_param_block(sc.content, key, mode="detail")
+        # for key in all_para_settings.keys():
+        #     self._build_param_block(sc.content, key, mode="detail")
+        mode = int(self.mode.get()) if hasattr(self, "mode") else 0
+        for key in self._config_blocks_for_mode(mode):
+            if mode == 0:
+                self._build_param_block(sc.content, key, mode="detail")
+            else:
+                self._build_param_block(sc.content, key, mode="brief")
+
+    def _config_blocks_for_mode(self, mode: int):
+        keys = list(all_para_settings.keys())
+
+        if int(mode) == 0:
+            # Capture：仅显示 camera + load
+            preferred = ["camera"]
+        elif int(mode) == 1:
+            # Process：显示全部
+            preferred = ["preprocess", "trackmate", "features"]
+        else:
+            return keys
+
+        allow = [k for k in preferred if k in all_para_settings]
+        if allow:
+            return allow
+        else:
+            return keys
 
     def _build_param_block(self, parent, block_key: str, mode: str = "detail"):
         """
@@ -541,6 +633,24 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.param_vars[name] = v
         return v
 
+    def _apply_config_mode(self, mode: int):
+        # 先把当前 UI 里编辑过的参数写回 all_para_dict，避免丢修改
+        try:
+            self._sync_dict_from_vars()
+        except Exception:
+            pass
+
+        # 重建中列（mid）
+        if not hasattr(self, "mid") or self.mid is None:
+            return
+
+        for child in self.mid.winfo_children():
+            child.destroy()
+
+        self._build_config_groups(self.mid)
+
+        # 可选：重算一次最小尺寸（你已有这套机制）
+        self.after_idle(self._update_min_constraints)
 
     # ---- 右列：进度 + 状态 ----
     def _build_progress_and_status(self, parent):
@@ -566,14 +676,14 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
     def _toast(self, msg, title="Info", bootstyle="info"):
         ToastNotification(title=title, message=msg, duration=1800, bootstyle=bootstyle).show_toast()
 
-    # ====== 右侧显示的 tabs 随 self.mode 改变 ======
+    # ====== 显示的内容随 self.mode 改变 ======
     def _on_mode_changed_main(self, mode: int):
         """
-        ModeMixin 回调：
-            1. 切换右侧 Tab 组合
-            2. 切换右侧按钮组
-            3. 刷新 minsize 约束
+        mode切换时，改变显示布局
         """
+
+        # 切换 Config 列显示内容
+        self._apply_config_mode(int(mode))
 
         # 切换 tab 显示
         if hasattr(self, "_apply_view_mode"):
@@ -622,6 +732,27 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
             return fn(self)
         except TypeError:
             return fn()
+
+    # ====== 窗口刷新相关 ======
+    def _on_root_resize(self, event=None):
+        # 最小化时不算 resize
+        try:
+            if self.state() == "iconic":
+                return
+        except Exception:
+            pass
+
+        self._is_resizing = True
+        if self._resize_job is not None:
+            try:
+                self.after_cancel(self._resize_job)
+            except Exception:
+                pass
+        self._resize_job = self.after(180, self._end_root_resize)
+
+    def _end_root_resize(self):
+        self._resize_job = None
+        self._is_resizing = False
 
     # ====== 最小宽度 & 高度：动态计算并强制不小于 ======
     def _calc_min_height(self) -> int:
