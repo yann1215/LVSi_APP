@@ -42,15 +42,15 @@ class ModeMixin:
 
         # ttk.Label(mode_row, text="Mode:").pack(side="left")
 
-        ttk.Radiobutton(
+        self.rb_capture = ttk.Radiobutton(
             mode_row, text="Capture", value=0, variable=self.mode,
-            command=self._on_mode_changed
-        ).pack(side="left", padx=(10, 0))
+            command=self._on_mode_changed)
+        self.rb_capture.pack(side="left", padx=(10, 0))
 
-        ttk.Radiobutton(
+        self.rb_process = ttk.Radiobutton(
             mode_row, text="Process", value=1, variable=self.mode,
-            command=self._on_mode_changed
-        ).pack(side="left", padx=(10, 0))
+            command=self._on_mode_changed)
+        self.rb_process.pack(side="left", padx=(10, 0))
 
         # ---- Capture ChildBox ----
         cap_box = ttk.Labelframe(proc, text="Capture", padding=10, style="ChildBox.TLabelframe")

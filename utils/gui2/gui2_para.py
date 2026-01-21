@@ -1,3 +1,5 @@
+# 修改 all_para_settings 中的变量类型时，需要在 _para.py 中同步修改 all_para_dict 中的变量类型
+
 all_para_settings = {
     "camera": {
         # "brief": [
@@ -11,9 +13,9 @@ all_para_settings = {
             {"str": "样本数量", "name": "sample_num", "type": "int"},
             {"str": "帧率 (fps)", "name": "vimbaX_AcquisitionFrameRate", "type": "float"},
             # {"str": "", "name": "range=(1.0369e-05, 289.04776)", "type": "label"},
-            {"str": "单次拍摄时长 (s) ", "name": "video_period", "type": "int"},
-            {"str": "拍摄时间间隔 (min)", "name": "video_interval", "type": "int"},
-            {"str": "拍摄截止时间 (min)", "name": "video_end_time", "type": "int"},
+            {"str": "单次拍摄时长 (s) ", "name": "video_period", "type": "float"},
+            {"str": "拍摄时间间隔 (min)", "name": "video_interval", "type": "float"},
+            {"str": "拍摄截止时间 (min)", "name": "video_end_time", "type": "float"},
 
             {"str": "— 相机参数 —", "name": "", "type": "label"},
             {"str": "曝光时间", "name": "vimbaX_ExposureTime", "type": "float"},

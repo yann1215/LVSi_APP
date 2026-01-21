@@ -112,6 +112,15 @@ def file_chooser(self, path_mode):
     except KeyError:
         raise ValueError(f"Invalid path_mode={path_mode}, expected one of {sorted(target_map)}")
 
+    title_map = {
+        0: "选择相机拍摄保存路径 cameraPath",
+        1: "选择数据处理输入路径 inputPath",
+        2: "选择数据处理输出路径 outputPath",
+        3: "选择预览文件 browsePath",
+    }
+    title = title_map.get(path_mode, "选择路径")
+    chooser.setDialogTitle(title)
+
     # file-select settings
     if path_mode == 3:
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)

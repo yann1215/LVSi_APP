@@ -95,9 +95,13 @@ class FileMixin:
                 entry = ttk.Entry(row, state="readonly")
             entry.grid(row=0, column=0, sticky="ew")
 
-            ttk.Button(row, text="···", width=3, bootstyle="info",
-                       command=lambda e=entry: callback(e)).grid(row=0, column=1, padx=(6,0))
-
+            if attr_name == "entry_camera":
+                self.b_sp_camera = ttk.Button(row, text="···", width=3, bootstyle="info",
+                           command=lambda e=entry: callback(e))
+                self.b_sp_camera.grid(row=0, column=1, padx=(6,0))
+            else:
+                ttk.Button(row, text="···", width=3, bootstyle="info",
+                           command=lambda e=entry: callback(e)).grid(row=0, column=1, padx=(6, 0))
             setattr(self, attr_name, entry)
 
         # 1) Camera Save Path：沿用旧逻辑的“输入目录”（filepath_list + path_var + Preferences）
@@ -133,6 +137,9 @@ class FileMixin:
             self.file_params[name] = entry
 
     def _browse_camera_path(self, entry):
+        if getattr(self, "record_lock", False):
+            return
+
         self._ensure_file_exsistence()
         sel = file_chooser(self, 0)
         if not sel:

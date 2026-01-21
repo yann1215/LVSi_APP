@@ -3,18 +3,19 @@ from __future__ import annotations
 
 import os
 from typing import Any, Optional
-
 import numpy as np
 from PIL import Image
 import tifffile
 from tkinter import filedialog
 
+from utils.camera.camera_record import record_save_frame
+
 
 def handle_new_frame(app: Any, frame) -> None:
     """
     相机回调入口：把单张相机图像写入 app.img。
-    - 不做 per-frame copy（按你的要求）
     - 写入时使用 app._img_lock（如存在）
+
     """
     lock = getattr(app, "_img_lock", None)
     if lock is not None:
@@ -25,6 +26,9 @@ def handle_new_frame(app: Any, frame) -> None:
             app.img = frame
     else:
         app.img = frame
+
+    # 内部判断 save_frame/save_until_ts
+    record_save_frame(app, frame)
 
 
 def get_single_frame(app: Any) -> Optional[np.ndarray]:
@@ -60,13 +64,13 @@ def get_single_frame(app: Any) -> Optional[np.ndarray]:
     # 只在“点击保存”时 copy 一次，避免保存过程中源被替换/变化
     arr = np.asarray(src.copy())
 
-    # 兜底：如果是 3 通道，取第 1 通道
-    if arr.ndim == 3:
-        arr = arr[:, :, 0]
+    # # 如果是 3 通道，取第 1 通道
+    # if arr.ndim == 3:
+    #     arr = arr[:, :, 0]
 
-    # 兜底：确保 uint8
-    if arr.dtype != np.uint8:
-        arr = np.clip(arr.astype(np.float32), 0, 255).astype(np.uint8)
+    # # 确保 uint8
+    # if arr.dtype != np.uint8:
+    #     arr = np.clip(arr.astype(np.float32), 0, 255).astype(np.uint8)
 
     return arr
 
@@ -100,13 +104,12 @@ def capture_single(app: Any) -> Optional[str]:
 
     if ext in (".tif", ".tiff"):
         tifffile.imwrite(path, arr, photometric="minisblack")
-    elif ext == ".png":
-        Image.fromarray(arr, mode="L").save(path, format="PNG")
-    elif ext in (".jpg", ".jpeg"):
-        Image.fromarray(arr, mode="L").save(path, format="JPEG", quality=95)
-    else:
-        # 兜底：不支持/没扩展名，默认 tiff
+    elif ext == "":
+        # 没扩展名/不支持，默认 tiff
         path = path + ".tif"
         tifffile.imwrite(path, arr, photometric="minisblack")
+    else:
+        arr8 = np.clip(arr.astype(np.float32), 0, 255).astype(np.uint8)
+        Image.fromarray(arr8, mode="L").save(path)
 
     return path

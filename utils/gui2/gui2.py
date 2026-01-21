@@ -225,6 +225,10 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.program_start = 0
         self.program_end = 3
 
+        # 录制时的参数禁用相关
+        self.record_lock = False
+        self.record_lock_widgets= set()  # 保存要禁用的控件引用
+
         # 供相机模块使用的占位图 / 当前帧缓冲
         try:
             with ASSETS.joinpath("empty.png").open("rb") as f:
@@ -464,6 +468,9 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         中列参数区：直接从 all_para_settings 生成 Camera / Filter / Tracking / Features
         """
 
+        if not hasattr(self, "record_lock_widgets") or self.record_lock_widgets is None:
+            self.record_lock_widgets= set()
+
         # 绘制最外层的 Config 边框
         outer = ttk.Labelframe(parent, text="Config",
                                padding=10, style="ParentBox.TLabelframe")
@@ -478,22 +485,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.param_vars = {}
         self.enum_meta = {}
 
-        # 绘制内部子分区的外框
-        # note: 因为目前还没对 gui2_para.py 中的参数作分区适配
-        #       所以暂时延用旧版分区方法，分隔显示直接在 gui2_para.py 中设置，此处先注释
-        # blocks = [
-        #     ("camera", "Camera"),
-        #     ("preprocess", "Filter"),
-        #     ("trackmate", "Tracking"),
-        #     ("features", "Features"),
-        # ]
-        #
-        # for key, title in blocks:
-        #     box = Collapsible(sc.content, text=title, style="ChildBox.TLabelframe")
-        #     box.pack(fill="x", pady=(0, 8))
-        #     # 用 detail 模式，把该类的所有参数都展开到中列
-        #     self._build_param_block(box.body, key, mode="detail")
-
         # 不绘制子分区外框，把参数分区在 gui2_para.py 中设置
         # 此处仅按顺序绘制出所有的参数
         section = ttk.Frame(sc.content, style="ComponentItem.TFrame")
@@ -504,9 +495,16 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         mode = int(self.mode.get()) if hasattr(self, "mode") else 0
         for key in self._config_blocks_for_mode(mode):
             if mode == 0:
-                self._build_param_block(sc.content, key, mode="detail")
+                # capture
+                w = self._build_param_block(sc.content, key, mode="detail")
+                if w is not None:
+                    self.record_lock_widgets.update(w)
             else:
+                # process
                 self._build_param_block(sc.content, key, mode="brief")
+                # w = self._build_param_block(sc.content, key, mode="brief")
+                # if w is not None:
+                #     self.process_lock_cfg.update(w)
 
     def _config_blocks_for_mode(self, mode: int):
         keys = list(all_para_settings.keys())
@@ -532,6 +530,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         """
         settings = all_para_settings.get(block_key, {})
         items = settings.get(mode, [])
+        w = set()
 
         for item in items:
             # e.g. {"str": "噪声过滤", "name": "", "type": "label"}
@@ -563,11 +562,13 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
             if value_type in ("int", "float", "str"):
                 entry = ttk.Entry(row, textvariable=var, width=12)
                 entry.pack(side="left", fill="x", expand=True)
+                w.add(entry)
 
             # 布尔量：Checkbutton
             elif value_type == "bool":
                 chk = ttk.Checkbutton(row, variable=var, bootstyle="round-toggle")
                 chk.pack(side="left", padx=4)
+                w.add(chk)
 
             # 字典：Combobox
             elif isinstance(value_type, dict):
@@ -593,6 +594,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
                 combo = ttk.Combobox(row, textvariable=combo_list,
                     values=options, state="readonly", width=12)
                 combo.pack(side="left", fill="x", expand=True)
+                w.add(combo)
 
                 # 4. 当用户选择变化时：反向写回 IntVar
                 def on_combo_changed(*_):
@@ -610,10 +612,14 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
                     self.enum_meta = {}
                 self.enum_meta[name] = (value_type, combo_list)
 
+        return w
+
     def _create_param_var(self, name: str, value_type):
         """
         创建或复用一个 tk.Variable，并用 all_para_dict 里的当前值初始化
         value_type 可以是 "int"/"float"/"str"/"bool" 或 dict(枚举)
+
+        变量类型使用 all_para_settins 中的类型
         """
         if name in self.param_vars:
             return self.param_vars[name]
@@ -664,6 +670,63 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.status_var = tk.StringVar(value="Ready.")
         self.status = ttk.Label(parent, textvariable=self.status_var, font=("Segoe UI", 9), foreground="#64748b")
         self.status.grid(row=2, column=0, sticky="ew", pady=(2,8))
+
+
+    # =============== 录制时禁用 UI ===============
+    def _set_widget_state(self, w, locked: bool):
+        """统一处理 ttkbootstrap/ttk/tk 控件的禁用/启用。"""
+        if w is None:
+            return
+        try:
+            # ttk widgets
+            if locked:
+                w.state(["disabled"])
+            else:
+                w.state(["!disabled"])
+            return
+        except Exception:
+            pass
+
+        try:
+            # tk widgets
+            w.configure(state=("disabled" if locked else "normal"))
+        except Exception:
+            pass
+
+    def lock_ui_for_recording(self):
+        self.record_lock = True
+
+        # File browse buttons
+        self._set_widget_state(getattr(self, "b_sp_camera", None), True)
+        # self._set_widget_state(getattr(self, "file_params", None), True)
+        fp = getattr(self, "file_params", None)
+        if isinstance(fp, dict):
+            for ent in fp.values():
+                self._set_widget_state(ent, True)
+
+        # Mode radiobuttons
+        self._set_widget_state(getattr(self, "rb_capture", None), True)
+        self._set_widget_state(getattr(self, "rb_process", None), True)
+
+        # Config widgets
+        for w in getattr(self, "record_lock_widgets", []):
+            self._set_widget_state(w, True)
+
+    def unlock_ui_after_recording(self):
+        self.record_lock = False
+
+        self._set_widget_state(getattr(self, "b_sp_camera", None), False)
+        # self._set_widget_state(getattr(self, "file_params", None), False)
+        fp = getattr(self, "file_params", None)
+        if isinstance(fp, dict):
+            for ent in fp.values():
+                self._set_widget_state(ent, False)
+
+        self._set_widget_state(getattr(self, "rb_capture", None), False)
+        self._set_widget_state(getattr(self, "rb_process", None), False)
+
+        for w in getattr(self, "record_lock_widgets", []):
+            self._set_widget_state(w, False)
 
     # =============== 行为占位 ===============
 

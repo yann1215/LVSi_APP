@@ -28,18 +28,21 @@ class ConfigMixin:
             old = self.all_para_dict[name]
             val = var.get()
 
-            try:
-                if isinstance(old, bool):
-                    self.all_para_dict[name] = bool(val)
-                elif isinstance(old, int) and not isinstance(old, bool):
-                    self.all_para_dict[name] = int(val)
-                elif isinstance(old, float):
-                    self.all_para_dict[name] = float(val)
-                else:
-                    self.all_para_dict[name] = str(val)
-            except Exception:
-                # 转换失败就保持原值
-                self.all_para_dict[name] = old
+            # all_para_dict 中的数据类型与 all_para_settings 的类型一致
+            self.all_para_dict[name] = val
+
+            # try:
+            #     if isinstance(old, bool):
+            #         self.all_para_dict[name] = bool(val)
+            #     elif isinstance(old, int) and not isinstance(old, bool):
+            #         self.all_para_dict[name] = int(val)
+            #     elif isinstance(old, float):
+            #         self.all_para_dict[name] = float(val)
+            #     else:
+            #         self.all_para_dict[name] = str(val)
+            # except Exception:
+            #     # 转换失败就保持原值
+            #     self.all_para_dict[name] = old
 
     def _sync_vars_from_dict(self):
         """
