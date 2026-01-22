@@ -151,7 +151,25 @@ def _apply_bitdepth_and_pixelformat(app, cam) -> None:
 def vimbaX_photo_handler(app):
     # 创建一个 frame 回调函数，同时传递 app
     def frame_handler(cam, stream, frame):
-        img = frame.as_opencv_image()  # ndarray
+        # 不会因为异常导致回调链路不稳定；无效帧会被跳过并回收
+        # img = frame.as_opencv_image()  # ndarray
+        try:
+            img = frame.as_opencv_image()  # ndarray
+        except ValueError:
+            # 收到不完整帧/切流期间的帧时，pixelFormat 可能为 0
+            try:
+                cam.queue_frame(frame)
+            except Exception:
+                pass
+            return
+        except Exception:
+            # 任何转换失败都不要炸回调
+            try:
+                cam.queue_frame(frame)
+            except Exception:
+                pass
+            return
+
         handle_new_frame(app, img)  # 这里会用 _img_lock 写入 app.img
         cam.queue_frame(frame)
 
@@ -193,7 +211,7 @@ def vimbaX_finder_handler(app, vmb):
             thread = threading.Thread(target=work_thread, args=(app, vmb), daemon=True)
             thread.start()
             if app.searching == False and app.running == False and (app.program_start == app.task_mode):
-                app.AST_btn_var.set("Camera started")
+                app.AST_btn_var.set("Camera started.")
                 app.AST_btn.config(bg='#4CAF50')
         elif state == 0 or state == 3 or state == 4:
             app.camera = False
@@ -227,9 +245,9 @@ def start_vimbaX(app):
         try:
             # note: 这里内部出现了VmbTransportLayerError
             with VmbSystem.get_instance() as vmb:
-                print("Vimba X installed. Camera starting...")
+                print("Vimba X connected.")
                 # app.Alltitle_var.set("LVSi System ( Vimba X Installed )")
-                _safe_set_tk_var(app, "Alltitle_var", "LVSi System ( Vimba X Installed )")
+                _safe_set_tk_var(app, "Alltitle_var", "LVSi System")
                 # 找相机并启用
                 handler = vimbaX_finder_handler(app, vmb)
                 vmb.register_camera_change_handler(handler)

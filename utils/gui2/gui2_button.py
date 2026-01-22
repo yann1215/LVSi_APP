@@ -43,7 +43,9 @@ class ButtonMixin:
         self._apply_button_mode(mode)
 
     def _apply_button_mode(self, mode: int):
-        """外部调用：切换模式时重建按钮组。"""
+        """
+        外部调用：切换模式时重建按钮组。
+        """
         if not hasattr(self, "_btns_container"):
             return
 
@@ -66,14 +68,39 @@ class ButtonMixin:
             ("cam_rec",    "Record"),
             ("cam_rec_stop", "Stop Record"),
         ]
+
+        self.cap_btn = {}
         for c, (key, text) in enumerate(specs):
-            ttk.Button(
+            btn = ttk.Button(
                 self._btns_container,
                 text=text,
                 bootstyle="info",
                 command=lambda k=key: self._invoke_action(k, mode=0),
-                width=14
-            ).grid(row=0, column=c, padx=(0, 12) if c != len(specs) - 1 else 0)
+                width=14)
+            btn.grid(row=0, column=c, padx=(0, 12) if c != len(specs) - 1 else 0)
+            self.cap_btn[key] = btn
+        self._update_live_buttons_state()
+        self._update_record_buttons_state()
+
+    def _update_live_buttons_state(self):
+        b = getattr(self, "cap_btn", None)
+        if not b:
+            return
+
+        # Live/Stop Live 互斥
+        live = bool(getattr(self, "live_flag", False))
+        b["cam_live"].configure(state=("disabled" if live else "normal"))
+        b["cam_stop_live"].configure(state=("normal" if live else "disabled"))
+
+    def _update_record_buttons_state(self):
+        b = getattr(self, "cap_btn", None)
+        if not b:
+            return
+
+        # Record/Stop Record 互斥
+        rec = bool(getattr(self, "recording_flag", False))
+        b["cam_rec"].configure(state=("disabled" if rec else "normal"))
+        b["cam_rec_stop"].configure(state=("normal" if rec else "disabled"))
 
     def _build_process_buttons(self):
         specs = [

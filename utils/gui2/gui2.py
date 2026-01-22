@@ -11,11 +11,11 @@ import threading
 from ttkbootstrap.toast import ToastNotification
 from pathlib import Path
 
-from gui2_file import FileMixin
-from gui2_mode import ModeMixin
-from gui2_config import ConfigMixin
-from gui2_image import ImageMixin
-from gui2_button import ButtonMixin
+from utils.gui2.gui2_file import FileMixin
+from utils.gui2.gui2_mode import ModeMixin
+from utils.gui2.gui2_config import ConfigMixin
+from utils.gui2.gui2_image import ImageMixin
+from utils.gui2.gui2_button import ButtonMixin
 
 from _para import all_para_dict, base_path
 from utils.gui2.gui2_para import all_para_settings
@@ -202,6 +202,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.all_para_dict = all_para_dict.copy()
         self.param_vars = {}
         self.enum_meta = {}     # 记录枚举型参数的 mapping + combobox 变量
+        self.cap_btn = {}
 
         # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
         self.camera_path_var = tk.StringVar(self, value="")  # 相机拍摄存储路径字符串
@@ -226,6 +227,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.program_end = 3
 
         # 录制时的参数禁用相关
+        self.recording_flag = False
         self.record_lock = False
         self.record_lock_widgets= set()  # 保存要禁用的控件引用
 
@@ -242,28 +244,30 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
             self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype=np.uint8)
 
         # 若相机未连接，self.img为None，则无法成功保存
-        # self.img = self.NonePng
-        self.img = None
+        self.img = self.NonePng
+        # self.img = None
         self._img_lock = threading.Lock()
 
         self.live_flag = False
-        self.img_froze = None
+        # self.img_froze = self.NonePng   # 避免为 None
 
         # 窗口缩放相关设置
         self._is_resizing = False
         self._resize_job = None
         self.bind("<Configure>", self._on_root_resize, add="+")
+        # 关闭窗口相关操作
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         # Mode 选择
         # 0: Capture(默认)  1: Process
         self.mode = tk.IntVar(value=0)
         # Capture 是否启动预览
-        self.preview_flag = tk.BooleanVar(value=False)  # 默认关
+        self.preview_flag = True  # 默认开
 
         # Preview background (in-memory)
         self.preview_background = None  # numpy.ndarray or None
         # self.preview_background_meta = None  # dict: dtype/shape/pixfmt/time etc.
-        self.img_preview = None
+        self.img_preview = self.NonePng
 
         # 运行状态（防止重复启动）
         self.searching = False
@@ -693,7 +697,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         except Exception:
             pass
 
-    def lock_ui_for_recording(self):
+    def _lock_ui_for_recording(self):
         self.record_lock = True
 
         # File browse buttons
@@ -712,7 +716,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         for w in getattr(self, "record_lock_widgets", []):
             self._set_widget_state(w, True)
 
-    def unlock_ui_after_recording(self):
+    def _unlock_ui_after_recording(self):
         self.record_lock = False
 
         self._set_widget_state(getattr(self, "b_sp_camera", None), False)
@@ -787,16 +791,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         fn = getattr(mod, func_name)
         return fn
 
-    def _call_maybe_with_self(self, fn):
-        """
-        兼容两种实现：
-        - 外部函数签名：fn(self)   （推荐，便于拿到 GUI 状态）
-        - 外部函数签名：fn()       （也支持）
-        """
-        try:
-            return fn(self)
-        except TypeError:
-            return fn()
 
     # ====== 窗口刷新相关 ======
     def _on_root_resize(self, event=None):
@@ -908,29 +902,24 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         """
         return {
             # 相机实时显示
-            "cam_live": lambda: self._call_maybe_with_self(
-                self._import_func("camera.camera_live", "start_live")
-            ),
+            "cam_live": lambda:
+                self._import_func("camera.camera_live", "start_live"),
 
             # 相机暂停实时显示
-            "cam_stop_live": lambda: self._call_maybe_with_self(
-                self._import_func("camera.camera_live", "stop_live")
-            ),
+            "cam_stop_live": lambda:
+                self._import_func("camera.camera_live", "stop_live"),
 
             # 拍摄单张图像
-            "cam_snap": lambda: self._call_maybe_with_self(
-                self._import_func("camera.camera_capture", "capture_single")
-            ),
+            "cam_snap": lambda:
+                self._import_func("camera.camera_capture", "capture_single"),
 
             # 录制视频
-            "cam_rec": lambda: self._call_maybe_with_self(
-                self._import_func("camera.camera_record", "start_record")
-            ),
+            "cam_rec": lambda:
+                self._import_func("camera.camera_record", "start_record"),
 
             # 结束录制视频
-            "cam_rec_stop": lambda: self._call_maybe_with_self(
-                self._import_func("camera.camera_record", "stop_record")
-            ),
+            "cam_rec_stop": lambda:
+                self._import_func("camera.camera_record", "stop_record"),
         }
 
     def _make_process_actions(self) -> dict:
@@ -939,25 +928,68 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         你需要把 module/function 名称改成你真实的实现。
         """
         return {
-            "play": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_player", "play")
-            ),
-            "pause": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_player", "pause")
-            ),
-            "to_start": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_player", "seek_to_start")
-            ),
-            "back_2s": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_player", "seek_back_2s")
-            ),
-            "forward_2s": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_player", "seek_forward_2s")
-            ),
-            "run_proc": lambda: self._call_maybe_with_self(
-                self._import_func("process.process_runner", "run_processing")
-            ),
+            "play": lambda:
+                self._import_func("process.process_player", "play"),
+            "pause": lambda:
+                self._import_func("process.process_player", "pause"),
+            "to_start": lambda:
+                self._import_func("process.process_player", "seek_to_start"),
+            "back_2s": lambda:
+                self._import_func("process.process_player", "seek_back_2s"),
+            "forward_2s": lambda:
+                self._import_func("process.process_player", "seek_forward_2s"),
+            "run_proc": lambda:
+                self._import_func("process.process_runner", "run_processing"),
         }
+
+    def _on_close(self):
+        # 1) 通知所有后台线程退出（尤其是那些 wait EndEvent 的）
+        try:
+            if getattr(self, "EndEvent", None) is not None:
+                self.EndEvent.set()
+        except Exception:
+            pass
+
+        # 2) 停止常见循环标志，避免线程继续 while app.camera / live_flag
+        try:
+            self.live_flag = False
+        except Exception:
+            pass
+        try:
+            self.camera = False
+        except Exception:
+            pass
+        try:
+            self.searching = False
+            self.running = False
+        except Exception:
+            pass
+
+        # 3) 如果有录制 after 计划在跑，尽量停掉（不强依赖也行）
+        try:
+            if hasattr(self, "_record_groups_running"):
+                self._record_groups_running = False
+            self.save_frame = False
+            self.save_until_ts = None
+        except Exception:
+            pass
+
+        # 4) 调试：打印仍存活的非 daemon 线程（你可以先保留，确认修复后再删）
+        try:
+            import threading
+            alive = [t for t in threading.enumerate() if t.is_alive() and not t.daemon and t.name != "MainThread"]
+            if alive:
+                print("[GUI2] Non-daemon threads still alive on close:")
+                for t in alive:
+                    print("  -", t.name, t)
+        except Exception:
+            pass
+
+        # 5) 关闭窗口
+        try:
+            self.destroy()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

@@ -5,35 +5,31 @@
 def start_live(app):
     # 修改 live_flag 为 True
     app.live_flag = True
-
+    if hasattr(app, "_update_live_buttons_state"):
+        app._update_live_buttons_state()
     run_live(app)
-
     return
 
 def stop_live(app):
     # 修改 live_flag 为 False
     app.live_flag = False
-
-    lock = getattr(app, "_img_lock", None)
-    if lock is not None:
-        with lock:
-            img = getattr(app, "img", None)
-            app.img_froze = None if img is None else img.copy()
-    else:
-        img = getattr(app, "img", None)
-        app.img_froze = None if img is None else img.copy()
+    if hasattr(app, "_update_live_buttons_state"):
+        app._update_live_buttons_state()
     return
+
 
 def run_live(app):
     """
-    画布上显示 app.img_live，通过 run_live() 更新
+    画布上显示 app.img，通过 run_live() 更新
     live_flag 不影响 camera 采集 app.img/保存等相关操作，之影响显示
     """
     # import time
 
     if not app.live_flag:
+        # 如果不在 live，就不更新画面
         return
 
+    # 如果在 live，就更新 preview_background 内容
     # 取当前帧（尽量线程安全）
     frame, bg = snapshot_frame_and_bg(app)
     if app.preview_flag:

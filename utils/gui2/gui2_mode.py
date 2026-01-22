@@ -90,10 +90,9 @@ class ModeMixin:
         将当前相机帧保存为 preview background（内存 numpy.ndarray）。
         后续 Preview tab 可以用 frame - background 实时显示。
         """
-        import time
-        import numpy as np
 
         # 取当前帧（尽量线程安全）
+        # 有 _img_lock 就 lock，没有就不 lock
         if hasattr(self, "_img_lock") and self._img_lock is not None:
             with self._img_lock:
                 frame = getattr(self, "img", None)
@@ -103,12 +102,22 @@ class ModeMixin:
             frame = None if frame is None else frame.copy()
 
         if frame is None:
+            # 如果读到的 frame 是 None，就不更新
             if hasattr(self, "status_var"):
                 self.status_var.set("[Preview] No camera frame available; cannot update background.")
             return
-
-        if hasattr(self, "status_var"):
-            self.status_var.set(f"[Preview] Background updated: {frame.shape}, {frame.dtype}")
+        else:
+            # 更新 self.preview_background
+            # 写入时也加锁
+            lock = getattr(self, "_img_lock", None)
+            if lock is not None:
+                with lock:
+                    self.preview_background = frame
+            else:
+                self.preview_background = frame
+            # 更新提示语
+            if hasattr(self, "status_var"):
+                self.status_var.set(f"[Preview] Background updated: {frame.shape}, {frame.dtype}")
 
     # ----------------- 互斥模式控制 -----------------
     def _set_children_state(self, parent, enabled: bool):

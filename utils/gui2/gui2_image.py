@@ -311,47 +311,39 @@ class ImageMixin:
                 self.after(200, self._live_view_tick)
             return
 
-        # live_flag=False 时，Camera 优先显示冻结帧（不影响相机后端采集）
         live_flag = bool(getattr(self, "live_flag", True))
-        if live_flag:
+        if live_flag or single_shot:
+            # live_flag == True
             if name == "Camera":
-                frame = self._snapshot_frame("img")
-                frame_to_show = frame
-
+                # Camera 刷新 self.img 的内容
+                frame_to_update = self._snapshot_frame("img")
             elif name == "Preview":
+                # 获取 preview flag
                 try:
                     p_flag = bool(getattr(self, "preview_flag").get())  # BooleanVar
                 except Exception:
                     p_flag = False
-
-                if p_flag:
-                    preview = self._snapshot_frame("img_preview")
-                    frame_to_show = preview
+                # Preview 刷新/不刷新 self.img_preview
+                if p_flag or single_shot:
+                    frame_to_update = self._snapshot_frame("img_preview")
                 else:
-                    if not single_shot:
-                        self.after(200, self._live_view_tick)
-                    return
+                    frame_to_update = self._get_empty_frame()
+            else:
+                raise ValueError("[Value ERROR] Invalid canvas tab name.")
+                return
+
+            _show_ndarray_on_canvas(canvas, frame_to_update)
+            # 等待；控制显示刷新率
+            if not single_shot:
+                interval_ms = _calc_live_view_delay_ms(self)
+                self.after(interval_ms, self._live_view_tick)  # 显示的最大刷新率为 30 fps
 
         else:
-            frame_to_show = self._snapshot_frame("img_froze") or self._snapshot_frame("img")
-            if frame_to_show is None:
-                frame_to_show = self._get_empty_frame()
-
-            _show_ndarray_on_canvas(canvas, frame_to_show)
-
+            # live_flag == False
+            # 不刷新画布
             if not single_shot:
                 self.after(200, self._live_view_tick)
-
             return
-
-        if frame_to_show is None:
-            frame_to_show = self._get_empty_frame()
-
-        _show_ndarray_on_canvas(canvas, frame_to_show)
-
-        if not single_shot:
-            interval_ms = _calc_live_view_delay_ms(self)
-            self.after(interval_ms, self._live_view_tick)  # 显示的最大刷新率为 30 fps
 
 
     def _get_output_root(self):

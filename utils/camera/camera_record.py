@@ -31,9 +31,11 @@ def start_record(app):
         return
 
     # 4) 上锁（但要确保 Stop Record 仍可点击：不要把 Stop 按钮加入锁列表）
-    if hasattr(app, "lock_ui_for_recording"):
-        app.lock_ui_for_recording()
+    if hasattr(app, "_lock_ui_for_recording"):
+        app._lock_ui_for_recording()
     app.recording_flag = True
+    if hasattr(app, "_update_record_buttons_state"):
+        app._update_record_buttons_state()
     if hasattr(app, "_sync_vars_from_dict"):
         app._sync_vars_from_dict()
 
@@ -56,8 +58,10 @@ def stop_record(app):
 
     # 解锁
     app.recording_flag = False
-    if hasattr(app, "unlock_ui_after_recording"):
-        app.unlock_ui_after_recording()
+    if hasattr(app, "_update_record_buttons_state"):
+        app._update_record_buttons_state()
+    if hasattr(app, "_unlock_ui_after_recording"):
+        app._unlock_ui_after_recording()
 
 
 def check_value_validation(app):
@@ -266,8 +270,8 @@ def _abort_recording(app, msg: str):
     app.save_frame = False
     app.save_until_ts = None
     app.recording_flag = False
-    if hasattr(app, "unlock_ui_after_recording"):
-        app.unlock_ui_after_recording()
+    if hasattr(app, "_unlock_ui_after_recording"):
+        app._unlock_ui_after_recording()
     if hasattr(app, "status_var"):
         app.status_var.set(f"[Record ERROR] {msg}")
     if hasattr(app, "_toast"):
