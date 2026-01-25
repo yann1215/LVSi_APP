@@ -127,7 +127,7 @@ class FileMixin:
         # 让右边输入框可拉伸
         form.columnconfigure(1, weight=1)
 
-        self.file_params = {}  # 保存引用，便于后面取值
+        self.file_params = {}  # 保存引用，便于后面取值；类型为 dict
         for i, name in enumerate(names):
             # 直接复用你已有的行渲染方法
             self._param_row(form, i, name)  # ← 左标签 + 右 Entry

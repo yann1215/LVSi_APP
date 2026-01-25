@@ -182,6 +182,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.EndEvent = threading.Event()
 
         # 图像尺寸、保存相关标志 —— 保持和旧 gui 一致
+        # note: 可能后续不需要使用了
         self.img_shape = (728, 544)
 
         # ---- 让 camera/ process 目录可 import（与 gui2 文件夹同级）----
@@ -202,7 +203,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.all_para_dict = all_para_dict.copy()
         self.param_vars = {}
         self.enum_meta = {}     # 记录枚举型参数的 mapping + combobox 变量
-        self.cap_btn = {}
+        self.cap_btn = {}       # capture 模式下需要控制互斥的按钮
 
         # 确保旧版文件所需的 StringVar 存在（path_var和output_path_var等）
         self.camera_path_var = tk.StringVar(self, value="")  # 相机拍摄存储路径字符串
@@ -213,8 +214,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         # 路径 & 任务
         self.filepath_list = []
         self.output_filepath = "auto"
-        # 当前预览的单个图像/视频文件（左侧第三行）
-        self.current_file = ""
+        self.current_file = ""      # 当前预览的单个图像/视频文件（左侧第三行）
+        self.file_params = {}       # 用于保存文件命名的 file_params，类型为 dict
 
         self.task_list = []
         self.output_root = None
@@ -227,7 +228,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.program_end = 3
 
         # 录制时的参数禁用相关
-        self.recording_flag = False
+        self.recording_flag = False     # recording_flag 的类型为 bool
         self.record_lock = False
         self.record_lock_widgets= set()  # 保存要禁用的控件引用
 
@@ -240,7 +241,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
                 # 所以这里建议存成 BGR，避免颜色颠倒
                 self.NonePng = arr[:, :, ::-1]
         except Exception as e:
-            print("[Camera WARN] empty.png load failed:", e)
+            print("[Value ERROR] empty.png load failed:", e)
             self.NonePng = np.zeros((self.img_shape[1], self.img_shape[0], 3), dtype=np.uint8)
 
         # 若相机未连接，self.img为None，则无法成功保存
@@ -262,7 +263,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         # 0: Capture(默认)  1: Process
         self.mode = tk.IntVar(value=0)
         # Capture 是否启动预览
-        self.preview_flag = True  # 默认开
+        # preview_flag 必须是 BooleanVar，因为要做 tk 控件 variable 输入
+        self.preview_flag = tk.BooleanVar(value=True)  # 默认开; tk.BooleanVar
 
         # Preview background (in-memory)
         self.preview_background = None  # numpy.ndarray or None
@@ -339,6 +341,8 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
 
         self._build_menubar()
         self._build_main_layout()
+        # canvas 初始化刷新
+        self.after(200, self._refresh_current_view)
 
         # 根据按钮实际宽度“动态锁定”最小宽度；并在窗口尺寸变化时强制不小于该宽度
         self.after(80, self._update_min_constraints)
@@ -395,7 +399,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         m_file.add_command(label="Process Output Path", command=lambda: self._browse_output_path(self.entry_output))
         m_file.add_command(label="Current Browse File", command=lambda: self._browse_current_path(self.entry_current))
         m_file.add_separator()
-        m_file.add_command(label="Exit", command=self.destroy)
+        m_file.add_command(label="Exit", command=self._on_close)
 
         menubar.add_cascade(label="File", menu=m_file)
 
@@ -770,8 +774,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
 
     def _ensure_project_root_on_syspath(self):
         """
-        你的工程结构：camera/ 与 gui2/ 同级，process/ 与 gui2/ 同级。
-        这里把“gui2 文件夹的上一级”加入 sys.path，确保 `import camera.xxx` 可用。
+        把“gui2 文件夹的上一级”加入 sys.path，确保 `import camera.xxx` 可用。
         """
         here = Path(__file__).resolve()
         # 如果 gui2.py 在 gui2/ 目录里，则 project_root = gui2/ 的父目录
@@ -779,17 +782,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         p = str(project_root)
         if p not in sys.path:
             sys.path.insert(0, p)
-
-    def _import_func(self, module_name: str, func_name: str):
-        """
-        note:
-        动态导入 module 并取出函数。
-        你只需要把下面 _make_capture_actions/_make_process_actions 里
-        的 module_name/func_name 改成你真实文件里的名字。
-        """
-        mod = importlib.import_module(module_name)
-        fn = getattr(mod, func_name)
-        return fn
 
 
     # ====== 窗口刷新相关 ======
@@ -898,49 +890,63 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         """
         note:
         Capture 模式按钮 -> camera 文件夹里的功能函数
-        你需要把 module/function 名称改成你真实的实现。
         """
         return {
             # 相机实时显示
-            "cam_live": lambda:
-                self._import_func("camera.camera_live", "start_live"),
-
+            "cam_live":
+                lambda: self._call_action("camera.camera_live", "start_live"),
             # 相机暂停实时显示
-            "cam_stop_live": lambda:
-                self._import_func("camera.camera_live", "stop_live"),
-
+            "cam_stop_live":
+                lambda: self._call_action("camera.camera_live", "stop_live"),
             # 拍摄单张图像
-            "cam_snap": lambda:
-                self._import_func("camera.camera_capture", "capture_single"),
-
+            "cam_snap":
+                lambda: self._call_action("camera.camera_capture", "capture_single"),
             # 录制视频
-            "cam_rec": lambda:
-                self._import_func("camera.camera_record", "start_record"),
-
+            "cam_rec":
+                lambda: self._call_action("camera.camera_record", "start_record"),
             # 结束录制视频
-            "cam_rec_stop": lambda:
-                self._import_func("camera.camera_record", "stop_record"),
+            "cam_rec_stop":
+                lambda: self._call_action("camera.camera_record", "stop_record"),
         }
+
 
     def _make_process_actions(self) -> dict:
         """
         Process 模式按钮 -> process 文件夹里的功能函数
-        你需要把 module/function 名称改成你真实的实现。
         """
         return {
-            "play": lambda:
-                self._import_func("process.process_player", "play"),
-            "pause": lambda:
-                self._import_func("process.process_player", "pause"),
-            "to_start": lambda:
-                self._import_func("process.process_player", "seek_to_start"),
-            "back_2s": lambda:
-                self._import_func("process.process_player", "seek_back_2s"),
-            "forward_2s": lambda:
-                self._import_func("process.process_player", "seek_forward_2s"),
-            "run_proc": lambda:
-                self._import_func("process.process_runner", "run_processing"),
+            "play":
+                lambda:self._call_action("process.process_player", "play"),
+            "pause":
+                lambda:self._call_action("process.process_player", "pause"),
+            "to_start":
+                lambda:self._call_action("process.process_player", "seek_to_start"),
+            "back_2s":
+                lambda:self._call_action("process.process_player", "seek_back_2s"),
+            "forward_2s":
+                lambda:self._call_action("process.process_player", "seek_forward_2s"),
+            "run_proc":
+                lambda:self._call_action("process.process_runner", "run_processing"),
         }
+
+
+    def _call_action(self, module_name: str, func_name: str):
+        fn = self._import_func(module_name, func_name)
+        # capture 的相关函数调用都是 fn(self)，固定只传入 self 一个参数
+        return fn(self)
+
+
+    def _import_func(self, module_name: str, func_name: str):
+        """
+        note:
+        动态导入 module 并取出函数。
+        你只需要把下面 _make_capture_actions/_make_process_actions 里
+        的 module_name/func_name 改成你真实文件里的名字。
+        """
+        mod = importlib.import_module(module_name)
+        fn = getattr(mod, func_name)
+        return fn
+
 
     def _on_close(self):
         # 1) 通知所有后台线程退出（尤其是那些 wait EndEvent 的）

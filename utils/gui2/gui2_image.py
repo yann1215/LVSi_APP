@@ -188,14 +188,14 @@ class ImageMixin:
         2) 启动 GUI 侧 window manager（只启动一次）
         """
 
-        # 1) 用 Canvas 作为“容器”（Camera/Preview 同理）
+        # 1) 用 Canvas 作为 container
         container = getattr(self, "canvas_camera", None)
         if container is None:
             if hasattr(self, "status_var"):
                 self.status_var.set("[Camera ERROR] camera_canvas not found.")
             return
 
-        # 2) 启动/确保后端（由 camera_status 统一管理 container_hwnd / width / height / resize bind）
+        # 2) 启动/确保后端（由 camera_status 统一管理 container / width / height / resize bind）
         start_camera(self, container, start_backend=True, allow_restart=True, update_status=True)
 
         # 3) Pillow 刷新循环：一定要启动（否则只会 single_shot 刷一次）
@@ -237,19 +237,26 @@ class ImageMixin:
 
     def _snapshot_frame(self, attr: str):
         """
-        锁内取图，返回 copy；无图则 None。
+        锁内取图，返回 copy；无图则 self.NonePng。
         """
+
         lock = getattr(self, "_img_lock", None)
         if lock is not None:
-            try:
-                with lock:
-                    v = getattr(self, attr, None)
-                    return None if v is None else v.copy()
-            except Exception:
+            with lock:
                 v = getattr(self, attr, None)
-                return None if v is None else v.copy()
-        v = getattr(self, attr, None)
-        return None if v is None else v.copy()
+                if v is None:
+                    out = getattr(self, "NonePng", None)
+                else:
+                    out = v.copy()
+
+        else:
+            v = getattr(self, attr, None)
+            if v is None:
+                out = getattr(self, "NonePng", None)
+            else:
+                out = v.copy()
+
+        return out
 
     def _get_empty_frame(self):
         """
@@ -320,7 +327,7 @@ class ImageMixin:
             elif name == "Preview":
                 # 获取 preview flag
                 try:
-                    p_flag = bool(getattr(self, "preview_flag").get())  # BooleanVar
+                    p_flag = bool(getattr(self, "preview_flag").get())
                 except Exception:
                     p_flag = False
                 # Preview 刷新/不刷新 self.img_preview
@@ -332,10 +339,11 @@ class ImageMixin:
                 raise ValueError("[Value ERROR] Invalid canvas tab name.")
                 return
 
-            _show_ndarray_on_canvas(canvas, frame_to_update)
+            show_ndarray_on_canvas(canvas, frame_to_update)
+
             # 等待；控制显示刷新率
             if not single_shot:
-                interval_ms = _calc_live_view_delay_ms(self)
+                interval_ms = calc_live_view_delay_ms(self)
                 self.after(interval_ms, self._live_view_tick)  # 显示的最大刷新率为 30 fps
 
         else:
@@ -411,7 +419,7 @@ class ImageMixin:
         self._show_image_on_canvas(self.canvas_processed, img_path, "_processed_photo")
 
 
-def _to_uint8_for_display(arr):
+def to_uint8_for_display(arr):
     """
     把任意数值类型的图像转成 uint8 便于显示（不改变原始数据用于计算）。
     """
@@ -436,7 +444,7 @@ def _to_uint8_for_display(arr):
     return np.clip(a, 0, 255).astype(np.uint8)
 
 
-def _show_ndarray_on_canvas(canvas, arr):
+def show_ndarray_on_canvas(canvas, arr):
     """
     把 ndarray 显示到 Tk canvas（等比缩放 + 居中），并保存 PhotoImage 引用防止被 GC。
     """
@@ -451,7 +459,7 @@ def _show_ndarray_on_canvas(canvas, arr):
     cw = max(2, int(canvas.winfo_width()))
     ch = max(2, int(canvas.winfo_height()))
 
-    a = _to_uint8_for_display(arr)
+    a = to_uint8_for_display(arr)
     if a is None:
         canvas.delete("content")
         canvas.delete("border")
@@ -499,7 +507,7 @@ def _show_ndarray_on_canvas(canvas, arr):
     canvas._photo = photo
 
 
-def _calc_live_view_delay_ms(app, cap_fps: float = 30.0, fallback_fps: float = 5.0) -> int:
+def calc_live_view_delay_ms(app, cap_fps: float = 30.0, fallback_fps: float = 5.0) -> int:
     """
     根据相机采集帧率动态决定 UI 刷新间隔（ms）。
     建议设置显示上限(30fps)，避免 120fps 在 Tk+PIL 下过载。

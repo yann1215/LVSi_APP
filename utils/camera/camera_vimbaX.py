@@ -2,7 +2,7 @@ import os, time
 import threading
 
 from utils.camera.camera_capture import handle_new_frame   # 注意你的实际模块路径
-
+from utils.camera.camera_status import set_status
 
 # Vinma X download website: https://www.alliedvision.com/en/products/software/vimba-x-sdk/#c13326
 VIMBAX_FLAG = False
@@ -70,6 +70,7 @@ def _init_vmbpy():
 
 def work_thread(app, vmb):
     print("Camera starting...")
+    set_status(app, "Camera starting...")
     handler = vimbaX_photo_handler(app)
     cams = vmb.get_all_cameras()
     with cams[0] as cam:
@@ -79,7 +80,10 @@ def work_thread(app, vmb):
         _apply_bitdepth_and_pixelformat(app, cam)
 
         cam.start_streaming(handler)
-        while app.camera:
+        print("Camera ready.")
+        set_status(app, "Camera ready.")
+        end = getattr(app, "EndEvent", None)
+        while app.camera and (end is None or not end.is_set()):
             # 参数需要更新
             if app.camera_settings:
                 cam.stop_streaming()
@@ -96,11 +100,13 @@ def work_thread(app, vmb):
 
                 app.camera_settings = False
                 app._cam_settings_applied_ts = time.monotonic()
+
+                print("Camera configuration updated.")
             else:
                 time.sleep(1)
         cam.stop_streaming()
     app.img = app.NonePng
-    print("stop cam work")
+    print("Camera shut down.")
 
 
 def _apply_bitdepth_and_pixelformat(app, cam) -> None:
@@ -215,7 +221,8 @@ def vimbaX_finder_handler(app, vmb):
                 app.AST_btn.config(bg='#4CAF50')
         elif state == 0 or state == 3 or state == 4:
             app.camera = False
-            app.AST_btn_var.set("Camera not found.")
+            set_status(app, "Camera not found.")
+            app.AST_btn_var.set("Camera not found.")        # note: 暂时不确定有什么用
             app.AST_btn.config(bg='#cccccc')
     return print_device_id
 
@@ -246,6 +253,7 @@ def start_vimbaX(app):
             # note: 这里内部出现了VmbTransportLayerError
             with VmbSystem.get_instance() as vmb:
                 print("Vimba X connected.")
+                set_status(app, "Vimba X connected.")
                 # app.Alltitle_var.set("LVSi System ( Vimba X Installed )")
                 _safe_set_tk_var(app, "Alltitle_var", "LVSi System")
                 # 找相机并启用
@@ -254,7 +262,11 @@ def start_vimbaX(app):
                 vmb.register_interface_change_handler(handler)
                 if vmb.get_all_cameras():
                     app.camera = True
+                    # note: set_status 现在似乎没有 flag、要一直刷新？后续可以优化。
+                    set_status(app, "Camera starting...")
                     work_thread(app, vmb)
+                else:
+                    set_status(app, "Camera not found.")
                 app.EndEvent.wait()
         except VmbTransportLayerError as e:
             # Vimba X 没装好 / 没有 TL的情况
@@ -283,10 +295,6 @@ def start_vimbaX_backend_thread(app):
 
 
 def vimbaX_threading(app, start_window: bool = False, window_name: str = "vimba X"):
-    """
-
-    """
-    print("[DEPRECATED] vimbaX_threading(): prefer camera_status.start_camera() + GUI _window_manager_loop().")
 
     # 1) 启动后端
     t_backend = start_vimbaX_backend_thread(app)

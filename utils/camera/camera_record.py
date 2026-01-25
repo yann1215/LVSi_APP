@@ -363,11 +363,18 @@ def _build_save_dir(app: Any, cg: int, ct: float) -> str:
 
     leaf = f"{_format_ct_minutes(ct)}min"
 
-    # file_params：Entry 列表 [name, append1, append2]
+    # file_params：dict
+    # {"Name":Entry,"Append 1":Entry,"Append 2":Entry}
     parts = []
-    fp = getattr(app, "file_params", None) or []
-    for ent in fp[:3]:
-        if ent is None:
+    fp = getattr(app, "file_params", None)
+    if fp is None:
+        fp = {}
+    elif not isinstance(fp, dict):
+        raise TypeError(f"app.file_params must be dict, got {type(fp)}")
+
+    for key in ("Name", "Append 1", "Append 2"):
+        ent = fp.get(key)
+        if ent is None or not hasattr(ent, "get"):
             continue
         v = ent.get().strip()
         if v:

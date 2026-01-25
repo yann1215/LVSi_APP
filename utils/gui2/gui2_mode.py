@@ -7,7 +7,7 @@ class ModeMixin:
     """
     左侧 Mode/Process 区域（Capture / Process 两种模式互斥）
     - self.mode: IntVar (0=Capture, 1=Process)
-    - self.preview_flag: BooleanVar
+    - self.preview_flag: 必须是 BooleanVar
     - self.var_noise / self.var_track / self.var_feat: BooleanVar
     - self.program_start / self.program_end: pipeline range
     """
@@ -27,7 +27,7 @@ class ModeMixin:
         if not hasattr(self, "mode"):
             self.mode = tk.IntVar(value=0)  # 0=Capture, 1=Process
         if not hasattr(self, "preview_flag"):
-            self.preview_flag = tk.BooleanVar(value=False)
+            self.preview_flag = tk.BooleanVar(value=True)
 
         if not hasattr(self, "var_noise"):
             self.var_noise = tk.BooleanVar(value=True)
@@ -113,9 +113,12 @@ class ModeMixin:
             if lock is not None:
                 with lock:
                     self.preview_background = frame
+                    # setattr(self, "preview_background", frame)
             else:
                 self.preview_background = frame
+                # setattr(self, "preview_background", frame)
             # 更新提示语
+            print("Preview background updated.")
             if hasattr(self, "status_var"):
                 self.status_var.set(f"[Preview] Background updated: {frame.shape}, {frame.dtype}")
 
