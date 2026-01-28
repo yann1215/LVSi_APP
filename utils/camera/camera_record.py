@@ -2,13 +2,22 @@
 from __future__ import annotations
 
 import os
+import threading
 import time
 from typing import Any, Optional
 import numpy as np
 import tifffile
 
+# 电机底层：可选依赖（无电机也能跑）
+try:
+    from utils.motor.motor import move_forward as _motor_next_group_impl
+    from utils.motor.motor import motor_reset as _motor_reset_impl
+except Exception:
+    _motor_next_group_impl = None
+    _motor_reset_impl = None
 
-CAMERA_WAIT_S = 5       # 相机线程参数更新等待时间
+MOTOR_WAIT_S = 4.0
+CAMERA_WAIT_S = 5.0       # 相机线程参数更新等待时间
 _BITDEPTH_INT_TO_BITS = {1: 8, 2: 10, 3: 12}   # 0=Adaptive
 _BITDEPTH_INT_TO_NAME = {0: "Adaptive", 1: "Bpp8", 2: "Bpp10", 3: "Bpp12"}
 
@@ -52,7 +61,6 @@ def stop_record(app):
     app.save_frame = False
     app.save_until_ts = None
 
-    # 如果你有 record_groups 状态机，也应停止它
     if hasattr(app, "_record_groups_running"):
         app._record_groups_running = False
 
@@ -80,36 +88,36 @@ def check_value_validation(app):
     # --- 基本合法性 ---
     if sample_num is None or video_interval is None or video_end_time is None or vp is None:
         raise ValueError(
-            "Value ERROR: record_groups 参数缺失，需要 sample_num, video_interval, video_end_time, video_period。")
+            "Config ERROR: record_groups 参数缺失，需要 sample_num, video_interval, video_end_time, video_period。")
 
     if sample_num < 1:
-        raise ValueError("Value ERROR: sample_num 必须 >= 1。")
+        raise ValueError("Config ERROR: sample_num 必须 >= 1。")
     if video_interval <= 0:
-        raise ValueError("Value ERROR: video_interval 必须为正数（min）。")
+        raise ValueError("Config ERROR: video_interval 必须为正数（min）。")
     if video_end_time < 0:
-        raise ValueError("Value ERROR: video_end_time 必须 >= 0（min）。")
+        raise ValueError("Config ERROR: video_end_time 必须 >= 0（min）。")
     if vp <= 0:
-        raise ValueError("Value ERROR: video_period 必须为正数（sec）。")
+        raise ValueError("Config ERROR: video_period 必须为正数（sec）。")
 
     # --- 校验 1：video_interval 是否能容纳 sample_num * video_period ---
-    need_s = sample_num * vp
+    need_s = sample_num * (vp + MOTOR_WAIT_S)
     slot_s = video_interval * 60.0
     if need_s > slot_s:
-        raise ValueError("Value ERROR: 样本数量过多，或每组拍摄时间过长，或两组间隔过小。")
+        raise ValueError("Config ERROR: 样本数量过多，或每组拍摄时间过长，或两组间隔过小。")
 
     # --- 校验 2：fps 是否能满足曝光时间 ---
     # 这里按 Vimba 常见单位：ExposureTime 为 microseconds
     if fps is None or exp is None:
-        raise ValueError("Value ERROR: 缺少相机参数，需要 vimbaX_AcquisitionFrameRate 与 vimbaX_ExposureTime 用于校验。")
+        raise ValueError("Config ERROR: 缺少相机参数，需要 vimbaX_AcquisitionFrameRate 与 vimbaX_ExposureTime 用于校验。")
     fps = float(fps)
     exp_us = float(exp)
     if fps <= 0:
-        raise ValueError("Value ERROR: vimbaX_AcquisitionFrameRate 必须为正数（Hz）。")
+        raise ValueError("Config ERROR: vimbaX_AcquisitionFrameRate 必须为正数（Hz）。")
 
     frame_period_s = 1.0 / fps
     exp_s = exp_us / 1e6
     if exp_s > frame_period_s:
-        raise ValueError("Value ERROR: 帧率过高，或曝光时间过长。")
+        raise ValueError("Config ERROR: 帧率过高，或曝光时间过长。")
 
 
 def _wait_camera_settings_then_start(app, t_start: float, timeout_s: float):
@@ -234,15 +242,23 @@ def record_groups(app: Any) -> None:
             plan.append({
                 "cg": cg,
                 "ct": ct_min,
-                "start_offset_s": base + (cg - 1) * vp,
+                "start_offset_s": base + (cg - 1) * (vp + MOTOR_WAIT_S),
             })
 
     # --- 启动调度 ---
+    # 相机相关
     app._record_groups_running = True
     app._rg_plan = plan
     app._rg_idx = 0
     app._rg_t0 = time.monotonic()
     app._rg_vp = vp
+    # 电机相关
+    app._rg_sample_num = sample_num
+    app._rg_motor_wait_s = MOTOR_WAIT_S
+    app._rg_reset_wait_s = MOTOR_WAIT_S
+    app._rg_pending_action = None
+    app._rg_motor_inflight = False
+    app._rg_wait_until_ts = None
 
     _record_groups_tick(app)
 
@@ -293,6 +309,43 @@ def _record_groups_tick(app: Any) -> None:
         app.after(30, lambda: _record_groups_tick(app))
         return
 
+    # 电机正在动：轮询
+    if getattr(app, "_rg_motor_inflight", False):
+        app.after(30, lambda: _record_groups_tick(app))
+        return
+
+    # 电机动完后的稳定等待：轮询
+    wait_until = getattr(app, "_rg_wait_until_ts", None)
+    if wait_until is not None:
+        if time.monotonic() < float(wait_until):
+            app.after(30, lambda: _record_groups_tick(app))
+            return
+        app._rg_wait_until_ts = None
+
+    # 如果上一组录完后需要执行电机动作（move/reset），先做动作，再回来
+    pending = getattr(app, "_rg_pending_action", None)
+    if pending in ("move", "reset"):
+        app._rg_pending_action = None
+
+        if pending == "move":
+            wait_s = float(getattr(app, "_rg_motor_wait_s", MOTOR_WAIT_S) or MOTOR_WAIT_S)
+            if _motor_next_group_impl is None:
+                # 无电机：仅软件等待，保持时序
+                app._rg_wait_until_ts = time.monotonic() + wait_s
+            else:
+                _rg_run_motor_async(app, lambda: _motor_next_group_impl(), wait_s_after=wait_s)
+            app.after(10, lambda: _record_groups_tick(app))
+            return
+
+        if pending == "reset":
+            wait_s = float(getattr(app, "_rg_reset_wait_s", MOTOR_WAIT_S) or MOTOR_WAIT_S)
+            if _motor_reset_impl is None:
+                app._rg_wait_until_ts = time.monotonic() + wait_s
+            else:
+                _rg_run_motor_async(app, lambda: _motor_reset_impl(), wait_s_after=wait_s)
+            app.after(10, lambda: _record_groups_tick(app))
+            return
+
     plan = getattr(app, "_rg_plan", []) or []
     idx = int(getattr(app, "_rg_idx", 0) or 0)
     if idx >= len(plan):
@@ -318,6 +371,18 @@ def _record_groups_tick(app: Any) -> None:
     # 到时间：启动该组录制（record_single 会置 save_frame=True，持续 vp 秒）
     vp = float(getattr(app, "_rg_vp", 0.0) or 0.0)
     record_single(app, int(item["cg"]), float(item["ct"]), vp=vp)
+
+    # 一组结束后：
+    # - 若不是本 timepoint 最后一组：move + 等待
+    # - 若是本 timepoint 最后一组：reset + 等待（然后再判断是否要进入下一个 timepoint）
+    sample_num = int(getattr(app, "_rg_sample_num", 1) or 1)
+    if int(item["cg"]) < sample_num:
+        app._rg_pending_action = "move"
+    else:
+        app._rg_pending_action = "reset"
+
+    # 一组结束后执行 move + wait
+    # app._rg_post_record = True
 
     # 推进到下一项
     app._rg_idx = idx + 1
@@ -354,6 +419,8 @@ def _format_ct_minutes(ct: float) -> str:
     return s if s else "0"
 
 
+# ============== 创建目标文件夹 ==============
+
 def _build_save_dir(app: Any, cg: int, ct: float) -> str:
     root = _ensure_camera_path(app)
 
@@ -376,7 +443,11 @@ def _build_save_dir(app: Any, cg: int, ct: float) -> str:
         ent = fp.get(key)
         if ent is None or not hasattr(ent, "get"):
             continue
-        v = ent.get().strip()
+        try:
+            v = ent.get()
+        except Exception:
+            continue
+        v = _sanitize_folder_part(v)
         if v:
             parts.append(v)
 
@@ -387,3 +458,90 @@ def _build_save_dir(app: Any, cg: int, ct: float) -> str:
     # 非空：{camera save path}/{name}_{append1}_{append2}/{cg}/{ct}min
     exp_folder = "_".join(parts)
     return os.path.join(root, exp_folder, str(cg_int), leaf)
+
+
+def _sanitize_folder_part(s: str) -> str:
+    """
+    把用户输入变成安全的文件夹名（尤其针对 Windows）。
+    """
+    s = (s or "").strip()
+    if not s:
+        return ""
+
+    # 禁止路径分隔符
+    s = s.replace("/", "_").replace("\\", "_")
+
+    # Windows 非法字符: < > : " / \ | ? *
+    for ch in '<>:"|?*':
+        s = s.replace(ch, "_")
+
+    # 结尾的点/空格在 Windows 也不友好
+    s = s.rstrip(" .")
+    return s
+
+
+# ============== 组间电机移动 ==============
+
+def _run_bg(app, fn, *, on_done=None, on_error=None, name="bg-task"):
+    """
+    后台线程执行 fn；回主线程用 app.after。
+    """
+    def worker():
+        try:
+            fn()
+        except Exception as e:
+            if callable(on_error):
+                app.after(0, lambda: on_error(e))
+            return
+        if callable(on_done):
+            app.after(0, on_done)
+
+    threading.Thread(target=worker, daemon=True, name=name).start()
+
+
+def _rg_start_motor_next_group(app) -> bool:
+    """move -> 完成后进入 2s 稳定等待（不阻塞 UI/live）。"""
+    if getattr(app, "_rg_motor_inflight", False):
+        return True
+    if _motor_next_group_impl is None:
+        return False
+
+    app._rg_motor_inflight = True
+    wait_s = MOTOR_WAIT_S
+
+    def done():
+        app._rg_motor_inflight = False
+        app._rg_wait_until_ts = time.monotonic() + wait_s
+
+    def err(e: Exception):
+        app._rg_motor_inflight = False
+        if hasattr(app, "status_var"):
+            app.status_var.set(f"[Motor ERROR] {e}")
+
+    _run_bg(app, _motor_next_group_impl, on_done=done, on_error=err, name="motor-next-group")
+    return True
+
+
+def _rg_run_motor_async(app: Any, fn, wait_s_after: float) -> None:
+    """
+    后台线程跑阻塞式电机动作；完成后进入 wait_s_after 的“非阻塞等待”阶段。
+    """
+    app._rg_motor_inflight = True
+
+    def worker():
+        try:
+            fn()
+        except Exception as e:
+            def _err():
+                app._rg_motor_inflight = False
+                if hasattr(app, "status_var"):
+                    app.status_var.set(f"[Motor ERROR] {e}")
+            app.after(0, _err)
+            return
+
+        def _done():
+            app._rg_motor_inflight = False
+            app._rg_wait_until_ts = time.monotonic() + float(wait_s_after)
+        app.after(0, _done)
+
+    threading.Thread(target=worker, daemon=True, name="motor-action").start()

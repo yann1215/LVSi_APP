@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image, ImageTk
 
 from utils.camera.camera_status import start_camera
+from utils.camera.camera_live import update_preview
 
 
 class ImageMixin:
@@ -332,6 +333,7 @@ class ImageMixin:
                     p_flag = False
                 # Preview 刷新/不刷新 self.img_preview
                 if p_flag or single_shot:
+                    update_preview(self)
                     frame_to_update = self._snapshot_frame("img_preview")
                 else:
                     frame_to_update = self._get_empty_frame()

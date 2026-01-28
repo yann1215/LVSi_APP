@@ -19,6 +19,8 @@ from utils.gui2.gui2_button import ButtonMixin
 
 from _para import all_para_dict, base_path
 from utils.gui2.gui2_para import all_para_settings
+from utils.motor.motor import motor_reset
+from utils.camera.camera_record import MOTOR_WAIT_S
 from utils.process.process_dir_seeker import path_finding_thread
 from utils.camera.ast_loop import camera_mode_manager
 
@@ -275,6 +277,17 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.searching = False
         self.running = False
         self.camera = False
+
+        # 电机与拍摄相关参数初始化
+        self._rg_sample_num = 0
+        self._rg_motor_wait_s = MOTOR_WAIT_S
+        self._rg_reset_wait_s = MOTOR_WAIT_S
+        self._rg_pending_action = None
+        self._rg_motor_inflight = False
+        self._rg_wait_until_ts = None
+
+        # 启动后先做一次电机复位（不阻塞 UI）
+        self.after_idle(self._startup_motor_reset)
 
         # 与参数弹窗共享的列表
         self.object_dict_list = []
@@ -883,6 +896,21 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
     def _enforce_min_width(self, event):
         self._enforce_min_constraints(event)
 
+    # ==================== 电机复位 ====================
+    def _startup_motor_reset(self):
+        if not callable(motor_reset):
+            return
+
+        def worker():
+            try:
+                motor_reset(self, MOTOR_WAIT_S)
+            except Exception as e:
+                if hasattr(self, "status_var"):
+                    msg = f"[Motor ERROR] {e}"
+                    self.after(0, lambda : self.status_var.set(msg))
+
+        threading.Thread(target=worker, daemon=True, name="motor-reset-on-startup").start()
+
     # ==================== 函数映射 ====================
     # 在 gui2.py 里实现两个 action 映射（把真实函数绑进来）
 
@@ -909,7 +937,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
                 lambda: self._call_action("camera.camera_record", "stop_record"),
         }
 
-
     def _make_process_actions(self) -> dict:
         """
         Process 模式按钮 -> process 文件夹里的功能函数
@@ -929,12 +956,10 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
                 lambda:self._call_action("process.process_runner", "run_processing"),
         }
 
-
     def _call_action(self, module_name: str, func_name: str):
         fn = self._import_func(module_name, func_name)
         # capture 的相关函数调用都是 fn(self)，固定只传入 self 一个参数
         return fn(self)
-
 
     def _import_func(self, module_name: str, func_name: str):
         """
@@ -946,7 +971,6 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         mod = importlib.import_module(module_name)
         fn = getattr(mod, func_name)
         return fn
-
 
     def _on_close(self):
         # 1) 通知所有后台线程退出（尤其是那些 wait EndEvent 的）
