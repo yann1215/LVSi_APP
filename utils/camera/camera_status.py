@@ -143,11 +143,6 @@ def start_camera(
             else:
                 return False
 
-    # 这里开始执行启动
-    print("Starting camera...")
-    if update_status:
-        set_status(app, "Starting camera...")
-
     if start_backend and not backend_is_alive:
         # 若 vimba X 后端线程不在跑，则启动
         print("Starting vimba X...")

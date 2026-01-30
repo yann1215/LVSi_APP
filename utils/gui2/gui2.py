@@ -18,7 +18,7 @@ from utils.gui2.gui2_image import ImageMixin
 from utils.gui2.gui2_button import ButtonMixin
 
 from _para import all_para_dict, base_path
-from utils.gui2.gui2_para import all_para_settings
+from utils.gui2.gui2_para_EN import all_para_settings
 from utils.motor.motor import motor_reset
 from utils.camera.camera_record import MOTOR_WAIT_S
 from utils.process.process_dir_seeker import path_finding_thread
@@ -506,7 +506,7 @@ class App(FileMixin, ModeMixin, ConfigMixin, ImageMixin, ButtonMixin, tb.Window)
         self.param_vars = {}
         self.enum_meta = {}
 
-        # 不绘制子分区外框，把参数分区在 gui2_para.py 中设置
+        # 不绘制子分区外框，把参数分区在 gui2_para_CN.py 中设置
         # 此处仅按顺序绘制出所有的参数
         section = ttk.Frame(sc.content, style="ComponentItem.TFrame")
         section.pack(fill="x", padx=6)

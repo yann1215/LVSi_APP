@@ -69,8 +69,8 @@ def _init_vmbpy():
 
 
 def work_thread(app, vmb):
-    print("Camera starting...")
-    set_status(app, "Camera starting...")
+    print("Starting camera...")
+    set_status(app, "Starting camera...")
     handler = vimbaX_photo_handler(app)
     cams = vmb.get_all_cameras()
     with cams[0] as cam:
